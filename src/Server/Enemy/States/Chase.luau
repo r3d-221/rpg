@@ -10,6 +10,7 @@ end
 
 function public.onUpdate(enemy, handler, player)
 	if not player or not player.Character then
+		print(enemy.Name .. " changed state to: Chase")
 		handler:changeState("Idle")
 		return
 	end
@@ -19,11 +20,11 @@ function public.onUpdate(enemy, handler, player)
 	print(distance)
 
 	if distance <= attackRange then
-		handler:changeState("Attack")
 		print(enemy.Name .. " changed state to: Attack")
+		handler:changeState("Attack")
 	elseif distance >= aggroLoseRange then
-		handler:changeState("Idle")
 		print(enemy.Name .. " changed state to: Idle")
+		handler:changeState("Idle")
 	else
 		enemy.Humanoid:MoveTo(targetRoot.Position)
 	end

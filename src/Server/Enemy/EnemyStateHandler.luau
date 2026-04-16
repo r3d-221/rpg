@@ -10,6 +10,7 @@ function public.new(enemy)
 
 	self.Character = enemy
 	self.currentState = nil
+	self.data = {}
 	self.states = {}
 
 	return self
@@ -27,22 +28,18 @@ function public:changeState(name: string)
 	self.currentState = self.states[name]
 
 	if self.currentState and self.currentState.onEnter then
-		self.currentState.onEnter(self.Character)
+		self.currentState.onEnter(self.Character, self)
 	end
 end
 
 function public:update()
 	self.targetPlayer = public:nearestPlayer(self.Character)
 	if self.currentState and self.currentState.onUpdate then
-		local name = self.targetPlayer and self.targetPlayer.Name or "NIL"
+		-- local name = self.targetPlayer and self.targetPlayer.Name or "NIL"
 		-- print("Target player set to: " .. name)
 
 		self.currentState.onUpdate(self.Character, self, self.targetPlayer)
 	end
-end
-
-function public:getPlayer()
-	return
 end
 
 function public:nearestPlayer(enemy)
