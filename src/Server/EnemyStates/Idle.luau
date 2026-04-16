@@ -14,9 +14,9 @@ function public.onUpdate(enemy, handler)
 		return
 	end
 
-	local dist = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+	local distance = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
 
-	if dist <= aggroRange then
+	if distance <= aggroRange then
 		handler:changeState("Chase")
 	end
 end

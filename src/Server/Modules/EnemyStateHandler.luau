@@ -1,6 +1,9 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local EnemyStates = ServerScriptService.Server.EnemyStates
+local HelperModules = ServerScriptService.Server.HelperModules
+
+local TargetPlayer = require(HelperModules.TargetPlayer)
 local idleState = require(EnemyStates.Idle)
 local chaseState = require(EnemyStates.Chase)
 local attackState = require(EnemyStates.Attack)
@@ -14,6 +17,7 @@ function public.new(enemy)
 
 	self.character = enemy
 	self.currentState = nil
+	self.targetPlayer = nil
 	self.states = {}
 
 	return self
@@ -38,7 +42,12 @@ end
 function public:update()
 	if self.currentState and self.currentState.onUpdate then
 		self.currentState.onUpdate(self.character, self)
+		self.targetPlayer = TargetPlayer.find(self.character)
 	end
+end
+
+function public:getPlayer()
+	return self.targetPlayer
 end
 
 return public
