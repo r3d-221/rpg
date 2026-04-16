@@ -19,17 +19,17 @@ function private.nearestPlayer(enemy)
 			continue
 		end
 
-		local root = character:FindFirstChild("HumanoidRootPart")
+		local playerRoot = character:FindFirstChild("HumanoidRootPart")
 		local humanoid = character:FindFirstChild("Humanoid")
 
-		if not root or not humanoid then
+		if not playerRoot or not humanoid then
 			continue
 		end
 		if humanoid.Health <= 0 then
 			continue
 		end
 
-		local distance = (root.Position - enemy.HumanoidRootPart.Position).Magnitude
+		local distance = (playerRoot.Position - enemy.HumanoidRootPart.Position).Magnitude
 
 		if distance <= range and distance < minDistance then
 			minDistance = distance

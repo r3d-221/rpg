@@ -4,10 +4,6 @@ local EnemyStates = ServerScriptService.Server.EnemyStates
 local HelperModules = ServerScriptService.Server.HelperModules
 
 local TargetPlayer = require(HelperModules.TargetPlayer)
-local idleState = require(EnemyStates.Idle)
-local chaseState = require(EnemyStates.Chase)
-local attackState = require(EnemyStates.Attack)
-local deadState = require(EnemyStates.Dead)
 
 local public = {}
 public.__index = public
@@ -23,7 +19,7 @@ function public.new(enemy)
 	return self
 end
 
-function public:addState(name: string, module)
+function public:addState(name: string, module: {})
 	self.states[name] = module
 end
 
@@ -43,6 +39,7 @@ function public:update()
 	if self.currentState and self.currentState.onUpdate then
 		self.currentState.onUpdate(self.character, self)
 		self.targetPlayer = TargetPlayer.find(self.character)
+		print("Target player set to: " .. (self.targetPlayer.Name or "NIL")) -- debug
 	end
 end
 

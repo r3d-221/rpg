@@ -4,10 +4,10 @@ local Modules = ServerScriptService.Server.Modules
 local EnemyStates = ServerScriptService.Server.EnemyStates
 
 local StateHandler = require(Modules.EnemyStateHandler)
-local Idle = require(EnemyStates.Idle)
-local Chase = require(EnemyStates.Chase)
-local Attack = require(EnemyStates.Attack)
-local Dead = require(EnemyStates.Dead)
+local idleState = require(EnemyStates.Idle)
+local chaseState = require(EnemyStates.Chase)
+local attackState = require(EnemyStates.Attack)
+local deadState = require(EnemyStates.Dead)
 
 local enemies: Folder = game.Workspace.enemies
 
@@ -27,6 +27,12 @@ function public.new(model: Model)
 	enemy.Parent = enemies
 
 	StateHandler.new(self)
+
+	StateHandler:addState("Idle", idleState)
+	StateHandler:addState("Chase", chaseState)
+	StateHandler:addState("Attack", attackState)
+	StateHandler:addState("Dead", deadState)
+
 	StateHandler:changeState("Idle")
 
 	task.spawn(function()
