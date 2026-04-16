@@ -1,13 +1,13 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local Modules = ServerScriptService.Server.Modules
-local EnemyStates = ServerScriptService.Server.EnemyStates
+local Enemy = ServerScriptService.Server.Enemy
+local States = Enemy.States
 
-local StateHandler = require(Modules.EnemyStateHandler)
-local idleState = require(EnemyStates.Idle)
-local chaseState = require(EnemyStates.Chase)
-local attackState = require(EnemyStates.Attack)
-local deadState = require(EnemyStates.Dead)
+local StateHandler = require(Enemy.EnemyStateHandler)
+local idleState = require(States.Idle)
+local chaseState = require(States.Chase)
+local attackState = require(States.Attack)
+local deadState = require(States.Dead)
 
 local enemies: Folder = game.Workspace.enemies
 
@@ -26,12 +26,12 @@ function public.new(model: Model)
 	local enemy = model:Clone()
 	enemy.Parent = enemies
 
-	StateHandler.new(self)
+	self.handler = StateHandler.new(model)
 
-	StateHandler:addState("Idle", idleState)
-	StateHandler:addState("Chase", chaseState)
-	StateHandler:addState("Attack", attackState)
-	StateHandler:addState("Dead", deadState)
+	self.handler:addState("Idle", idleState)
+	self.handler:addState("Chase", chaseState)
+	self.handler:addState("Attack", attackState)
+	self.handler:addState("Dead", deadState)
 
 	StateHandler:changeState("Idle")
 

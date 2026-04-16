@@ -4,7 +4,7 @@ local attackRange = 5
 local aggroLoseRange = 40
 
 function public.onEnter(enemy)
-	enemy.Humanoid.Walkspeed = 16
+	enemy.Humanoid.WalkSpeed = 16
 end
 
 function public.onUpdate(enemy, handler)

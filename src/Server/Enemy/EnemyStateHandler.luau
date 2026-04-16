@@ -1,9 +1,8 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local EnemyStates = ServerScriptService.Server.EnemyStates
-local HelperModules = ServerScriptService.Server.HelperModules
+local Enemy = ServerScriptService.Server.Enemy
 
-local TargetPlayer = require(HelperModules.TargetPlayer)
+local TargetPlayer = require(Enemy.TargetPlayer)
 
 local public = {}
 public.__index = public
@@ -11,7 +10,7 @@ public.__index = public
 function public.new(enemy)
 	local self = setmetatable({}, public)
 
-	self.character = enemy
+	self.Character = enemy
 	self.currentState = nil
 	self.targetPlayer = nil
 	self.states = {}
@@ -25,21 +24,24 @@ end
 
 function public:changeState(name: string)
 	if self.currentState and self.currentState.onExit then
-		self.currentState.onExit(self.character)
+		self.currentState.onExit(self.Character)
 	end
 
 	self.currentState = self.states[name]
 
 	if self.currentState and self.currentState.onEnter then
-		self.currentState.onEnter(self.character)
+		self.currentState.onEnter(self.Character)
 	end
 end
 
 function public:update()
+	self.targetPlayer = TargetPlayer.find(self.Character)
 	if self.currentState and self.currentState.onUpdate then
-		self.currentState.onUpdate(self.character, self)
-		self.targetPlayer = TargetPlayer.find(self.character)
-		print("Target player set to: " .. (self.targetPlayer.Name or "NIL")) -- debug
+		self.currentState.onUpdate(self.Character, self, self.targetPlayer)
+
+		-- debug
+		local name = self.targetPlayer and self.targetPlayer.Name or "NIL"
+		print("Target player set to: " .. name)
 	end
 end
 

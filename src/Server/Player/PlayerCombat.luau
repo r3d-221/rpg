@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local players = game:GetService("Players")
 
 local Remotes = ReplicatedStorage:FindFirstChild("Shared"):FindFirstChild("Remotes")
 local attack = Remotes.attack

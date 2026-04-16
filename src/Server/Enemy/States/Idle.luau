@@ -5,7 +5,7 @@ local aggroRange = 20
 function public.onEnter(enemy)
 	-- roam
 	-- play animation
-	enemy.Humanoid.Walkspeed = 0
+	enemy.Humanoid.WalkSpeed = 0
 end
 
 function public.onUpdate(enemy, handler)
