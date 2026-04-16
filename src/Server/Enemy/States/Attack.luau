@@ -12,7 +12,6 @@ end
 
 function public.onUpdate(enemy, handler, player)
 	if not player or not player.Character then
-		print(enemy.Name .. " changed state to: Idle")
 		handler:changeState("Idle")
 		return
 	end
@@ -20,7 +19,6 @@ function public.onUpdate(enemy, handler, player)
 	local distance = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
 
 	if distance > attackRange then
-		print(enemy.Name .. " changed state to: Chase")
 		handler:changeState("Chase")
 		return
 	end

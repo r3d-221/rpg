@@ -26,7 +26,7 @@ function public.new(model: Model)
 	local enemy = model:Clone()
 	enemy.Parent = enemies
 
-	self.handler = StateHandler.new(model)
+	self.handler = StateHandler.new(enemy)
 
 	self.handler:addState("Idle", idleState)
 	self.handler:addState("Chase", chaseState)
@@ -35,11 +35,12 @@ function public.new(model: Model)
 
 	self.handler:changeState("Idle")
 
+	enemy.Humanoid.Died:Connect(function()
+		self.handler:changeState("Dead")
+	end)
+
 	task.spawn(function()
-		while true do
-			if enemy.Humanoid.Health == 0 then
-				self.handler:changeState("Dead", deadState)
-			end
+		while enemy and enemy.Parent and enemy.Humanoid.Health > 0 do
 			self.handler:update()
 			task.wait(0.1)
 		end

@@ -26,6 +26,7 @@ function public:changeState(name: string)
 	end
 
 	self.currentState = self.states[name]
+	print("changed state to: " .. name .. " for: " .. self.Character.Name)
 
 	if self.currentState and self.currentState.onEnter then
 		self.currentState.onEnter(self.Character, self)
