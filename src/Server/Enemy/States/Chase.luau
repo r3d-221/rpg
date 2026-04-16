@@ -1,7 +1,7 @@
 local public = {}
 
-local attackRange = 30
-local aggroLoseRange = 50
+local attackRange = 5
+local aggroLoseRange = 40
 
 function public.onEnter(enemy)
 	print(enemy.Name .. " entered state: Chase")
@@ -17,7 +17,6 @@ function public.onUpdate(enemy, handler, player)
 
 	local targetRoot = player.Character.HumanoidRootPart
 	local distance = (enemy.HumanoidRootPart.Position - targetRoot.Position).Magnitude
-	print(distance)
 
 	if distance <= attackRange then
 		print(enemy.Name .. " changed state to: Attack")

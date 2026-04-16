@@ -1,6 +1,6 @@
 local public = {}
 
-local attackRange = 30
+local attackRange = 5
 local damage = 20
 local attackCooldown = 1.5
 
@@ -18,7 +18,6 @@ function public.onUpdate(enemy, handler, player)
 	end
 
 	local distance = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-	print(distance)
 
 	if distance > attackRange then
 		print(enemy.Name .. " changed state to: Chase")

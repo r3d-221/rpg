@@ -3,7 +3,7 @@ local public = {}
 function public.onEnter(enemy)
 	enemy.Humanoid.Health = 0
 	task.delay(3, function()
-		enemy.Parent:Destroy()
+		enemy:Destroy()
 	end)
 end
 

@@ -1,6 +1,6 @@
 local public = {}
 
-local aggroRange = 40
+local aggroRange = 20
 
 function public.onEnter(enemy)
 	print(enemy.Name .. " entered state: Idle")

@@ -37,6 +37,9 @@ function public.new(model: Model)
 
 	task.spawn(function()
 		while true do
+			if enemy.Humanoid.Health == 0 then
+				self.handler:changeState("Dead", deadState)
+			end
 			self.handler:update()
 			task.wait(0.1)
 		end
