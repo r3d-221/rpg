@@ -1,8 +1,6 @@
-local ServerScriptService = game:GetService("ServerScriptService")
+local Players = game:GetService("Players")
 
-local Enemy = ServerScriptService.Server.Enemy
-
-local TargetPlayer = require(Enemy.TargetPlayer)
+local range = 30
 
 local public = {}
 public.__index = public
@@ -12,7 +10,6 @@ function public.new(enemy)
 
 	self.Character = enemy
 	self.currentState = nil
-	self.targetPlayer = nil
 	self.states = {}
 
 	return self
@@ -35,18 +32,51 @@ function public:changeState(name: string)
 end
 
 function public:update()
-	self.targetPlayer = TargetPlayer.find(self.Character)
+	self.targetPlayer = public:nearestPlayer(self.Character)
 	if self.currentState and self.currentState.onUpdate then
-		self.currentState.onUpdate(self.Character, self, self.targetPlayer)
-
-		-- debug
 		local name = self.targetPlayer and self.targetPlayer.Name or "NIL"
-		print("Target player set to: " .. name)
+		-- print("Target player set to: " .. name)
+
+		self.currentState.onUpdate(self.Character, self, self.targetPlayer)
 	end
 end
 
 function public:getPlayer()
-	return self.targetPlayer
+	return
+end
+
+function public:nearestPlayer(enemy)
+	local nearest = nil
+	local minDistance = math.huge
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		local character = player.Character
+		if not character then
+			return
+		end
+
+		local playerRoot = character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character:FindFirstChild("Humanoid")
+
+		if not playerRoot or not humanoid then
+			return
+		end
+		if humanoid.Health <= 0 then
+			return
+		end
+
+		-- print("a player was found by: " .. enemy.Name)
+		local distance = (playerRoot.Position - enemy.HumanoidRootPart.Position).Magnitude
+		-- print(enemy.Name .. "- " .. distance)
+
+		if distance <= range and distance < minDistance then
+			minDistance = distance
+			nearest = player
+			-- print("target set condition met")
+		end
+	end
+
+	return nearest
 end
 
 return public

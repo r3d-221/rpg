@@ -5,6 +5,7 @@ local damage = 20
 local attackCooldown = 1.5
 
 function public.onEnter(enemy)
+	print(enemy.Name .. " entered state: Attack")
 	enemy.Humanoid.WalkSpeed = 0
 	enemy._lastAttack = 0
 end
@@ -17,9 +18,11 @@ function public.onUpdate(enemy, handler)
 	end
 
 	local distance = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+	print(distance)
 
 	if distance > attackRange then
 		handler:changeState("Chase")
+		print(enemy.Name .. " changed state to: Chase")
 		return
 	end
 

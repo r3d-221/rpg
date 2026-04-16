@@ -33,11 +33,11 @@ function public.new(model: Model)
 	self.handler:addState("Attack", attackState)
 	self.handler:addState("Dead", deadState)
 
-	StateHandler:changeState("Idle")
+	self.handler:changeState("Idle")
 
 	task.spawn(function()
 		while true do
-			StateHandler:update()
+			self.handler:update()
 			task.wait(0.1)
 		end
 	end)

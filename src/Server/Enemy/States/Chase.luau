@@ -1,14 +1,14 @@
 local public = {}
 
-local attackRange = 5
-local aggroLoseRange = 40
+local attackRange = 30
+local aggroLoseRange = 50
 
 function public.onEnter(enemy)
+	print(enemy.Name .. " entered state: Chase")
 	enemy.Humanoid.WalkSpeed = 16
 end
 
-function public.onUpdate(enemy, handler)
-	local player = game.Players:GetPlayers()[1] -- needs to be the same target that the idle state focused on
+function public.onUpdate(enemy, handler, player)
 	if not player or not player.Character then
 		handler:changeState("Idle")
 		return
@@ -16,11 +16,14 @@ function public.onUpdate(enemy, handler)
 
 	local targetRoot = player.Character.HumanoidRootPart
 	local distance = (enemy.HumanoidRootPart.Position - targetRoot.Position).Magnitude
+	print(distance)
 
 	if distance <= attackRange then
 		handler:changeState("Attack")
+		print(enemy.Name .. " changed state to: Attack")
 	elseif distance >= aggroLoseRange then
 		handler:changeState("Idle")
+		print(enemy.Name .. " changed state to: Idle")
 	else
 		enemy.Humanoid:MoveTo(targetRoot.Position)
 	end
