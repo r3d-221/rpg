@@ -8,10 +8,19 @@ local animate = ReplicatedStorage:FindFirstChild("IgnoredFolder"):FindFirstChild
 
 local enemyTag = "Enemy"
 
-for i, object in CollectionService:GetTagged(enemyTag) do
+local function applyAnimate(object)
+	if object:FindFirstChild("Animate") then
+		return
+	end
+
 	local newAnimate = animate:Clone()
 	newAnimate.Parent = object
 	newAnimate.Enabled = true
 end
 
+for _, object in CollectionService:GetTagged(enemyTag) do
+	applyAnimate(object)
+end
+
+CollectionService:GetInstanceAddedSignal(enemyTag):Connect(applyAnimate)
 UserInput.onStart()
