@@ -1,14 +1,13 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
-local ServerStorage = game:GetService("ServerStorage")
-local RunService = game:GetService("RunService")
 
-local HelperModules = ServerScriptService.Server.HelperModules
-local ServerModules = ServerScriptService.Server.Modules
+local ServerModules = ServerScriptService.Server
+local EnemyFolder = ServerModules.Enemy
+local Player = ServerModules.Player
 
-local PlayerCombat = require(ServerModules.PlayerCombat)
+local PlayerCombat = require(Player.PlayerCombat)
 
-local Enemy = require(ServerModules.Enemy)
+local Enemy = require(EnemyFolder.Enemy)
 local enemyTag = "Enemy"
 
 for _, object in CollectionService:GetTagged(enemyTag) do
