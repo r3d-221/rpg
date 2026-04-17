@@ -5,16 +5,16 @@ local roamRange = 15
 
 local MAX_IDLE = 1.3
 local MIN_IDLE = 0.5
+local roamRange = 15
 
-function public.onEnter(enemy, handler)
-	-- print(enemy.Name .. " entered state: Idle")
-	handler.data.isRoaming = true
+local MAX_IDLE = 1.3
+local MIN_IDLE = 0.5
 
-	task.spawn(function()
-		while handler.data.isRoaming do
-			public:_roam(handler)
-		end
-	end)
+function public.onEnter(enemy)
+	print(enemy.Name .. " entered state: Idle")
+	-- roam
+	-- play animation
+	enemy.Humanoid.WalkSpeed = 0
 end
 
 function public.onUpdate(enemy, handler, player)
