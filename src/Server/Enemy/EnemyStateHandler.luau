@@ -13,6 +13,9 @@ function public.new(enemy)
 	self.data = {}
 	self.states = {}
 
+	self.data.origin = enemy.HumanoidRootPart.Position
+	self.data.RootPart = enemy.HumanoidRootPart
+	self.data.Humanoid = enemy.Humanoid
 	return self
 end
 
@@ -22,7 +25,7 @@ end
 
 function public:changeState(name: string)
 	if self.currentState and self.currentState.onExit then
-		self.currentState.onExit(self.Character)
+		self.currentState.onExit(self)
 	end
 
 	self.currentState = self.states[name]

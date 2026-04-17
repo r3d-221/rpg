@@ -5,7 +5,7 @@ local aggroLoseRange = 40
 
 function public.onEnter(enemy)
 	print(enemy.Name .. " entered state: Chase")
-	enemy.Humanoid.WalkSpeed = 16
+	enemy.Humanoid.WalkSpeed = 10
 end
 
 function public.onUpdate(enemy, handler, player)
@@ -15,17 +15,17 @@ function public.onUpdate(enemy, handler, player)
 	end
 
 	local targetRoot = player.Character.HumanoidRootPart
-	local distance = (enemy.HumanoidRootPart.Position - targetRoot.Position).Magnitude
+	local distanceToPlayer = (enemy.HumanoidRootPart.Position - targetRoot.Position).Magnitude
+	local distanceFromOrigin = (targetRoot.Position - handler.data.origin).Magnitude
 
-	if distance <= attackRange then
+	if distanceToPlayer <= attackRange then
 		handler:changeState("Attack")
-	elseif distance >= aggroLoseRange then
+	elseif distanceFromOrigin >= aggroLoseRange then
 		handler:changeState("Idle")
 	else
 		enemy.Humanoid:MoveTo(targetRoot.Position)
 	end
 end
-
 function public.onExit() end
 
 return public
