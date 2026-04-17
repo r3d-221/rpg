@@ -5,7 +5,7 @@ local damage = 20
 local attackCooldown = 1.5
 
 function public.onEnter(enemy, handler)
-	print(enemy.Name .. " entered state: Attack")
+	-- print(enemy.Name .. " entered state: Attack")
 	enemy.Humanoid.WalkSpeed = 0
 	handler.data._lastAttack = 0
 end

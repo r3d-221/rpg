@@ -4,7 +4,7 @@ local attackRange = 5
 local aggroLoseRange = 40
 
 function public.onEnter(enemy)
-	print(enemy.Name .. " entered state: Chase")
+	-- print(enemy.Name .. " entered state: Chase")
 	enemy.Humanoid.WalkSpeed = 10
 end
 
