@@ -5,18 +5,20 @@ local ServerModules = ServerScriptService.Server
 local EnemyFolder = ServerModules.Enemy
 local Player = ServerModules.Player
 
+local EnemySpawner = require(EnemyFolder.EnemySpawner)
 local PlayerCombat = require(Player.PlayerCombat)
 
-local Enemy = require(EnemyFolder.Enemy)
-local enemyTag = "Enemy"
+-- local Enemy = require(EnemyFolder.Enemy)
+-- local enemyTag = "Enemy"
 
-for _, object in CollectionService:GetTagged(enemyTag) do
-	print(object)
-	Enemy.new(object)
-end
+-- for _, object in CollectionService:GetTagged(enemyTag) do
+-- 	print(object)
+-- 	Enemy.new(object)
+-- end
 
-CollectionService:GetInstanceAddedSignal(enemyTag):Connect(Enemy.new)
+-- CollectionService:GetInstanceAddedSignal(enemyTag):Connect(Enemy.new)
 
+EnemySpawner.onStart()
 PlayerCombat.onStart()
 
 game.Players.PlayerAdded:Connect(function(player)

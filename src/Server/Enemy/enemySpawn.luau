@@ -1,3 +1,0 @@
-local public = {}
-
-return public

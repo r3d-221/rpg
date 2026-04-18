@@ -14,6 +14,7 @@ export type attributes = {
 	critRate: number,
 	critDamage: number,
 	attackCooldown: number,
+	armorPenetration: number,
 }
 
 export type Multipliers = {
@@ -28,6 +29,7 @@ export type Multipliers = {
 	aggroRangeMulti: number,
 	attackRangeMulti: number,
 	dropMulti: number,
+	armorPenetrationMulti: number,
 }
 
 export type BaseStats = {
@@ -42,6 +44,7 @@ export type BaseStats = {
 	armor: number,
 	reactionTime: number,
 	attackRange: number,
+	armorPenetration: number,
 	drops: {},
 }
 
@@ -59,6 +62,7 @@ public.type = {
 		aggroLoseRangeMulti = 1,
 		aggroRangeMulti = 1,
 		dropMulti = 1,
+		armorPenetrationMulti = 1,
 	},
 	ranged = {
 		cooldownReductionMulti = 1,
@@ -72,6 +76,7 @@ public.type = {
 		aggroLoseRangeMulti = 2,
 		aggroRangeMulti = 2,
 		dropMulti = 1,
+		armorPenetrationMulti = 1.2,
 	},
 	elemental = {
 		cooldownReductionMulti = 1.2,
@@ -85,6 +90,7 @@ public.type = {
 		aggroLoseRangeMulti = 1.2,
 		aggroRangeMulti = 1.2,
 		dropMulti = 1,
+		armorPenetrationMulti = 1.1,
 	},
 	explosive = {
 		cooldownReductionMulti = 1,
@@ -98,6 +104,7 @@ public.type = {
 		aggroLoseRangeMulti = 1.1,
 		aggroRangeMulti = 1.5,
 		dropMulti = 1,
+		armorPenetrationMulti = 1.5,
 	},
 }
 
@@ -115,6 +122,7 @@ public.subtype = {
 		aggroLoseRangeMulti = 1,
 		aggroRangeMulti = 1,
 		dropMulti = 1.1,
+		armorPenetrationMulti = 1,
 	},
 	elite = {
 		cooldownReductionMulti = 1.1,
@@ -128,6 +136,7 @@ public.subtype = {
 		aggroLoseRangeMulti = 1.05,
 		aggroRangeMulti = 1.05,
 		dropMulti = 1.2,
+		armorPenetrationMulti = 1.2,
 	},
 	miniBoss = {
 		cooldownReductionMulti = 1.2,
@@ -141,6 +150,7 @@ public.subtype = {
 		aggroLoseRangeMulti = 1.1,
 		aggroRangeMulti = 1.1,
 		dropMulti = 1.5,
+		armorPenetrationMulti = 1.3,
 	},
 }
 

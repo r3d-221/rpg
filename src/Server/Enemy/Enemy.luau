@@ -20,11 +20,8 @@ local public = {}
 public.__index = public
 
 ---- Constructer ----
-function public.new(model: Model)
+function public.new(enemy)
 	local self = setmetatable({}, public)
-
-	local enemy = model:Clone()
-	enemy.Parent = enemies
 
 	self.handler = StateHandler.new(enemy)
 

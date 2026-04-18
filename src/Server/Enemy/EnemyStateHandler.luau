@@ -53,27 +53,23 @@ function public:nearestPlayer(enemy)
 	for _, player in ipairs(Players:GetPlayers()) do
 		local character = player.Character
 		if not character then
-			return
+			continue
 		end
 
 		local playerRoot = character:FindFirstChild("HumanoidRootPart")
 		local humanoid = character:FindFirstChild("Humanoid")
 
 		if not playerRoot or not humanoid then
-			return
+			continue
 		end
 		if humanoid.Health <= 0 then
-			return
+			continue
 		end
 
-		-- print("a player was found by: " .. enemy.Name)
 		local distance = (playerRoot.Position - enemy.HumanoidRootPart.Position).Magnitude
-		-- print(enemy.Name .. "- " .. distance)
-
 		if distance <= range and distance < minDistance then
 			minDistance = distance
 			nearest = player
-			-- print("target set condition met")
 		end
 	end
 
