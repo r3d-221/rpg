@@ -11,36 +11,27 @@ local private = {}
 local public = {}
 
 function public.onStart()
-	attack.OnServerEvent:Connect(function(player, enemy, dmg)
-		private.checkAttack(player, enemy, dmg)
+	attack.OnServerEvent:Connect(function(player, enemy)
+		private.checkAttack(player, enemy)
 	end)
 end
 
-function private.checkAttack(player: Player, enemy, dmg)
-	print("validating attack..")
+function private.checkAttack(player: Player, enemy)
+	-- print("validating attack..")
 	local char = player.Character or player.CharacterAdded:Wait()
 	local plrRoot = char:FindFirstChild("HumanoidRootPart")
 	local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
 	local enemyHum = enemy:FindFirstChild("Humanoid")
 
 	if not (plrRoot and enemyRoot and enemyHum) then
-		print("all info not loaded")
-		if plrRoot then
-			print("plrRoot loaded")
-		end
-		if enemyRoot then
-			print("enemyRoot loaded")
-		end
-		if enemyHum then
-			print("enemyHum loaded")
-		end
+		return
 	end
 
 	local distanceVector = enemyRoot.Position - plrRoot.Position
 	local distance = distanceVector.Magnitude
 
 	if distance > Range then
-		print("INVALID RANGE!")
+		-- print("INVALID RANGE!")
 		return
 	end
 
@@ -52,12 +43,12 @@ function private.checkAttack(player: Player, enemy, dmg)
 	local angleInDegrees = math.deg(angleInRadians)
 
 	if angleInDegrees > Angle / 2 then
-		print("INVALID AOE!")
+		-- print("INVALID AOE!")
 		return
 	end
 
-	enemyHum:TakeDamage(dmg)
-	print("Mob hit! Remaining Health:", enemyHum.Health)
+	enemyHum:TakeDamage(Dmg)
+	-- print("Mob hit! Remaining Health:", enemyHum.Health)
 end
 
 return public

@@ -57,7 +57,7 @@ end
 function private.getModel(level: string)
 	for _, model in enemyTemplates:GetChildren() do
 		if model:GetAttribute("level") == level then
-			return model
+			return model:Clone()
 		end
 	end
 	warn("No template found for level: " .. level)
@@ -73,6 +73,7 @@ function private.spawnEnemy(spawner: BasePart)
 	local level = spawner:GetAttribute("level") or "starter"
 	local spawnCount = spawner:GetAttribute("spawnCount") or 3
 	local respawnTime = spawner:GetAttribute("respawnTime") or 10
+	local spawnCFrame = spawner.CFrame
 	local activeCount = 0
 
 	local function trySpawn()
@@ -80,21 +81,18 @@ function private.spawnEnemy(spawner: BasePart)
 			return
 		end
 
-		local model = private.getModel(level)
-		if not model then
+		local clone = private.getModel(level)
+		if not clone then
 			return
 		end
 
-		local clone = model:Clone()
 		clone:SetAttribute("enemyType", private.pickType(level))
 		clone:SetAttribute("enemySubtype", private.pickSubtype())
-		clone:PivotTo(spawner.CFrame)
+		clone:PivotTo(spawnCFrame)
 		clone.Parent = workspace.enemies
 		activeCount += 1
 
-		Enemy.new(clone)
-
-		clone.Humanoid.Died:Connect(function()
+		Enemy.new(clone, function()
 			task.delay(respawnTime, function()
 				activeCount -= 1
 				trySpawn()
