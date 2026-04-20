@@ -30,6 +30,7 @@ export type Multipliers = {
 	attackRangeMulti: number,
 	dropMulti: number,
 	armorPenetrationMulti: number,
+	damageMulti: number,
 }
 
 export type BaseStats = {
@@ -45,6 +46,7 @@ export type BaseStats = {
 	reactionTime: number,
 	attackRange: number,
 	armorPenetration: number,
+	dropRate: number,
 	drops: {},
 }
 
@@ -63,6 +65,7 @@ public.type = {
 		aggroRangeMulti = 1,
 		dropMulti = 1,
 		armorPenetrationMulti = 1,
+		damageMulti = 1,
 	},
 	ranged = {
 		cooldownReductionMulti = 1,
@@ -77,6 +80,7 @@ public.type = {
 		aggroRangeMulti = 2,
 		dropMulti = 1,
 		armorPenetrationMulti = 1.2,
+		damageMulti = 0.9,
 	},
 	elemental = {
 		cooldownReductionMulti = 1.2,
@@ -91,6 +95,7 @@ public.type = {
 		aggroRangeMulti = 1.2,
 		dropMulti = 1,
 		armorPenetrationMulti = 1.1,
+		damageMulti = 0.95,
 	},
 	explosive = {
 		cooldownReductionMulti = 1,
@@ -105,6 +110,7 @@ public.type = {
 		aggroRangeMulti = 1.5,
 		dropMulti = 1,
 		armorPenetrationMulti = 1.5,
+		damageMulti = 1.2,
 	},
 }
 
@@ -123,11 +129,12 @@ public.subtype = {
 		aggroRangeMulti = 1,
 		dropMulti = 1.1,
 		armorPenetrationMulti = 1,
+		damageMulti = 1.1,
 	},
 	elite = {
 		cooldownReductionMulti = 1.1,
 		reactionTimeMulti = 1.1,
-		walkspeedMulti = 1,
+		walkspeedMulti = 1.05,
 		critRateMulti = 1.2,
 		critDamageMulti = 1.2,
 		healthMulti = 1.3,
@@ -137,6 +144,7 @@ public.subtype = {
 		aggroRangeMulti = 1.05,
 		dropMulti = 1.2,
 		armorPenetrationMulti = 1.2,
+		damageMulti = 1.2,
 	},
 	miniBoss = {
 		cooldownReductionMulti = 1.2,
@@ -151,6 +159,7 @@ public.subtype = {
 		aggroRangeMulti = 1.1,
 		dropMulti = 1.5,
 		armorPenetrationMulti = 1.3,
+		damageMulti = 1.4,
 	},
 }
 
@@ -159,20 +168,22 @@ public.enemyLevel = {
 	starter = {
 		health = 100,
 		aggroRange = 20,
+		aggroLoseRange = 40,
 		damage = 10,
 		critRate = 0.05, -- 5%
 		critDamage = 1.2, -- 120%
 		attackCooldown = 5,
 		walkspeed = 12,
 		armor = 10,
+		reactionTime = 0.1,
+		attackRange = 8,
+		armorPenetration = 10,
+		dropRate = 1,
 		drops = { -- drops may vary depending on the type
 			"coins",
 			"gems",
 			"common loot",
 		},
-		reactionTime = 0.1,
-		attackRange = 8,
-		aggroloseRange = 40,
 	},
 }
 
@@ -188,5 +199,56 @@ public.subtypeChance = {
 	elite = 0.08,
 	miniBoss = 0.02,
 }
+
+function public.getStats(level: string, type: string, subtype: string): BaseStats
+	local base = public.enemyLevel[level]
+	local typeMulti = public.type[type]
+	local subTypeMulti = public.subtype[subtype]
+
+	if not base or not typeMulti then
+		warn("Invalid level or type: " .. tostring(level) .. ", " .. tostring(type))
+		return base
+	end
+
+	local enemyStats = {
+		health = base.health * typeMulti.healthMulti,
+		damage = base.damage * typeMulti.damageMulti,
+		walkspeed = base.walkspeed * typeMulti.walkspeedMulti,
+		armor = base.armor * typeMulti.armorMulti,
+		aggroRange = base.aggroRange * typeMulti.aggroRangeMulti,
+		aggroLoseRange = base.aggroLoseRange * typeMulti.aggroLoseRangeMulti,
+		attackRange = base.attackRange * typeMulti.attackRangeMulti,
+		attackCooldown = base.attackCooldown * typeMulti.cooldownReductionMulti, -- might need to be recalculated
+		critRate = base.critRate * typeMulti.critRateMulti,
+		critDamage = base.critDamage * typeMulti.critDamageMulti,
+		reactionTime = base.reactionTime * typeMulti.reactionTimeMulti,
+		armorPenetration = base.armorPenetration * typeMulti.armorPenetrationMulti,
+		dropRate = base.dropRate * typeMulti.dropMulti,
+	}
+
+	if subTypeMulti then
+		for key, mult in pairs({
+			health = subTypeMulti.healthMulti,
+			damage = subTypeMulti.damageMulti,
+			walkspeed = subTypeMulti.walkspeedMulti,
+			armor = subTypeMulti.armorMulti,
+			aggroRange = subTypeMulti.aggroRangeMulti,
+			aggroLoseRange = subTypeMulti.aggroLoseRangeMulti,
+			attackRange = subTypeMulti.attackRangeMulti,
+			attackCooldown = subTypeMulti.cooldownReductionMulti,
+			critRate = subTypeMulti.critRateMulti,
+			critDamage = subTypeMulti.critDamageMulti,
+			reactionTime = subTypeMulti.reactionTimeMulti,
+			armorPenetration = subTypeMulti.armorPenetrationMulti,
+			dropRate = subTypeMulti.dropMulti,
+		}) do
+			if enemyStats[key] then
+				enemyStats[key] = enemyStats[key] * mult
+			end
+		end
+	end
+
+	return enemyStats
+end
 
 return public

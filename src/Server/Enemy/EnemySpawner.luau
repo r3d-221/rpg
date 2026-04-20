@@ -86,13 +86,36 @@ function private.spawnEnemy(spawner: BasePart)
 			return
 		end
 
-		clone:SetAttribute("enemyType", private.pickType(level))
-		clone:SetAttribute("enemySubtype", private.pickSubtype())
+		local enemyType = private.pickType(level)
+		local enemySubtype = private.pickSubtype()
+		local enemyStats = EnemyData.getStats(level, enemyType, enemySubtype)
+
+		-- comment it out later and never use the attributes
+		clone:SetAttribute("enemyType", enemyType)
+		clone:SetAttribute("enemySubtype", enemySubtype)
+		clone:SetAttribute("Health", enemyStats.health)
+		clone:SetAttribute("Damage", enemyStats.damage)
+		clone:SetAttribute("Armor", enemyStats.armor)
+		clone:SetAttribute("CritRate", enemyStats.critRate)
+		clone:SetAttribute("CritDamage", enemyStats.critDamage)
+		clone:SetAttribute("AttackRange", enemyStats.attackRange)
+		clone:SetAttribute("AggroRange", enemyStats.aggroRange)
+		clone:SetAttribute("AggroLoseRange", enemyStats.aggroLoseRange)
+		clone:SetAttribute("AttackCooldown", enemyStats.attackCooldown)
+		clone:SetAttribute("Walkspeed", enemyStats.walkspeed)
+		clone:SetAttribute("ReactionTime", enemyStats.reactionTime)
+		clone:SetAttribute("ArmorPenetration", enemyStats.armorPenetration)
+		clone:SetAttribute("DropRate", enemyStats.dropRate)
+
+		clone.Humanoid.MaxHealth = enemyStats.health
+		clone.Humanoid.Health = enemyStats.health
+		clone.Humanoid.WalkSpeed = enemyStats.walkspeed
+
 		clone:PivotTo(spawnCFrame)
 		clone.Parent = workspace.enemies
 		activeCount += 1
 
-		Enemy.new(clone, function()
+		Enemy.new(clone, enemyStats, function()
 			task.delay(respawnTime, function()
 				activeCount -= 1
 				trySpawn()

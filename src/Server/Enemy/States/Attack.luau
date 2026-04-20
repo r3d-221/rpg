@@ -1,9 +1,5 @@
 local public = {}
 
-local attackRange = 5
-local damage = 20
-local attackCooldown = 1.5
-
 function public.onEnter(enemy, handler)
 	-- print(enemy.Name .. " entered state: Attack")
 	enemy.Humanoid.WalkSpeed = 0
@@ -16,17 +12,18 @@ function public.onUpdate(enemy, handler, player)
 		return
 	end
 
+	local enemyStats = handler.data.stats
 	local distance = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
 
-	if distance > attackRange then
+	if distance > enemyStats.attackRange then
 		handler:changeState("Chase")
 		return
 	end
 
 	local now = tick()
-	if now - handler.data._lastAttack >= attackCooldown then
+	if now - handler.data._lastAttack >= enemyStats.attackCooldown then
 		handler.data._lastAttack = now
-		player.Character.Humanoid:TakeDamage(damage)
+		player.Character.Humanoid:TakeDamage(enemyStats.damage)
 	end
 end
 

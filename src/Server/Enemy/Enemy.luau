@@ -13,9 +13,9 @@ local public = {}
 public.__index = public
 
 ---- Constructer ----
-function public.new(model, onDied)
+function public.new(model, enemyStats, onDied)
 	local self = setmetatable({}, public)
-	self.handler = StateHandler.new(model)
+	self.handler = StateHandler.new(model, enemyStats)
 
 	self.handler:addState("Idle", idleState)
 	self.handler:addState("Chase", chaseState)

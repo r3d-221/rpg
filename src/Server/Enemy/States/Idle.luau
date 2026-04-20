@@ -1,6 +1,5 @@
 local public = {}
 
-local aggroRange = 20
 local roamRange = 15
 
 local MAX_IDLE = 1.3
@@ -54,9 +53,10 @@ function public.onUpdate(enemy, handler, player)
 		return
 	end
 
+	local enemyStats = handler.data.stats
 	local distance = (enemy.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
 
-	if distance <= aggroRange then
+	if distance <= enemyStats.aggroRange then
 		handler:changeState("Chase")
 	end
 end

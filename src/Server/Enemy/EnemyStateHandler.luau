@@ -5,7 +5,7 @@ local range = 30
 local public = {}
 public.__index = public
 
-function public.new(enemy)
+function public.new(enemy, enemyStats)
 	local self = setmetatable({}, public)
 
 	self.Character = enemy
@@ -16,6 +16,7 @@ function public.new(enemy)
 	self.data.origin = enemy.HumanoidRootPart.Position
 	self.data.RootPart = enemy.HumanoidRootPart
 	self.data.Humanoid = enemy.Humanoid
+	self.data.stats = enemyStats
 	return self
 end
 
