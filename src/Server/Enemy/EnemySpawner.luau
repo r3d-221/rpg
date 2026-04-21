@@ -45,13 +45,37 @@ function private.pickType(level: string): string
 	return "melee"
 end
 
-function private.pickSubtype(): string?
+function private.pickSubtype(level: string, spawner: BasePart): { string }
+	local subtypes = {}
 	for subtype, chance in EnemyData.subtypeChance do
 		if math.random() <= chance then
-			return subtype
+			table.insert(subtypes, subtype)
+			break
 		end
 	end
-	return nil
+
+	if #subtypes == 0 then
+		return subtypes
+	end
+
+	local allowDoubles = spawner:GetAttribute("doubleSubtype")
+	if not allowDoubles then
+		return subtypes
+	end
+
+	local levelData = EnemyData.enemyLevel[level]
+	local doubleChance = levelData and levelData.doubleSubtypeChance or 0
+
+	if doubleChance > 0 and math.random() <= doubleChance then
+		for subtype, chance in EnemyData.subtypeChance do
+			if math.random() <= chance then
+				table.insert(subtypes, subtype)
+				break
+			end
+		end
+	end
+
+	return subtypes
 end
 
 function private.getModel(level: string)
@@ -87,12 +111,13 @@ function private.spawnEnemy(spawner: BasePart)
 		end
 
 		local enemyType = private.pickType(level)
-		local enemySubtype = private.pickSubtype()
+		local enemySubtype = private.pickSubtype(level, spawner)
 		local enemyStats = EnemyData.getStats(level, enemyType, enemySubtype)
 
 		-- comment it out later and never use the attributes
 		clone:SetAttribute("enemyType", enemyType)
-		clone:SetAttribute("enemySubtype", enemySubtype)
+		clone:SetAttribute("enemySubtype", table.concat(enemySubtype, ", "))
+
 		clone:SetAttribute("Health", enemyStats.health)
 		clone:SetAttribute("Damage", enemyStats.damage)
 		clone:SetAttribute("Armor", enemyStats.armor)
@@ -101,7 +126,7 @@ function private.spawnEnemy(spawner: BasePart)
 		clone:SetAttribute("AttackRange", enemyStats.attackRange)
 		clone:SetAttribute("AggroRange", enemyStats.aggroRange)
 		clone:SetAttribute("AggroLoseRange", enemyStats.aggroLoseRange)
-		clone:SetAttribute("AttackCooldown", enemyStats.attackCooldown)
+		clone:SetAttribute("CooldownReduction", enemyStats.cooldownReduction)
 		clone:SetAttribute("Walkspeed", enemyStats.walkspeed)
 		clone:SetAttribute("ReactionTime", enemyStats.reactionTime)
 		clone:SetAttribute("ArmorPenetration", enemyStats.armorPenetration)

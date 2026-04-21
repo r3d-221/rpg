@@ -13,38 +13,38 @@ export type attributes = {
 	reactionTime: number,
 	critRate: number,
 	critDamage: number,
-	attackCooldown: number,
+	cooldownReduction: number,
 	armorPenetration: number,
 }
 
 export type Multipliers = {
-	cooldownReductionMulti: number,
-	reactionTimeMulti: number,
-	walkspeedMulti: number,
-	critRateMulti: number,
-	critDamageMulti: number,
-	healthMulti: number,
-	armorMulti: number,
-	aggroLoseRangeMulti: number,
-	aggroRangeMulti: number,
-	attackRangeMulti: number,
-	dropMulti: number,
-	armorPenetrationMulti: number,
-	damageMulti: number,
+	cooldownReductionMultiplier: number,
+	reactionTimeMultiplier: number,
+	walkspeedMultiplier: number,
+	critRateMultiplier: number,
+	critDamageMultiplier: number,
+	healthMultiplier: number,
+	armorMultiplier: number,
+	aggroLoseRangeMultiplier: number,
+	aggroRangeMultiplier: number,
+	attackRangeMultiplier: number,
+	dropMultiplier: number,
+	armorPenetrationMultiplier: number,
+	damageMultiplier: number,
 }
 
 export type BaseStats = {
 	health: number,
-	aggroRange: number,
-	aggroLoseRange: number,
 	damage: number,
-	critRate: number,
-	critDamage: number,
-	attackCooldown: number,
 	walkspeed: number,
 	armor: number,
-	reactionTime: number,
+	aggroRange: number,
+	aggroLoseRange: number,
 	attackRange: number,
+	cooldownReduction: number,
+	critRate: number,
+	critDamage: number,
+	reactionTime: number,
 	armorPenetration: number,
 	dropRate: number,
 	drops: {},
@@ -53,117 +53,117 @@ export type BaseStats = {
 -- every enemy will have a type
 public.type = {
 	melee = {
-		cooldownReductionMulti = 1,
-		reactionTimeMulti = 1,
-		walkspeedMulti = 1.2,
-		critRateMulti = 1,
-		critDamageMulti = 1,
-		healthMulti = 1.2,
-		armorMulti = 1.1,
-		attackRangeMulti = 1,
-		aggroLoseRangeMulti = 1,
-		aggroRangeMulti = 1,
-		dropMulti = 1,
-		armorPenetrationMulti = 1,
-		damageMulti = 1,
+		cooldownReductionMultiplier = 1,
+		reactionTimeMultiplier = 1,
+		walkspeedMultiplier = 1.2,
+		critRateMultiplier = 1,
+		critDamageMultiplier = 1,
+		healthMultiplier = 1.2,
+		armorMultiplier = 1.1,
+		attackRangeMultiplier = 1,
+		aggroLoseRangeMultiplier = 1,
+		aggroRangeMultiplier = 1,
+		dropMultiplier = 1,
+		armorPenetrationMultiplier = 1,
+		damageMultiplier = 1,
 	},
 	ranged = {
-		cooldownReductionMulti = 1,
-		reactionTimeMulti = 1.1,
-		walkspeedMulti = 0.9,
-		critRateMulti = 1.1,
-		critDamageMulti = 1.2,
-		healthMulti = 1,
-		armorMulti = 1,
-		attackRangeMulti = 1.5,
-		aggroLoseRangeMulti = 2,
-		aggroRangeMulti = 2,
-		dropMulti = 1,
-		armorPenetrationMulti = 1.2,
-		damageMulti = 0.9,
+		cooldownReductionMultiplier = 1,
+		reactionTimeMultiplier = 1.1,
+		walkspeedMultiplier = 0.9,
+		critRateMultiplier = 1.1,
+		critDamageMultiplier = 1.2,
+		healthMultiplier = 1,
+		armorMultiplier = 1,
+		attackRangeMultiplier = 1.5,
+		aggroLoseRangeMultiplier = 2,
+		aggroRangeMultiplier = 2,
+		dropMultiplier = 1,
+		armorPenetrationMultiplier = 1.2,
+		damageMultiplier = 0.9,
 	},
 	elemental = {
-		cooldownReductionMulti = 1.2,
-		reactionTimeMulti = 1,
-		walkspeedMulti = 0.9,
-		critRateMulti = 1,
-		critDamageMulti = 1,
-		healthMulti = 1.1,
-		armorMulti = 1,
-		attackRangeMulti = 1.3,
-		aggroLoseRangeMulti = 1.2,
-		aggroRangeMulti = 1.2,
-		dropMulti = 1,
-		armorPenetrationMulti = 1.1,
-		damageMulti = 0.95,
+		cooldownReductionMultiplier = 1.2,
+		reactionTimeMultiplier = 1,
+		walkspeedMultiplier = 0.9,
+		critRateMultiplier = 1,
+		critDamageMultiplier = 1,
+		healthMultiplier = 1.1,
+		armorMultiplier = 1,
+		attackRangeMultiplier = 1.3,
+		aggroLoseRangeMultiplier = 1.2,
+		aggroRangeMultiplier = 1.2,
+		dropMultiplier = 1,
+		armorPenetrationMultiplier = 1.1,
+		damageMultiplier = 0.95,
 	},
 	explosive = {
-		cooldownReductionMulti = 1,
-		reactionTimeMulti = 1.3,
-		walkspeedMulti = 1.3,
-		critRateMulti = 1.2,
-		critDamageMulti = 1.2,
-		healthMulti = 1,
-		armorMulti = 1,
-		attackRangeMulti = 1.2, -- blast radius
-		aggroLoseRangeMulti = 1.1,
-		aggroRangeMulti = 1.5,
-		dropMulti = 1,
-		armorPenetrationMulti = 1.5,
-		damageMulti = 1.2,
+		cooldownReductionMultiplier = 1,
+		reactionTimeMultiplier = 1.3,
+		walkspeedMultiplier = 1.3,
+		critRateMultiplier = 1.2,
+		critDamageMultiplier = 1.2,
+		healthMultiplier = 1,
+		armorMultiplier = 1,
+		attackRangeMultiplier = 1.2, -- blast radius
+		aggroLoseRangeMultiplier = 1.1,
+		aggroRangeMultiplier = 1.5,
+		dropMultiplier = 1,
+		armorPenetrationMultiplier = 1.5,
+		damageMultiplier = 1.2,
 	},
 }
 
 -- there is a chance for enemies to get a supType
 public.subtype = {
 	armored = {
-		cooldownReductionMulti = 1,
-		reactionTimeMulti = 1,
-		walkspeedMulti = 0.95,
-		critRateMulti = 1,
-		critDamageMulti = 1,
-		healthMulti = 1.1,
-		armorMulti = 1.5,
-		attackRangeMulti = 1,
-		aggroLoseRangeMulti = 1,
-		aggroRangeMulti = 1,
-		dropMulti = 1.1,
-		armorPenetrationMulti = 1,
-		damageMulti = 1.1,
+		cooldownReductionMultiplier = 1,
+		reactionTimeMultiplier = 1,
+		walkspeedMultiplier = 0.95,
+		critRateMultiplier = 1,
+		critDamageMultiplier = 1,
+		healthMultiplier = 1.1,
+		armorMultiplier = 1.5,
+		attackRangeMultiplier = 1,
+		aggroLoseRangeMultiplier = 1,
+		aggroRangeMultiplier = 1,
+		dropMultiplier = 1.1,
+		armorPenetrationMultiplier = 1,
+		damageMultiplier = 1.1,
 	},
 	elite = {
-		cooldownReductionMulti = 1.1,
-		reactionTimeMulti = 1.1,
-		walkspeedMulti = 1.05,
-		critRateMulti = 1.2,
-		critDamageMulti = 1.2,
-		healthMulti = 1.3,
-		armorMulti = 1.4,
-		attackRangeMulti = 1.05,
-		aggroLoseRangeMulti = 1.05,
-		aggroRangeMulti = 1.05,
-		dropMulti = 1.2,
-		armorPenetrationMulti = 1.2,
-		damageMulti = 1.2,
+		cooldownReductionMultiplier = 1.1,
+		reactionTimeMultiplier = 1.1,
+		walkspeedMultiplier = 1.05,
+		critRateMultiplier = 1.2,
+		critDamageMultiplier = 1.2,
+		healthMultiplier = 1.3,
+		armorMultiplier = 1.4,
+		attackRangeMultiplier = 1.05,
+		aggroLoseRangeMultiplier = 1.05,
+		aggroRangeMultiplier = 1.05,
+		dropMultiplier = 1.2,
+		armorPenetrationMultiplier = 1.2,
+		damageMultiplier = 1.2,
 	},
 	miniBoss = {
-		cooldownReductionMulti = 1.2,
-		reactionTimeMulti = 1.2,
-		walkspeedMulti = 1.1,
-		critRateMulti = 1.25,
-		critDamageMulti = 1.3,
-		healthMulti = 1.5,
-		armorMulti = 1.6,
-		attackRangeMulti = 1.1,
-		aggroLoseRangeMulti = 1.1,
-		aggroRangeMulti = 1.1,
-		dropMulti = 1.5,
-		armorPenetrationMulti = 1.3,
-		damageMulti = 1.4,
+		cooldownReductionMultiplier = 1.2,
+		reactionTimeMultiplier = 1.2,
+		walkspeedMultiplier = 1.1,
+		critRateMultiplier = 1.25,
+		critDamageMultiplier = 1.3,
+		healthMultiplier = 1.5,
+		armorMultiplier = 1.6,
+		attackRangeMultiplier = 1.1,
+		aggroLoseRangeMultiplier = 1.1,
+		aggroRangeMultiplier = 1.1,
+		dropMultiplier = 1.5,
+		armorPenetrationMultiplier = 1.3,
+		damageMultiplier = 1.4,
 	},
 }
 
--- base enemy stats
+-- base enemy enemyStats
 public.enemyLevel = {
 	starter = {
 		health = 100,
@@ -172,13 +172,14 @@ public.enemyLevel = {
 		damage = 10,
 		critRate = 0.05, -- 5%
 		critDamage = 1.2, -- 120%
-		attackCooldown = 5,
+		cooldownReduction = 5,
 		walkspeed = 12,
 		armor = 10,
 		reactionTime = 0.1,
 		attackRange = 8,
 		armorPenetration = 10,
 		dropRate = 1,
+		doubleSubtypeChance = 0,
 		drops = { -- drops may vary depending on the type
 			"coins",
 			"gems",
@@ -195,57 +196,59 @@ public.spawnTable = {
 }
 
 public.subtypeChance = {
-	armored = 0.15, -- 15% chance
-	elite = 0.08,
-	miniBoss = 0.02,
+	armored = 0.1, -- 10% chance
+	elite = 0.05,
+	miniBoss = 0.012,
 }
 
-function public.getStats(level: string, type: string, subtype: string): BaseStats
+function public.getStats(level: string, type: string, subtypes: { string }): {}
 	local base = public.enemyLevel[level]
-	local typeMulti = public.type[type]
-	local subTypeMulti = public.subtype[subtype]
+	local typeMultiplier = public.type[type]
 
-	if not base or not typeMulti then
+	if not base or not typeMultiplier then
 		warn("Invalid level or type: " .. tostring(level) .. ", " .. tostring(type))
 		return base
 	end
 
 	local enemyStats = {
-		health = base.health * typeMulti.healthMulti,
-		damage = base.damage * typeMulti.damageMulti,
-		walkspeed = base.walkspeed * typeMulti.walkspeedMulti,
-		armor = base.armor * typeMulti.armorMulti,
-		aggroRange = base.aggroRange * typeMulti.aggroRangeMulti,
-		aggroLoseRange = base.aggroLoseRange * typeMulti.aggroLoseRangeMulti,
-		attackRange = base.attackRange * typeMulti.attackRangeMulti,
-		attackCooldown = base.attackCooldown * typeMulti.cooldownReductionMulti, -- might need to be recalculated
-		critRate = base.critRate * typeMulti.critRateMulti,
-		critDamage = base.critDamage * typeMulti.critDamageMulti,
-		reactionTime = base.reactionTime * typeMulti.reactionTimeMulti,
-		armorPenetration = base.armorPenetration * typeMulti.armorPenetrationMulti,
-		dropRate = base.dropRate * typeMulti.dropMulti,
+		health = base.health * typeMultiplier.healthMultiplier,
+		damage = base.damage * typeMultiplier.damageMultiplier,
+		walkspeed = base.walkspeed * typeMultiplier.walkspeedMultiplier,
+		armor = base.armor * typeMultiplier.armorMultiplier,
+		aggroRange = base.aggroRange * typeMultiplier.aggroRangeMultiplier,
+		aggroLoseRange = base.aggroLoseRange * typeMultiplier.aggroLoseRangeMultiplier,
+		attackRange = base.attackRange * typeMultiplier.attackRangeMultiplier,
+		cooldownReduction = base.cooldownReduction * typeMultiplier.cooldownReductionMultiplier, -- might need to be recalculated
+		critRate = base.critRate * typeMultiplier.critRateMultiplier,
+		critDamage = base.critDamage * typeMultiplier.critDamageMultiplier,
+		reactionTime = base.reactionTime * typeMultiplier.reactionTimeMultiplier,
+		armorPenetration = base.armorPenetration * typeMultiplier.armorPenetrationMultiplier,
+		dropRate = base.dropRate * typeMultiplier.dropMultiplier,
 	}
 
-	if subTypeMulti then
-		for key, mult in pairs({
-			health = subTypeMulti.healthMulti,
-			damage = subTypeMulti.damageMulti,
-			walkspeed = subTypeMulti.walkspeedMulti,
-			armor = subTypeMulti.armorMulti,
-			aggroRange = subTypeMulti.aggroRangeMulti,
-			aggroLoseRange = subTypeMulti.aggroLoseRangeMulti,
-			attackRange = subTypeMulti.attackRangeMulti,
-			attackCooldown = subTypeMulti.cooldownReductionMulti,
-			critRate = subTypeMulti.critRateMulti,
-			critDamage = subTypeMulti.critDamageMulti,
-			reactionTime = subTypeMulti.reactionTimeMulti,
-			armorPenetration = subTypeMulti.armorPenetrationMulti,
-			dropRate = subTypeMulti.dropMulti,
-		}) do
-			if enemyStats[key] then
-				enemyStats[key] = enemyStats[key] * mult
-			end
+	if not subtypes then
+		return enemyStats
+	end
+
+	for _, subtype in subtypes do
+		local subtypeMultiplier = public.subtype[subtype]
+		if not subtypeMultiplier then
+			continue
 		end
+
+		enemyStats.health = enemyStats.health * subtypeMultiplier.healthMultiplier
+		enemyStats.damage = enemyStats.damage * subtypeMultiplier.damageMultiplier
+		enemyStats.walkspeed = enemyStats.walkspeed * subtypeMultiplier.walkspeedMultiplier
+		enemyStats.armor = enemyStats.armor * subtypeMultiplier.armorMultiplier
+		enemyStats.aggroRange = enemyStats.aggroRange * subtypeMultiplier.aggroRangeMultiplier
+		enemyStats.aggroLoseRange = enemyStats.aggroLoseRange * subtypeMultiplier.aggroLoseRangeMultiplier
+		enemyStats.attackRange = enemyStats.attackRange * subtypeMultiplier.attackRangeMultiplier
+		enemyStats.cooldownReduction = enemyStats.cooldownReduction * subtypeMultiplier.cooldownReductionMultiplier
+		enemyStats.critRate = enemyStats.critRate * subtypeMultiplier.critRateMultiplier
+		enemyStats.critDamage = enemyStats.critDamage * subtypeMultiplier.critDamageMultiplier
+		enemyStats.reactionTime = enemyStats.reactionTime * subtypeMultiplier.reactionTimeMultiplier
+		enemyStats.armorPenetration = enemyStats.armorPenetration * subtypeMultiplier.armorPenetrationMultiplier
+		enemyStats.dropRate = enemyStats.dropRate * subtypeMultiplier.dropMultiplier
 	end
 
 	return enemyStats

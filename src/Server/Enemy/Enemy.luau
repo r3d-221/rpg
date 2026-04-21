@@ -40,7 +40,7 @@ function public.new(model, enemyStats, onDied)
 				break
 			end
 			self.handler:update()
-			task.wait(0.1)
+			task.wait(self.handler.data.stats.reactionTime)
 		end
 	end)
 
