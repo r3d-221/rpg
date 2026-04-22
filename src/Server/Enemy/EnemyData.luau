@@ -41,6 +41,7 @@ export type BaseStats = {
 	aggroRange: number,
 	aggroLoseRange: number,
 	attackRange: number,
+	basicAttackCooldown: number,
 	cooldownReduction: number,
 	critRate: number,
 	critDamage: number,
@@ -172,7 +173,8 @@ public.enemyLevel = {
 		damage = 10,
 		critRate = 0.05, -- 5%
 		critDamage = 1.2, -- 120%
-		cooldownReduction = 5,
+		basicAttackCooldown = 5,
+		cooldownReduction = 4,
 		walkspeed = 12,
 		armor = 10,
 		reactionTime = 0.1,
@@ -218,7 +220,7 @@ function public.getStats(level: string, type: string, subtypes: { string }): {}
 		aggroRange = base.aggroRange * typeMultiplier.aggroRangeMultiplier,
 		aggroLoseRange = base.aggroLoseRange * typeMultiplier.aggroLoseRangeMultiplier,
 		attackRange = base.attackRange * typeMultiplier.attackRangeMultiplier,
-		cooldownReduction = base.cooldownReduction * typeMultiplier.cooldownReductionMultiplier, -- might need to be recalculated
+		cooldownReduction = base.cooldownReduction * typeMultiplier.cooldownReductionMultiplier,
 		critRate = base.critRate * typeMultiplier.critRateMultiplier,
 		critDamage = base.critDamage * typeMultiplier.critDamageMultiplier,
 		reactionTime = base.reactionTime * typeMultiplier.reactionTimeMultiplier,
@@ -250,6 +252,9 @@ function public.getStats(level: string, type: string, subtypes: { string }): {}
 		enemyStats.armorPenetration = enemyStats.armorPenetration * subtypeMultiplier.armorPenetrationMultiplier
 		enemyStats.dropRate = enemyStats.dropRate * subtypeMultiplier.dropMultiplier
 	end
+
+	local effectiveCooldown = base.basicAttackCooldown * (1 - enemyStats.cooldownReduction / 100)
+	enemyStats.basicAttackCooldown = math.max(effectiveCooldown, 0.5)
 
 	return enemyStats
 end

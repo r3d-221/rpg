@@ -114,6 +114,9 @@ function private.spawnEnemy(spawner: BasePart)
 		local enemySubtype = private.pickSubtype(level, spawner)
 		local enemyStats = EnemyData.getStats(level, enemyType, enemySubtype)
 
+		local configName = clone:GetAttribute("attackConfig") or "zombie"
+		local config = require(EnemyFolder.Attacks[configName])
+
 		-- comment it out later and never use the attributes
 		clone:SetAttribute("enemyType", enemyType)
 		clone:SetAttribute("enemySubtype", table.concat(enemySubtype, ", "))
@@ -126,7 +129,7 @@ function private.spawnEnemy(spawner: BasePart)
 		clone:SetAttribute("AttackRange", enemyStats.attackRange)
 		clone:SetAttribute("AggroRange", enemyStats.aggroRange)
 		clone:SetAttribute("AggroLoseRange", enemyStats.aggroLoseRange)
-		clone:SetAttribute("CooldownReduction", enemyStats.cooldownReduction)
+		clone:SetAttribute("BasicAttackCooldown", enemyStats.basicAttackCooldown)
 		clone:SetAttribute("Walkspeed", enemyStats.walkspeed)
 		clone:SetAttribute("ReactionTime", enemyStats.reactionTime)
 		clone:SetAttribute("ArmorPenetration", enemyStats.armorPenetration)
@@ -140,7 +143,7 @@ function private.spawnEnemy(spawner: BasePart)
 		clone.Parent = workspace.enemies
 		activeCount += 1
 
-		Enemy.new(clone, enemyStats, function()
+		Enemy.new(clone, enemyStats, config, function()
 			task.delay(respawnTime, function()
 				activeCount -= 1
 				trySpawn()
