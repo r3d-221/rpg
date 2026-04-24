@@ -61,7 +61,7 @@ function public.onUpdate(enemy, handler, player)
 	end
 end
 
-function public.onExit(handler)
+function public.onExit(enemy, handler)
 	handler.data.isRoaming = false
 end
 

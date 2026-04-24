@@ -78,13 +78,13 @@ function private.pickSubtype(level: string, spawner: BasePart): { string }
 	return subtypes
 end
 
-function private.getModel(level: string)
+function private.getModel(level: string, enemyType: string)
 	for _, model in enemyTemplates:GetChildren() do
-		if model:GetAttribute("level") == level then
+		if model:GetAttribute("level") == level and model:GetAttribute("variant") == enemyType then
 			return model:Clone()
 		end
 	end
-	warn("No template found for level: " .. level)
+	warn("No template found for level: " .. level .. ", type: " .. enemyType)
 	return nil
 end
 
@@ -105,12 +105,13 @@ function private.spawnEnemy(spawner: BasePart)
 			return
 		end
 
-		local clone = private.getModel(level)
+		local enemyType = private.pickType(level)
+
+		local clone = private.getModel(level, enemyType)
 		if not clone then
 			return
 		end
 
-		local enemyType = private.pickType(level)
 		local enemySubtype = private.pickSubtype(level, spawner)
 		local enemyStats = EnemyData.getStats(level, enemyType, enemySubtype)
 

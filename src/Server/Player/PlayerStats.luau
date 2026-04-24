@@ -30,4 +30,6 @@ public.statPoints = {
 	critDamage = 0,
 }
 
+function public.getPlayerStats() end
+
 return public

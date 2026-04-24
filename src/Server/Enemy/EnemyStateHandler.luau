@@ -26,7 +26,7 @@ end
 
 function public:changeState(name: string)
 	if self.currentState and self.currentState.onExit then
-		self.currentState.onExit(self)
+		self.currentState.onExit(self.Character, self)
 	end
 
 	self.currentState = self.states[name]
