@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
 
 local EnemyFolder = ServerScriptService.Server.Enemy
+local EnemyDropsHandler = require(script.Parent.EnemyDropsHandler)
 local Enemy = require(EnemyFolder.Enemy)
 local EnemyData = require(EnemyFolder.EnemyData)
 
@@ -22,8 +23,8 @@ function public.onStart()
 	CollectionService:GetInstanceAddedSignal(SPAWNER_TAG):Connect(private.spawnEnemy)
 end
 
-function private.pickType(level: string): string
-	local pool = EnemyData.spawnTable[level]
+function private.pickType(difficultyLevel: string): string
+	local pool = EnemyData.spawnTable[difficultyLevel]
 	if not pool then
 		return "melee"
 	end
@@ -45,7 +46,7 @@ function private.pickType(level: string): string
 	return "melee"
 end
 
-function private.pickSubtype(level: string, spawner: BasePart): { string }
+function private.pickSubtype(difficultyLevel: string, spawner: BasePart): { string }
 	local subtypes = {}
 	for subtype, chance in EnemyData.subtypeChance do
 		if math.random() <= chance then
@@ -63,8 +64,8 @@ function private.pickSubtype(level: string, spawner: BasePart): { string }
 		return subtypes
 	end
 
-	local levelData = EnemyData.enemyLevel[level]
-	local doubleChance = levelData and levelData.doubleSubtypeChance or 0
+	local difficultyLevelData = EnemyData.enemyDifficultyLevel[difficultyLevel]
+	local doubleChance = difficultyLevelData and difficultyLevelData.doubleSubtypeChance or 0
 
 	if doubleChance > 0 and math.random() <= doubleChance then
 		for subtype, chance in EnemyData.subtypeChance do
@@ -78,13 +79,13 @@ function private.pickSubtype(level: string, spawner: BasePart): { string }
 	return subtypes
 end
 
-function private.getModel(level: string, enemyType: string)
+function private.getModel(difficultyLevel: string, enemyType: string)
 	for _, model in enemyTemplates:GetChildren() do
-		if model:GetAttribute("level") == level and model:GetAttribute("variant") == enemyType then
+		if model:GetAttribute("difficultyLevel") == difficultyLevel and model:GetAttribute("variant") == enemyType then
 			return model:Clone()
 		end
 	end
-	warn("No template found for level: " .. level .. ", type: " .. enemyType)
+	warn("No template found for difficultyLevel: " .. difficultyLevel .. ", type: " .. enemyType)
 	return nil
 end
 
@@ -94,7 +95,7 @@ function private.spawnEnemy(spawner: BasePart)
 	end
 	processedSpawners[spawner] = true
 
-	local level = spawner:GetAttribute("level") or "starter"
+	local difficultyLevel = spawner:GetAttribute("difficultyLevel") or "starter"
 	local spawnCount = spawner:GetAttribute("spawnCount") or 3
 	local respawnTime = spawner:GetAttribute("respawnTime") or 10
 	local spawnCFrame = spawner.CFrame
@@ -105,15 +106,15 @@ function private.spawnEnemy(spawner: BasePart)
 			return
 		end
 
-		local enemyType = private.pickType(level)
+		local enemyType = private.pickType(difficultyLevel)
 
-		local clone = private.getModel(level, enemyType)
+		local clone = private.getModel(difficultyLevel, enemyType)
 		if not clone then
 			return
 		end
 
-		local enemySubtype = private.pickSubtype(level, spawner)
-		local enemyStats = EnemyData.getStats(level, enemyType, enemySubtype)
+		local enemySubtype = private.pickSubtype(difficultyLevel, spawner)
+		local enemyStats = EnemyData.getStats(difficultyLevel, enemyType, enemySubtype)
 
 		local configName = clone:GetAttribute("attackConfig") or "zombie"
 		local config = require(EnemyFolder.Attacks[configName])
@@ -145,6 +146,13 @@ function private.spawnEnemy(spawner: BasePart)
 		activeCount += 1
 
 		Enemy.new(clone, enemyStats, config, function()
+			local attackerName = clone:GetAttribute("lastAttacker")
+			local lastAttacker = attackerName and game.Players:FindFirstChild(attackerName)
+			local luck = lastAttacker and lastAttacker:GetAttribute("luck") or 0 -- get the luck from player data
+			local drops = EnemyDropsHandler.rollDrops(difficultyLevel, enemyType, enemyStats.dropRate, luck) -- enemy drops
+
+			print(drops)
+
 			task.delay(respawnTime, function()
 				activeCount -= 1
 				trySpawn()

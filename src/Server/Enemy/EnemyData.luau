@@ -31,6 +31,7 @@ export type Multipliers = {
 	dropMultiplier: number,
 	armorPenetrationMultiplier: number,
 	damageMultiplier: number,
+	level: number,
 }
 
 export type BaseStats = {
@@ -48,6 +49,7 @@ export type BaseStats = {
 	reactionTime: number,
 	armorPenetration: number,
 	dropRate: number,
+	level: number,
 	drops: {},
 }
 
@@ -67,6 +69,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1,
 		damageMultiplier = 1,
+		level = 1,
 	},
 	ranged = {
 		cooldownReductionMultiplier = 1,
@@ -82,6 +85,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1.2,
 		damageMultiplier = 0.9,
+		level = 1,
 	},
 	elemental = {
 		cooldownReductionMultiplier = 1.2,
@@ -97,6 +101,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1.1,
 		damageMultiplier = 0.95,
+		level = 1,
 	},
 	explosive = {
 		cooldownReductionMultiplier = 1,
@@ -112,6 +117,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1.5,
 		damageMultiplier = 1.2,
+		level = 1,
 	},
 }
 
@@ -131,6 +137,7 @@ public.subtype = {
 		dropMultiplier = 1.1,
 		armorPenetrationMultiplier = 1,
 		damageMultiplier = 1.1,
+		level = 1,
 	},
 	elite = {
 		cooldownReductionMultiplier = 1.1,
@@ -146,6 +153,7 @@ public.subtype = {
 		dropMultiplier = 1.2,
 		armorPenetrationMultiplier = 1.2,
 		damageMultiplier = 1.2,
+		level = 1,
 	},
 	miniBoss = {
 		cooldownReductionMultiplier = 1.2,
@@ -161,11 +169,12 @@ public.subtype = {
 		dropMultiplier = 1.5,
 		armorPenetrationMultiplier = 1.3,
 		damageMultiplier = 1.4,
+		level = 1, -- mini bosses will have the highest level possible
 	},
 }
 
 -- base enemy enemyStats
-public.enemyLevel = {
+public.enemyDifficultyLevel = {
 	starter = {
 		health = 100,
 		aggroRange = 20,
@@ -203,12 +212,12 @@ public.subtypeChance = {
 	miniBoss = 0.012,
 }
 
-function public.getStats(level: string, type: string, subtypes: { string }): {}
-	local base = public.enemyLevel[level]
+function public.getStats(difficultyLevel: string, type: string, subtypes: { string }): {}
+	local base = public.enemyDifficultyLevel[difficultyLevel]
 	local typeMultiplier = public.type[type]
 
 	if not base or not typeMultiplier then
-		warn("Invalid level or type: " .. tostring(level) .. ", " .. tostring(type))
+		warn("Invalid difficultyLevel or type: " .. tostring(difficultyLevel) .. ", " .. tostring(type))
 		return base
 	end
 

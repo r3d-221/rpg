@@ -48,6 +48,8 @@ function private.checkAttack(player: Player, enemy)
 	end
 
 	enemyHum:TakeDamage(Dmg)
+
+	enemy:SetAttribute("lastAttacker", player.Name)
 	-- print("Mob hit! Remaining Health:", enemyHum.Health)
 end
 
