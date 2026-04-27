@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
 
 local EnemyFolder = ServerScriptService.Server.Enemy
+local PlayerDataHandler = require(ServerScriptService.Server.Player.PlayerDataHandler)
 local EnemyDropsHandler = require(script.Parent.EnemyDropsHandler)
 local Enemy = require(EnemyFolder.Enemy)
 local EnemyData = require(EnemyFolder.EnemyData)
@@ -148,10 +149,25 @@ function private.spawnEnemy(spawner: BasePart)
 		Enemy.new(clone, enemyStats, config, function()
 			local attackerName = clone:GetAttribute("lastAttacker")
 			local lastAttacker = attackerName and game.Players:FindFirstChild(attackerName)
-			local luck = lastAttacker and lastAttacker:GetAttribute("luck") or 0 -- get the luck from player data
-			local drops = EnemyDropsHandler.rollDrops(difficultyLevel, enemyType, enemyStats.dropRate, luck) -- enemy drops
+			local luck = 0
 
+			if lastAttacker then
+				local data = PlayerDataHandler.getData(lastAttacker)
+				luck = data and data.stats.luck or 0
+			end
+
+			local drops = EnemyDropsHandler.rollDrops(difficultyLevel, enemyType, enemyStats.dropRate, luck) -- enemy drops
 			print(drops)
+
+			if lastAttacker then
+				for _, currency in drops.currency do
+					PlayerDataHandler.addCurrency(lastAttacker, currency.id, currency.amount)
+				end
+
+				for _, item in drops.items do
+					PlayerDataHandler.addItem(lastAttacker, item)
+				end
+			end
 
 			task.delay(respawnTime, function()
 				activeCount -= 1

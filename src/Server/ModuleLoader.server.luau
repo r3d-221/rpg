@@ -1,12 +1,12 @@
 local ServerScriptService = game:GetService("ServerScriptService")
-local CollectionService = game:GetService("CollectionService")
 
 local ServerModules = ServerScriptService.Server
 local EnemyFolder = ServerModules.Enemy
-local Player = ServerModules.Player
+local PlayerFolder = ServerModules.Player
 
+local PlayerDataHandler = require(PlayerFolder.PlayerDataHandler)
 local EnemySpawner = require(EnemyFolder.EnemySpawner)
-local PlayerCombat = require(Player.PlayerCombat)
+local PlayerCombat = require(PlayerFolder.PlayerCombat)
 
 -- local Enemy = require(EnemyFolder.Enemy)
 -- local enemyTag = "Enemy"
@@ -18,6 +18,7 @@ local PlayerCombat = require(Player.PlayerCombat)
 
 -- CollectionService:GetInstanceAddedSignal(enemyTag):Connect(Enemy.new)
 
+PlayerDataHandler.onStart()
 EnemySpawner.onStart()
 PlayerCombat.onStart()
 
