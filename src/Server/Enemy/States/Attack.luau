@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local ServerScriptService = game:GetService("ServerScriptService")
+local PlayerDataHandler = require(ServerScriptService.Server.Player.PlayerDataHandler)
 
 local public = {}
 local private = {}
@@ -271,7 +273,8 @@ function private.fireRaycast(enemy, handler, player, ability)
 		return
 	end
 
-	local playerArmor = 20
+	local playerData = PlayerDataHandler.getData(player)
+	local playerArmor = playerData and playerData.stats.armor or 0
 	local damage = private.calculateDamage(stats, playerArmor, ability.damageMultiplier, ability.modifiers or {})
 	-- print(enemy.Name .. " did " .. damage .. " damage")
 	humanoid:TakeDamage(damage)
@@ -327,6 +330,14 @@ function private.performAttack(enemy, handler, player, ability)
 	end
 
 	task.wait(ability.windUp)
+
+	if not modifiers.ignoreAttackRange then
+		local humanoid = enemy:FindFirstChildOfClass("Humanoid")
+		if not humanoid or humanoid.Health <= 0 then
+			handler.data.isAttacking = false
+			return
+		end
+	end
 
 	local hits = {}
 	if hitboxType == "raycast" then

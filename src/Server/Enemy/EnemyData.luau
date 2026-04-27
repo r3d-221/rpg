@@ -1,22 +1,5 @@
 local public = {}
 
-export type attributes = {
-	type: {},
-	drops: {},
-	health: number,
-	walkspeed: number,
-	aggroRange: number,
-	aggroLoseRange: number,
-	damage: number,
-	attackRange: number,
-	armor: number,
-	reactionTime: number,
-	critRate: number,
-	critDamage: number,
-	cooldownReduction: number,
-	armorPenetration: number,
-}
-
 export type Multipliers = {
 	cooldownReductionMultiplier: number,
 	reactionTimeMultiplier: number,
@@ -31,7 +14,7 @@ export type Multipliers = {
 	dropMultiplier: number,
 	armorPenetrationMultiplier: number,
 	damageMultiplier: number,
-	level: number,
+	minimumLevelRange: number,
 }
 
 export type BaseStats = {
@@ -50,7 +33,7 @@ export type BaseStats = {
 	armorPenetration: number,
 	dropRate: number,
 	level: number,
-	drops: {},
+	levelRange: {},
 }
 
 -- every enemy will have a type
@@ -69,7 +52,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1,
 		damageMultiplier = 1,
-		level = 1,
+		minimumLevelRange = 1,
 	},
 	ranged = {
 		cooldownReductionMultiplier = 1,
@@ -85,7 +68,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1.2,
 		damageMultiplier = 0.9,
-		level = 1,
+		minimumLevelRange = 1,
 	},
 	elemental = {
 		cooldownReductionMultiplier = 1.2,
@@ -101,7 +84,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1.1,
 		damageMultiplier = 0.95,
-		level = 1,
+		minimumLevelRange = 1,
 	},
 	explosive = {
 		cooldownReductionMultiplier = 1,
@@ -117,7 +100,7 @@ public.type = {
 		dropMultiplier = 1,
 		armorPenetrationMultiplier = 1.5,
 		damageMultiplier = 1.2,
-		level = 1,
+		minimumLevelRange = 1,
 	},
 }
 
@@ -137,7 +120,7 @@ public.subtype = {
 		dropMultiplier = 1.1,
 		armorPenetrationMultiplier = 1,
 		damageMultiplier = 1.1,
-		level = 1,
+		minimumLevelRange = 5,
 	},
 	elite = {
 		cooldownReductionMultiplier = 1.1,
@@ -153,7 +136,7 @@ public.subtype = {
 		dropMultiplier = 1.2,
 		armorPenetrationMultiplier = 1.2,
 		damageMultiplier = 1.2,
-		level = 1,
+		minimumLevelRange = 8,
 	},
 	miniBoss = {
 		cooldownReductionMultiplier = 1.2,
@@ -169,7 +152,7 @@ public.subtype = {
 		dropMultiplier = 1.5,
 		armorPenetrationMultiplier = 1.3,
 		damageMultiplier = 1.4,
-		level = 1, -- mini bosses will have the highest level possible
+		minimumLevelRange = 12,
 	},
 }
 
@@ -191,11 +174,8 @@ public.enemyDifficultyLevel = {
 		armorPenetration = 10,
 		dropRate = 1,
 		doubleSubtypeChance = 0,
-		drops = { -- drops may vary depending on the type
-			"coins",
-			"gems",
-			"common loot",
-		},
+		level = 1,
+		levelRange = { 1, 15 },
 	},
 }
 
@@ -212,7 +192,44 @@ public.subtypeChance = {
 	miniBoss = 0.012,
 }
 
-function public.getStats(difficultyLevel: string, type: string, subtypes: { string }): {}
+function public.getLevel(difficultyLevel: string, subtypes: { string }): number
+	local area = public.enemyDifficultyLevel[difficultyLevel]
+	if not area then
+		return 1
+	end
+
+	local min = area.levelRange[1]
+	local max = area.levelRange[2]
+
+	local subtypeMin = min
+	for _, subtypeName in subtypes do
+		local subtype = public.subtype[subtypeName]
+		if subtype and subtype.minimumLevelRange > subtypeMin then
+			subtypeMin = subtype.minimumLevelRange
+		end
+	end
+
+	if #subtypes > 1 then
+		subtypeMin = math.min(subtypeMin + 3, max)
+	end
+
+	if subtypeMin > max then
+		return max
+	end
+
+	local effectiveMin = math.max(min, subtypeMin)
+
+	local roll1 = math.random(effectiveMin, max)
+	local roll2 = math.random(effectiveMin, max)
+	local roll3 = math.random(effectiveMin, max)
+
+	-- takes the lowest two rolls
+	local sorted = { roll1, roll2, roll3 }
+	table.sort(sorted)
+	return math.floor((sorted[1] + sorted[2]) / 2)
+end
+
+function public.getStats(difficultyLevel: string, type: string, subtypes: { string }, level: number): {}
 	local base = public.enemyDifficultyLevel[difficultyLevel]
 	local typeMultiplier = public.type[type]
 
@@ -261,6 +278,15 @@ function public.getStats(difficultyLevel: string, type: string, subtypes: { stri
 		enemyStats.armorPenetration = enemyStats.armorPenetration * subtypeMultiplier.armorPenetrationMultiplier
 		enemyStats.dropRate = enemyStats.dropRate * subtypeMultiplier.dropMultiplier
 	end
+
+	local levelScale = 1 + (level - 1) * 0.08 -- 8% increase per level
+	enemyStats.health = enemyStats.health * levelScale
+	enemyStats.damage = enemyStats.damage * levelScale
+	enemyStats.armor = enemyStats.armor * levelScale
+	enemyStats.armorPenetration = enemyStats.armorPenetration * levelScale
+	enemyStats.dropRate = enemyStats.dropRate * (1 + (level - 1) * 0.02) -- 2% per level
+
+	enemyStats.level = level
 
 	local effectiveCooldown = base.basicAttackCooldown * (1 - enemyStats.cooldownReduction / 100)
 	enemyStats.basicAttackCooldown = math.max(effectiveCooldown, 0.5)

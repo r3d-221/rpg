@@ -67,15 +67,16 @@ public.itemList = {
 
 public.items = {
 	starter = {
+		canDropMultiple = false, -- makes it so that enemies will have a chance to drop 2 or more pieces of armor, weapon or artifect; influenced by luck
 		melee = {
 			weapons = {
-				chance = 0.15,
+				chance = 0.02,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "uncommon" },
 				weaponType = { sword = 0.3, knife = 0.7 },
 			},
 			armors = {
-				chance = 0.10,
+				chance = 0.025,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "common" },
 				armorType = { heavySet = 0.3, lightSet = 0.7 },
@@ -89,13 +90,13 @@ public.items = {
 		},
 		ranged = {
 			weapons = {
-				chance = 0.15,
+				chance = 0.02,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "uncommon" },
 				weaponType = { longBow = 0.3, shortBow = 0.7 },
 			},
 			armors = {
-				chance = 0.10,
+				chance = 0.025,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "common" },
 				armorType = { heavySet = 0.2, lightSet = 0.8 },

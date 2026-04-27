@@ -115,7 +115,8 @@ function private.spawnEnemy(spawner: BasePart)
 		end
 
 		local enemySubtype = private.pickSubtype(difficultyLevel, spawner)
-		local enemyStats = EnemyData.getStats(difficultyLevel, enemyType, enemySubtype)
+		local enemyLevel = EnemyData.getLevel(difficultyLevel, enemySubtype)
+		local enemyStats = EnemyData.getStats(difficultyLevel, enemyType, enemySubtype, enemyLevel)
 
 		local configName = clone:GetAttribute("attackConfig") or "zombie"
 		local config = require(EnemyFolder.Attacks[configName])
@@ -123,6 +124,7 @@ function private.spawnEnemy(spawner: BasePart)
 		-- comment it out later and never use the attributes
 		clone:SetAttribute("enemyType", enemyType)
 		clone:SetAttribute("enemySubtype", table.concat(enemySubtype, ", "))
+		clone:SetAttribute("level", enemyLevel)
 
 		clone:SetAttribute("Health", enemyStats.health)
 		clone:SetAttribute("Damage", enemyStats.damage)
