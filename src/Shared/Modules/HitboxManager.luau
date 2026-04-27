@@ -26,10 +26,10 @@ function public.New()
 	if #nearByEnemies > 0 then
 		for _, enemy in pairs(nearByEnemies) do
 			attack:FireServer(enemy, Dmg)
-			print(enemy.Name)
+			-- print(enemy.Name)
 		end
-	else
-		print("No enemies in range!")
+		-- else
+		-- 	print("No enemies in range!")
 	end
 end
 

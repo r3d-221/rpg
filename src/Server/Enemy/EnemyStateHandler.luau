@@ -5,7 +5,7 @@ local range = 30
 local public = {}
 public.__index = public
 
-function public.new(enemy)
+function public.new(enemy, enemyStats)
 	local self = setmetatable({}, public)
 
 	self.Character = enemy
@@ -16,6 +16,7 @@ function public.new(enemy)
 	self.data.origin = enemy.HumanoidRootPart.Position
 	self.data.RootPart = enemy.HumanoidRootPart
 	self.data.Humanoid = enemy.Humanoid
+	self.data.stats = enemyStats
 	return self
 end
 
@@ -25,11 +26,10 @@ end
 
 function public:changeState(name: string)
 	if self.currentState and self.currentState.onExit then
-		self.currentState.onExit(self)
+		self.currentState.onExit(self.Character, self)
 	end
 
 	self.currentState = self.states[name]
-	-- print("changed state to: " .. name .. " for: " .. self.Character.Name)
 
 	if self.currentState and self.currentState.onEnter then
 		self.currentState.onEnter(self.Character, self)
@@ -37,11 +37,15 @@ function public:changeState(name: string)
 end
 
 function public:update()
-	self.targetPlayer = public:nearestPlayer(self.Character)
-	if self.currentState and self.currentState.onUpdate then
-		-- local name = self.targetPlayer and self.targetPlayer.Name or "NIL"
-		-- print("Target player set to: " .. name)
+	if not self.Character or not self.Character.Parent then
+		return
+	end
+	if not self.Character:FindFirstChild("HumanoidRootPart") then
+		return
+	end
 
+	self.targetPlayer = self:nearestPlayer(self.Character)
+	if self.currentState and self.currentState.onUpdate then
 		self.currentState.onUpdate(self.Character, self, self.targetPlayer)
 	end
 end
@@ -50,30 +54,31 @@ function public:nearestPlayer(enemy)
 	local nearest = nil
 	local minDistance = math.huge
 
+	local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
+	if not enemyRoot then
+		return nil
+	end -- guard here too
+
 	for _, player in ipairs(Players:GetPlayers()) do
 		local character = player.Character
 		if not character then
-			return
+			continue
 		end
 
 		local playerRoot = character:FindFirstChild("HumanoidRootPart")
 		local humanoid = character:FindFirstChild("Humanoid")
 
 		if not playerRoot or not humanoid then
-			return
+			continue
 		end
 		if humanoid.Health <= 0 then
-			return
+			continue
 		end
 
-		-- print("a player was found by: " .. enemy.Name)
-		local distance = (playerRoot.Position - enemy.HumanoidRootPart.Position).Magnitude
-		-- print(enemy.Name .. "- " .. distance)
-
+		local distance = (playerRoot.Position - enemyRoot.Position).Magnitude
 		if distance <= range and distance < minDistance then
 			minDistance = distance
 			nearest = player
-			-- print("target set condition met")
 		end
 	end
 

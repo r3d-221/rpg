@@ -9,7 +9,15 @@ local animate = ReplicatedStorage:FindFirstChild("IgnoredFolder"):FindFirstChild
 local enemyTag = "Enemy"
 
 local function applyAnimate(object)
+	if not object:IsDescendantOf(workspace) then
+		return
+	end
 	if object:FindFirstChild("Animate") then
+		return
+	end
+
+	local humanoid = object:FindFirstChildOfClass("Humanoid")
+	if not humanoid then
 		return
 	end
 

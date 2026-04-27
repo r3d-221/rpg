@@ -7,17 +7,20 @@
       "Shared": {
         "$path": "src/Shared",
         "Remotes": {
-        "$className": "Folder",
-        "attack": {
-          "$className": "RemoteEvent"
+          "$className": "Folder",
+          "attack": {
+            "$className": "RemoteEvent"
+          }
         }
-      }
       }
     },
 
     "ServerScriptService": {
       "Server": {
         "$path": "src/Server"
+      },
+      "ServerPackages": {
+       "$path": "ServerPackages"
       }
     },
 
