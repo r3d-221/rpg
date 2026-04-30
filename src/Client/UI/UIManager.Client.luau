@@ -22,7 +22,7 @@ function public.fire(name: string, ...: any)
 	end
 end
 
-function public.toggle(name: string)
+function public.toggle(name: string): boolean?
 	local screen = screens[name]
 	if not screen then
 		return
@@ -33,6 +33,8 @@ function public.toggle(name: string)
 		public.close("fullInfo")
 		public.close("quickInfo")
 	end
+
+	return screen.Visible
 end
 
 function public.closeAll()

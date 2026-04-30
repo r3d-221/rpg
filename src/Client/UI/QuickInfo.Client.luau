@@ -11,21 +11,21 @@ local UIManager = require(UIFolder["UIManager.Client"])
 local public = {}
 
 local frame
-local itemName
+local itemText
 local stats
 local level
 local type
 
-function public.init(screenGui: ScreenGui)
+function public.onStart(screenGui: ScreenGui)
 	frame = screenGui:FindFirstChild("quickInfo")
-	itemName = frame:FindFirstChild("itemName")
+	itemText = frame:FindFirstChild("itemName"):FindFirstChild("name")
 	stats = frame:FindFirstChild("stats")
 	level = frame:FindFirstChild("level")
 	type = frame:FindFirstChild("type")
 end
 
 function public.show(item, slot)
-	itemName.Text = item.name or "Unknown"
+	itemText.Text = item.name or "Unknown"
 	type.Text = item.subCategory or "?"
 	level.Text = tostring(item.level or 1)
 

@@ -20,26 +20,28 @@ local storeButton = screens:FindFirstChild("settings"):FindFirstChild("storeIcon
 
 local public = {}
 
-function public.init()
+function public.onStart()
 	inventoryButton.MouseButton1Click:Connect(function()
-		UIManager.toggle("inventory")
+		local isOpen = UIManager.toggle("inventory")
+		if not isOpen then
+			UIManager.fire("inventoryClosed")
+		end
 	end)
+	-- profileButton.MouseButton1Click:Connect(function()
+	-- 	UIManager.toggle("profile")
+	-- end)
 
-	profileButton.MouseButton1Click:Connect(function()
-		UIManager.toggle("profile")
-	end)
+	-- questButton.MouseButton1Click:Connect(function()
+	-- 	UIManager.toggle("quest")
+	-- end)
 
-	questButton.MouseButton1Click:Connect(function()
-		UIManager.toggle("quest")
-	end)
+	-- storeButton.MouseButton1Click:Connect(function()
+	-- 	UIManager.toggle("store")
+	-- end)
 
-	storeButton.MouseButton1Click:Connect(function()
-		UIManager.toggle("store")
-	end)
-
-	settingsButton.MouseButton1Click:Connect(function()
-		UIManager.toggle("settings")
-	end)
+	-- settingsButton.MouseButton1Click:Connect(function()
+	-- 	UIManager.toggle("settings")
+	-- end)
 end
 
 return public

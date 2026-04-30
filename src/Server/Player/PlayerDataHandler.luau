@@ -1,6 +1,10 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
+
+local Remotes = ReplicatedStorage.Shared.Remotes
+local syncPlayerData = Remotes.syncPlayerData
 
 local PROFILE_STORE_KEY = "test_v1"
 
@@ -84,6 +88,7 @@ function public.addCurrency(player: Player, id: string, amount: number)
 	end
 
 	data.currency[id] = (data.currency[id] or 0) + amount
+	private.sync(player)
 	print(data)
 end
 
@@ -116,6 +121,7 @@ function public.addItem(player: Player, item)
 				remaining -= toAdd
 			end
 			if remaining <= 0 then
+				private.sync(player)
 				return
 			end
 		end
@@ -131,6 +137,8 @@ function public.addItem(player: Player, item)
 			table.insert(slots, { id = item.id, category = category, rarity = item.rarity, quantity = toAdd })
 			remaining -= toAdd
 		end
+
+		private.sync(player)
 		return
 	end
 
@@ -138,10 +146,12 @@ function public.addItem(player: Player, item)
 	if #slots >= slotCap then
 		warn("Backpack full for category: " .. category .. " — item dropped: " .. item.id)
 		-- drop the item for pickup
+		private.sync(player)
 		return
 	end
 
 	table.insert(slots, item)
+	private.sync(player)
 end
 
 function public.addStorageSlots(player: Player, category: string, amount: number)
@@ -157,6 +167,7 @@ function public.addStorageSlots(player: Player, category: string, amount: number
 	end
 
 	data.storageSlots[category] += amount
+	private.sync(player)
 	print(data.storageSlots)
 end
 
@@ -181,6 +192,8 @@ function private.onPlayerAdded(player: Player)
 			private.onPlayerRemoved(player)
 		end
 	end)
+
+	private.sync(player)
 end
 
 function private.onPlayerRemoved(player: Player)
@@ -188,6 +201,13 @@ function private.onPlayerRemoved(player: Player)
 	if profile then
 		profile:EndSession()
 		profiles[player] = nil
+	end
+end
+
+function private.sync(player: Player)
+	local data = public.getData(player)
+	if data then
+		syncPlayerData:FireClient(player, data)
 	end
 end
 

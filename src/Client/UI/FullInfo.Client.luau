@@ -11,7 +11,7 @@ local UIManager = require(UIFolder["UIManager.Client"])
 local public = {}
 
 local frame
-local itemName
+local itemText
 local stats
 local level
 local passives
@@ -20,9 +20,9 @@ local equipButton
 local sellButton
 local closeButton
 
-function public.init(screenGui: ScreenGui)
+function public.onStart(screenGui: ScreenGui)
 	frame = screenGui:FindFirstChild("fullInfo")
-	itemName = frame:FindFirstChild("itemName")
+	itemText = frame:FindFirstChild("itemName"):FindFirstChild("name")
 	stats = frame:FindFirstChild("stats")
 	level = frame:FindFirstChild("level")
 	passives = frame:FindFirstChild("passives")
@@ -30,6 +30,10 @@ function public.init(screenGui: ScreenGui)
 	equipButton = frame:FindFirstChild("equip"):FindFirstChild("equipButton")
 	sellButton = frame:FindFirstChild("sell"):FindFirstChild("sellButton")
 	closeButton = frame:FindFirstChild("close"):FindFirstChild("closeButton")
+
+	UIManager.onEvent("showFullInfo", function(item)
+		public.show(item)
+	end)
 
 	closeButton.MouseButton1Click:Connect(function()
 		public.hide()
@@ -46,7 +50,7 @@ function public.hide()
 end
 
 function public.show(item)
-	itemName.Text = item.name or "Unknown"
+	itemText.Text = item.name or "Unknown"
 	type.Text = "Type: " .. (item.subCategory or "?")
 	level.Text = "Lvl: " .. (item.level or 1)
 

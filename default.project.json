@@ -10,6 +10,9 @@
           "$className": "Folder",
           "attack": {
             "$className": "RemoteEvent"
+          },
+          "syncPlayerData": {
+            "$className": "RemoteEvent"
           }
         }
       }

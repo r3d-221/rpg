@@ -11,10 +11,12 @@ local UIFolder = ClientFolder.UI
 
 local UIManager = require(UIFolder["UIManager.Client"])
 local QuickInfo = require(UIFolder["QuickInfo.Client"])
+local PlayerData = require(UIFolder["PlayerData.Client"])
 
+local private = {}
 local public = {}
 
-local SLIDE_AMOUNT = 0.2
+local SLIDE_AMOUNT = 0.07
 local TWEEN_INFO = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 local inventoryFrame
@@ -22,9 +24,9 @@ local slots
 local tabs
 local closeButton
 local isMoved = false
-local currentTab = "weaponsTab"
+local currentTab = "weapons"
 
-function public.init(screenGui: ScreenGui)
+function public.onStart(screenGui: ScreenGui)
 	inventoryFrame = screenGui:FindFirstChild("inventory")
 	slots = inventoryFrame:FindFirstChild("slots")
 	tabs = inventoryFrame:FindFirstChild("tabs")
@@ -32,6 +34,17 @@ function public.init(screenGui: ScreenGui)
 
 	closeButton.MouseButton1Click:Connect(function()
 		UIManager.closeAll()
+		if isMoved then
+			public.slideBack()
+		end
+	end)
+
+	PlayerData.onChange(function(data)
+		private.addSlots(data.inventory)
+	end)
+
+	UIManager.onEvent("inventoryClosed", function()
+		UIManager.close("fullInfo")
 		if isMoved then
 			public.slideBack()
 		end
@@ -51,7 +64,7 @@ function public.init(screenGui: ScreenGui)
 				end
 			end
 			tabButton.MouseButton1Click:Connect(function()
-				public.switchTab(tab.Name)
+				private.switchTab(tab.Name)
 			end)
 		end
 	end
@@ -89,11 +102,22 @@ function public.slideBack()
 	TweenService:Create(inventoryFrame, TWEEN_INFO, { Position = targetPos }):Play()
 end
 
-function public.switchTab(name: string)
+function private.switchTab(name: string)
 	currentTab = name
+	local data = PlayerData.getPlayerData()
+	if data then
+		private.addSlots(data.inventory)
+	end
 end
 
-function public.addSlots(itemList)
+function private.addSlots(inventory)
+	local itemList = inventory[currentTab]
+
+	if not itemList then
+		warn("No items were found in cache.")
+		return
+	end
+
 	for _, slot in slots:GetChildren() do
 		if slot:IsA("Frame") then
 			slot:Destroy()
@@ -101,23 +125,25 @@ function public.addSlots(itemList)
 	end
 
 	for _, item in itemList do
-		public.createSlot(item)
+		private.createSlot(item)
 	end
 end
 
-function public.createSlot(item)
+function private.createSlot(item)
 	local slot = UITemplates.slot:Clone()
 	slot.Parent = slots
 
-	slot.MouseEnter:Connect(function()
+	local itemButton = slot:FindFirstChild("item")
+
+	itemButton.MouseEnter:Connect(function()
 		QuickInfo.show(item, slot)
 	end)
 
-	slot.MouseLeave:Connect(function()
+	itemButton.MouseLeave:Connect(function()
 		QuickInfo.hide()
 	end)
 
-	slot.MouseButton1Click:Connect(function()
+	itemButton.MouseButton1Click:Connect(function()
 		QuickInfo.hide()
 		public.slide()
 		UIManager.fire("showFullInfo", item)
