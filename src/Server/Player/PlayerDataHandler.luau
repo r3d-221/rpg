@@ -6,7 +6,7 @@ local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 local Remotes = ReplicatedStorage.Shared.Remotes
 local syncPlayerData = Remotes.syncPlayerData
 
-local PROFILE_STORE_KEY = "test_v1"
+local PROFILE_STORE_KEY = "test_v2"
 
 local STACK_CAP = 100
 local DEFAULT_PLAYER_DATA = {

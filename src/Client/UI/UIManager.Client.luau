@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 
+local private = {}
 local public = {}
 local callbacks = {}
 
@@ -12,6 +13,10 @@ local screens = {
 	quickInfo = screenGui:WaitForChild("quickInfo"),
 }
 
+function private.getScreen(name: string)
+	return screenGui:FindFirstChild(name)
+end
+
 function public.onEvent(name: string, fn: (...any) -> ())
 	callbacks[name] = fn
 end
@@ -23,17 +28,11 @@ function public.fire(name: string, ...: any)
 end
 
 function public.toggle(name: string): boolean?
-	local screen = screens[name]
+	local screen = private.getScreen(name)
 	if not screen then
 		return
 	end
 	screen.Visible = not screen.Visible
-
-	if name == "inventory" and not screen.Visible then
-		public.close("fullInfo")
-		public.close("quickInfo")
-	end
-
 	return screen.Visible
 end
 
@@ -44,14 +43,14 @@ function public.closeAll()
 end
 
 function public.open(name: string)
-	local screen = screens[name]
+	local screen = private.getScreen(name)
 	if screen then
 		screen.Visible = true
 	end
 end
 
 function public.close(name: string)
-	local screen = screens[name]
+	local screen = private.getScreen(name)
 	if screen then
 		screen.Visible = false
 	end

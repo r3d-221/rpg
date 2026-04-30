@@ -1,16 +1,20 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local PlayerScripts = player:FindFirstChild("PlayerScripts")
 
 local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
+local Modules = ReplicatedStorage.Shared.Modules
 
+local ItemData = require(Modules.ItemData)
 local UIManager = require(UIFolder["UIManager.Client"])
 
 local public = {}
 
 local frame
+local itemName
 local itemText
 local stats
 local level
@@ -19,17 +23,26 @@ local type
 local equipButton
 local sellButton
 local closeButton
+local description
+local equip
+local sell
+local sellOriginalSize
 
 function public.onStart(screenGui: ScreenGui)
 	frame = screenGui:FindFirstChild("fullInfo")
-	itemText = frame:FindFirstChild("itemName"):FindFirstChild("name")
+	itemName = frame:FindFirstChild("itemName")
+	itemText = itemName:FindFirstChild("name")
 	stats = frame:FindFirstChild("stats")
 	level = frame:FindFirstChild("level")
 	passives = frame:FindFirstChild("passives")
 	type = frame:FindFirstChild("type")
-	equipButton = frame:FindFirstChild("equip"):FindFirstChild("equipButton")
-	sellButton = frame:FindFirstChild("sell"):FindFirstChild("sellButton")
+	equip = frame:FindFirstChild("equip")
+	sell = frame:FindFirstChild("sell")
+	equipButton = equip:FindFirstChild("equipButton")
+	sellButton = sell:FindFirstChild("sellButton")
 	closeButton = frame:FindFirstChild("close"):FindFirstChild("closeButton")
+	description = frame:FindFirstChild("description")
+	sellOriginalSize = sell.Size
 
 	UIManager.onEvent("showFullInfo", function(item)
 		public.show(item)
@@ -50,16 +63,39 @@ function public.hide()
 end
 
 function public.show(item)
-	itemText.Text = item.name or "Unknown"
-	type.Text = "Type: " .. (item.subCategory or "?")
-	level.Text = "Lvl: " .. (item.level or 1)
+	local info = ItemData[item.id] or {}
 
-	-- passives
-	if not item.passives or #item.passives == 0 then
+	itemText.Text = info.name or item.id
+	type.Text = "Type: " .. (info.subCategory or "?")
+	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
+
+	if info.subCategory == "Material" then
+		level.Text = "Qty: " .. (item.quantity or 1)
 		passives.Visible = false
+		stats.Visible = false
+		description.Visible = true
+		description.Text = info.description or "This is a description of the selected item..."
+		equip.Visible = false
+		sell.Size = UDim2.new(
+			sellOriginalSize.X.Scale + 0.45,
+			sellOriginalSize.X.Offset,
+			sellOriginalSize.Y.Scale,
+			sellOriginalSize.Y.Offset
+		)
 	else
-		passives.Visible = true
-		passives.Text = "Passives: " .. table.concat(item.passives, ", ")
+		stats.Visible = true
+		equip.Visible = true
+		sell.Size = sellOriginalSize
+		description.Visible = false
+		level.Text = "Lvl: " .. (item.level or 1)
+
+		-- passives
+		if not item.passives or #item.passives == 0 then
+			passives.Visible = false
+		else
+			passives.Visible = true
+			passives.Text = "Passives: " .. table.concat(item.passives, ", ")
+		end
 	end
 
 	UIManager.open("fullInfo")

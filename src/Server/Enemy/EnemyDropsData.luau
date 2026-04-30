@@ -33,7 +33,7 @@ public.itemList = {
 			{ id = "iron_knife", rarity = "common" },
 		},
 		longBow = {
-			{ id = "crude_bow", rarity = "common" },
+			{ id = "long_bow", rarity = "common" },
 		},
 		shortBow = {
 			{ id = "short_bow", rarity = "common" },
@@ -90,7 +90,7 @@ public.items = {
 		},
 		ranged = {
 			weapons = {
-				chance = 0.02,
+				chance = 1,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "uncommon" },
 				weaponType = { longBow = 0.3, shortBow = 0.7 },

@@ -16,7 +16,7 @@ local PlayerData = require(UIFolder["PlayerData.Client"])
 local Inventory = require(UIFolder["Inventory.Client"])
 local FullInfo = require(UIFolder["FullInfo.Client"])
 local QuickInfo = require(UIFolder["QuickInfo.Client"])
-local Screens = require(UIFolder["Screens.Client"])
+local HUD = require(UIFolder["HUD.Client"])
 
 local animate = ReplicatedStorage:FindFirstChild("IgnoredFolder"):FindFirstChild("Animate")
 
@@ -48,7 +48,7 @@ CollectionService:GetInstanceAddedSignal(enemyTag):Connect(applyAnimate)
 UserInput.onStart()
 
 PlayerData.onStart()
-Screens.onStart()
+HUD.onStart()
 Inventory.onStart(screenGui)
 FullInfo.onStart(screenGui)
 QuickInfo.onStart(screenGui)
