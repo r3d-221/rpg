@@ -15,6 +15,9 @@ local stats
 local level
 local type
 local description
+local stat1
+local stat2
+local stat3
 
 function public.onStart(screenGui: ScreenGui)
 	frame = screenGui:FindFirstChild("quickInfo")
@@ -24,6 +27,9 @@ function public.onStart(screenGui: ScreenGui)
 	level = frame:FindFirstChild("level")
 	type = frame:FindFirstChild("type")
 	description = frame:FindFirstChild("description")
+	stat1 = stats:FindFirstChild("stat1")
+	stat2 = stats:FindFirstChild("stat2")
+	stat3 = stats:FindFirstChild("stat3")
 end
 
 function public.show(item, slot)
@@ -33,7 +39,7 @@ function public.show(item, slot)
 	type.Text = "Type: " .. (info.subCategory or "?")
 	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
 
-	if info.subCategory == "Material" then
+	if item.category == "materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		stats.Visible = false
 		description.Visible = true
@@ -44,12 +50,34 @@ function public.show(item, slot)
 		level.Text = "Lvl: " .. (item.level or 1)
 
 		-- set stats
-		for _, stat in stats:GetChildren() do
-			if stat:IsA("Frame") then
-				local rank = stat:FindFirstChild("rank") -- show the quality from D to S rank
-				local statInfo = stat:FindFirstChild("statInfo")
-				-- get serialized info of the stats in player inventory
-			end
+		if item.category == "weapons" then
+			local itemStats = item.stats or {}
+			local itemRolls = item.rolls or {}
+
+			stat1:FindFirstChild("rank").Text = "[" .. (itemRolls[1] or "D") .. "]"
+			stat2:FindFirstChild("rank").Text = "[" .. (itemRolls[2] or "D") .. "]"
+			stat3:FindFirstChild("rank").Text = "[" .. (itemRolls[3] or "D") .. "]"
+
+			stat1:FindFirstChild("statInfo").Text = "Damage: " .. math.floor(itemStats.damage or 0)
+			stat2:FindFirstChild("statInfo").Text = "Crit Rate: "
+				.. string.format("%.1f", (itemStats.critRate or 0) * 100)
+				.. "%"
+			stat3:FindFirstChild("statInfo").Text = "Crit Damage: "
+				.. string.format("%.1f", (itemStats.critDamage or 1) * 100)
+				.. "%"
+		end
+
+		if item.category == "armors" then
+			local itemStats = item.stats or {}
+			local itemRolls = item.rolls or {}
+
+			stat1:FindFirstChild("rank").Text = "[" .. (itemRolls[1] or "D") .. "]"
+			stat2:FindFirstChild("rank").Text = "[" .. (itemRolls[2] or "D") .. "]"
+			stat3:FindFirstChild("rank").Text = "[" .. (itemRolls[3] or "D") .. "]"
+
+			stat1:FindFirstChild("statInfo").Text = "Health: " .. math.floor(itemStats.health or 0)
+			stat2:FindFirstChild("statInfo").Text = "Armor: " .. math.floor(itemStats.armor or 0)
+			stat3:FindFirstChild("statInfo").Text = "luck: " .. math.floor(itemStats.luck or 0)
 		end
 	end
 

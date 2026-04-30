@@ -10,6 +10,23 @@ public.rarityTiers = {
 	"secret",
 }
 
+-- the higher the index, the higher the rarity
+public.statRank = {
+	S = 1.2, -- 20%
+	A = 1.15,
+	B = 1.1,
+	C = 1.05,
+	D = 1,
+}
+
+public.statRankWeights = {
+	S = 0.05,
+	A = 0.10,
+	B = 0.20,
+	C = 0.30,
+	D = 0.35,
+}
+
 public.rarityWeights = {
 	common = 0.50,
 	uncommon = 0.25,
@@ -57,7 +74,7 @@ public.itemList = {
 	},
 
 	---- crafting Ingredients Category ----
-	craftingIngredients = {
+	materials = {
 		{ id = "bone_fragment", rarity = "common", quantity = { min = 1, max = 3 } },
 		{ id = "torn_cloth", rarity = "common", quantity = { min = 1, max = 2 } },
 		{ id = "iron_shard", rarity = "uncommon", quantity = { min = 1, max = 2 } },
@@ -82,7 +99,7 @@ public.items = {
 				armorType = { heavySet = 0.3, lightSet = 0.7 },
 			},
 			artifacts = nil,
-			craftingIngredients = {
+			materials = {
 				chance = 0.50,
 				rarityRange = { min = "common", max = "common" },
 				quantity = { min = 1, max = 3 },
@@ -102,7 +119,7 @@ public.items = {
 				armorType = { heavySet = 0.2, lightSet = 0.8 },
 			},
 			artifacts = nil,
-			craftingIngredients = {
+			materials = {
 				chance = 0.50,
 				rarityRange = { min = "common", max = "common" },
 				quantity = { min = 1, max = 3 },

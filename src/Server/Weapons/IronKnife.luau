@@ -5,7 +5,7 @@ return {
 	baseAttackSpeed = 1.1,
 	baseArmorPenetration = 3,
 	baseCritRate = 0.02,
-	baseCritDamage = 0.1,
+	baseCritDamage = 1.1,
 	passives = { "none" },
 	abilities = {
 		{ name = "slice", cooldown = 4, damageMultiplier = 1.3 },

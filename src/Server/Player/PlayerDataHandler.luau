@@ -6,7 +6,7 @@ local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 local Remotes = ReplicatedStorage.Shared.Remotes
 local syncPlayerData = Remotes.syncPlayerData
 
-local PROFILE_STORE_KEY = "test_v2"
+local PROFILE_STORE_KEY = "test_v4"
 
 local STACK_CAP = 100
 local DEFAULT_PLAYER_DATA = {
@@ -40,7 +40,7 @@ local DEFAULT_PLAYER_DATA = {
 	},
 
 	inventory = {
-		craftingIngredients = {},
+		materials = {},
 		artifacts = {},
 		weapons = {},
 		armors = {},
@@ -52,7 +52,7 @@ local DEFAULT_PLAYER_DATA = {
 		armors = 20,
 		artifects = 20,
 		misc = 20,
-		craftingIngredients = 20,
+		materials = 20,
 	},
 }
 
@@ -92,7 +92,6 @@ function public.addCurrency(player: Player, id: string, amount: number)
 	print(data)
 end
 
--- Example: item = { id = item.id, category = "weapons", rarity = rarity, level = level }
 function public.addItem(player: Player, item)
 	local data = public.getData(player)
 	if not data then
@@ -109,7 +108,7 @@ function public.addItem(player: Player, item)
 	local slots = data.inventory[category]
 	local slotCap = data.storageSlots[category]
 
-	if category == "craftingIngredients" then
+	if category == "materials" then
 		local remaining = item.quantity or 1
 
 		-- fills in slots that have the item but aren't full

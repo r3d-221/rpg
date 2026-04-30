@@ -24,17 +24,17 @@ return {
 
 	bone_fragment = {
 		name = "Bone Fragment",
-		subCategory = "Material",
+		subCategory = "materials",
 		description = "Bones collected from skeletons. Their properties are best for light weapons and armors.",
 	},
 	torn_cloth = {
 		name = "Torn Cloth",
-		subCategory = "Material",
+		subCategory = "materials",
 		description = "Scraps of leather collected from monsters. Used to make armor.",
 	},
 	iron_shard = {
 		name = "Iron Shard",
-		subCategory = "Material",
+		subCategory = "materials",
 		description = "Small pieces of iron which is usefull for making various armors and weapons.",
 	},
 
