@@ -32,6 +32,7 @@ local public = {}
 
 function public.onStart()
 	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, false)
+	private.setButtons()
 
 	private.updateHealth(humanoid.Health)
 	humanoid.HealthChanged:Connect(private.updateHealth)
@@ -42,7 +43,9 @@ function public.onStart()
 		private.updateHealth(humanoid.Health)
 		humanoid.HealthChanged:Connect(private.updateHealth)
 	end)
+end
 
+function private.setButtons()
 	inventoryButton.MouseButton1Click:Connect(function()
 		local isOpen = UIManager.toggle("inventory")
 		if not isOpen then

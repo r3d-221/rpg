@@ -2,8 +2,10 @@ return {
 	---- Weapons Category ----
 
 	iron_sword = { name = "Iron Sword", subCategory = "Sword" },
+	wooden_sword = { name = "Wooden Sword", subCategory = "Sword" },
 	steel_sword = { name = "Steel Sword", subCategory = "Sword" },
 	iron_knife = { name = "Iron Knife", subCategory = "Knife" },
+	rusty_knife = { name = "Rusty Knife", subCategory = "Knife" },
 	long_bow = { name = "Long Bow", subCategory = "longBow" },
 	short_bow = { name = "Short Bow", subCategory = "shortBow" },
 
