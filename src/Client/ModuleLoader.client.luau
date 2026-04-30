@@ -1,8 +1,21 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
 
+local player = Players.LocalPlayer
+local PlayerScripts = player:FindFirstChild("PlayerScripts")
+
 local Modules = ReplicatedStorage:FindFirstChild("Shared"):FindFirstChild("Modules")
 local UserInput = require(Modules:FindFirstChild("UserInput"))
+
+local screenGui = player:FindFirstChild("PlayerGui"):WaitForChild("ScreenGui")
+local ClientFolder = PlayerScripts:WaitForChild("Client")
+local UIFolder = ClientFolder.UI
+
+local Inventory = require(UIFolder["Inventory.Client"])
+local FullInfo = require(UIFolder["FullInfo.Client"])
+local QuickInfo = require(UIFolder["QuickInfo.Client"])
+local Screens = require(UIFolder["Screens.Client"])
 
 local animate = ReplicatedStorage:FindFirstChild("IgnoredFolder"):FindFirstChild("Animate")
 
@@ -32,3 +45,8 @@ end
 
 CollectionService:GetInstanceAddedSignal(enemyTag):Connect(applyAnimate)
 UserInput.onStart()
+
+Screens.init()
+Inventory.init(screenGui)
+FullInfo.init(screenGui)
+QuickInfo.init(screenGui)

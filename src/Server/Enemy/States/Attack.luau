@@ -246,7 +246,7 @@ function private.getPartsHit(enemy: Model, RootPart: BasePart, ability): { [Huma
 end
 
 -- uses raycast for ranged enemies
-function private.fireRaycast(enemy, handler, player, ability)
+function private.fireRaycast(handler, player, ability)
 	local RootPart = handler.data.RootPart
 	local stats = handler.data.stats
 
@@ -317,7 +317,7 @@ function private.performAttack(enemy, handler, player, ability)
 	local RootPart = handler.data.RootPart
 	local hitboxType = ability.hitbox.type
 	local modifiers = ability.modifiers or {}
-	local animationTime = ability.windUp + ability.active + ability.recovery
+	-- local animationTime = ability.windUp + ability.active + ability.recovery
 
 	-- creates hitbox visual
 	if RunService:IsStudio() then
@@ -341,7 +341,7 @@ function private.performAttack(enemy, handler, player, ability)
 
 	local hits = {}
 	if hitboxType == "raycast" then
-		private.fireRaycast(enemy, handler, player, ability) --  doesn't save the hits so no double damage
+		private.fireRaycast(handler, player, ability) --  doesn't save the hits so no double damage
 	else
 		hits = private.getPartsHit(enemy, RootPart, ability)
 	end
