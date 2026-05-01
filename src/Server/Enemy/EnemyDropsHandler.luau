@@ -229,9 +229,9 @@ function private.pickItemFromSubCategory(category: string, subCategory: string?,
 
 	local item = candidates[math.random(1, #candidates)]
 	local info = private.rollStats(item, category)
-	print("rollStats returned:", info)
-	print("rolls:", info and info.rolls)
-	print("stats:", info and info.stats)
+	-- print("rollStats returned:", info)
+	-- print("rolls:", info and info.rolls)
+	-- print("stats:", info and info.stats)
 
 	if not info then
 		return nil
@@ -256,14 +256,14 @@ function private.rollStats(item, category): {}?
 			return { rolls = {}, stats = {} }
 		end
 
-		print(
-			"info fields for: " .. item.id,
-			info.baseDamage,
-			info.baseCritRate,
-			info.baseCritDamage,
-			info.baseAttackSpeed,
-			info.baseArmorPenetration
-		)
+		-- print(
+		-- 	"info fields for: " .. item.id,
+		-- 	info.baseDamage,
+		-- 	info.baseCritRate,
+		-- 	info.baseCritDamage,
+		-- 	info.baseAttackSpeed,
+		-- 	info.baseArmorPenetration
+		-- )
 
 		rolls = {
 			private.pickRank(),
@@ -292,7 +292,7 @@ function private.rollStats(item, category): {}?
 			return { rolls = {}, stats = {} }
 		end
 
-		print("info fields for : " .. item.id, info.baseHealth, info.baseArmor, info.baseLuck)
+		-- print("info fields for : " .. item.id, info.baseHealth, info.baseArmor, info.baseLuck)
 
 		rolls = {
 			private.pickRank(),
@@ -308,8 +308,10 @@ function private.rollStats(item, category): {}?
 			walkspeed = 1,
 		}
 
-		if info.baseSpeed then
+		if info.baseSpeed and info.baseSpeed > 0 then
 			stats.walkspeed = info.baseSpeed * EnemyDropsData.statRank[rolls[4]]
+		else
+			stats.walkspeed = 0
 		end
 
 		return { rolls = rolls, stats = stats }

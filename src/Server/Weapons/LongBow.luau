@@ -1,6 +1,6 @@
 return {
 	id = "long_bow",
-	subCategory = "longBow",
+	subCategory = "LongBow",
 	baseDamage = 12,
 	baseAttackSpeed = 1.0,
 	baseArmorPenetration = 5,

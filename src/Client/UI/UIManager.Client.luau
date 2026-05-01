@@ -18,12 +18,17 @@ function private.getScreen(name: string)
 end
 
 function public.onEvent(name: string, fn: (...any) -> ())
-	callbacks[name] = fn
+	if not callbacks[name] then
+		callbacks[name] = {}
+	end
+	table.insert(callbacks[name], fn)
 end
 
 function public.fire(name: string, ...: any)
 	if callbacks[name] then
-		callbacks[name](...)
+		for _, fn in callbacks[name] do
+			fn(...)
+		end
 	end
 end
 

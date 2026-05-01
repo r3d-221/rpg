@@ -79,7 +79,7 @@ function public.show(item)
 	type.Text = "Type: " .. (info.subCategory or "?")
 	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
 
-	if info.subCategory == "materials" then
+	if info.subCategory == "Materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		passives.Visible = false
 		stats.Visible = false
@@ -127,8 +127,8 @@ function public.show(item)
 			stat3:FindFirstChild("statInfo").Text = "Crit Damage: "
 				.. string.format("%.1f", (itemStats.critDamage or 1) * 100)
 				.. "%"
-			stat4:FindFirstChild("statInfo").Text = "Attack Speed: +"
-				.. string.format("%.1f", ((itemStats.attackSpeed or 1) - 1) * 100)
+			stat4:FindFirstChild("statInfo").Text = "Attack Speed: "
+				.. string.format("%.1f", (itemStats.attackSpeed or 1) * 100)
 				.. "%"
 			stat5:FindFirstChild("statInfo").Text = "Armor Pierce: " .. math.floor(itemStats.armorPenetration or 0)
 		end
@@ -147,9 +147,10 @@ function public.show(item)
 			stat2:FindFirstChild("statInfo").Text = "Armor: " .. math.floor(itemStats.armor or 0)
 			stat3:FindFirstChild("statInfo").Text = "luck: " .. math.floor(itemStats.luck or 0)
 
-			if itemStats.walkspeed > 0 then
-				stat4.Visible = false
-				stat4:FindFirstChild("statInfo").Text = "walkspeed: " .. math.floor(itemStats.walkspeed or 0)
+			if itemStats.walkspeed and itemStats.walkspeed > 1 then
+				stat4.Visible = true
+				stat4:FindFirstChild("rank").Text = "[" .. (itemRolls[4] or "D") .. "]"
+				stat4:FindFirstChild("statInfo").Text = "Walkspeed: +" .. string.format("%.1f", itemStats.walkspeed - 1)
 			else
 				stat4.Visible = false
 			end

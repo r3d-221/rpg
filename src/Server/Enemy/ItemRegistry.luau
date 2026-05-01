@@ -19,7 +19,7 @@ end
 for _, module in armorConfigs:GetChildren() do
 	local ok, set = pcall(require, module)
 	if ok and set and set.pieces then
-		for name, piece in set.pieces do
+		for _, piece in set.pieces do
 			if piece.id then
 				registry[piece.id] = {
 					setName = set.setName,

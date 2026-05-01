@@ -136,7 +136,7 @@ function private.createSlot(item)
 	local itemButton = slot:FindFirstChild("item")
 
 	itemButton.MouseEnter:Connect(function()
-		QuickInfo.show(item, slot)
+		QuickInfo.show(item)
 	end)
 
 	itemButton.MouseLeave:Connect(function()

@@ -1,7 +1,5 @@
 local Players = game:GetService("Players")
 
-local range = 30
-
 local public = {}
 public.__index = public
 
@@ -57,7 +55,7 @@ function public:nearestPlayer(enemy)
 	local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
 	if not enemyRoot then
 		return nil
-	end -- guard here too
+	end
 
 	for _, player in ipairs(Players:GetPlayers()) do
 		local character = player.Character
@@ -76,7 +74,7 @@ function public:nearestPlayer(enemy)
 		end
 
 		local distance = (playerRoot.Position - enemyRoot.Position).Magnitude
-		if distance <= range and distance < minDistance then
+		if distance <= self.data.stats.aggroRange and distance < minDistance then
 			minDistance = distance
 			nearest = player
 		end

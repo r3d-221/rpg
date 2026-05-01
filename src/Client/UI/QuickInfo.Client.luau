@@ -32,14 +32,14 @@ function public.onStart(screenGui: ScreenGui)
 	stat3 = stats:FindFirstChild("stat3")
 end
 
-function public.show(item, slot)
+function public.show(item)
 	local info = ItemData[item.id] or {}
 
 	itemText.Text = info.name or item.id
 	type.Text = "Type: " .. (info.subCategory or "?")
 	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
 
-	if item.category == "materials" then
+	if info.subcategory == "Materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		stats.Visible = false
 		description.Visible = true

@@ -1,4 +1,5 @@
 return {
+	-- the sub categories have different casing since these will be used for UI
 	---- Weapons Category ----
 
 	iron_sword = { name = "Iron Sword", subCategory = "Sword" },
@@ -6,8 +7,8 @@ return {
 	steel_sword = { name = "Steel Sword", subCategory = "Sword" },
 	iron_knife = { name = "Iron Knife", subCategory = "Knife" },
 	rusty_knife = { name = "Rusty Knife", subCategory = "Knife" },
-	long_bow = { name = "Long Bow", subCategory = "longBow" },
-	short_bow = { name = "Short Bow", subCategory = "shortBow" },
+	long_bow = { name = "Long Bow", subCategory = "LongBow" },
+	short_bow = { name = "Short Bow", subCategory = "ShortBow" },
 
 	---- Armors Category ----
 
@@ -24,17 +25,17 @@ return {
 
 	bone_fragment = {
 		name = "Bone Fragment",
-		subCategory = "materials",
+		subCategory = "Materials",
 		description = "Bones collected from skeletons. Their properties are best for light weapons and armors.",
 	},
 	torn_cloth = {
 		name = "Torn Cloth",
-		subCategory = "materials",
+		subCategory = "Materials",
 		description = "Scraps of leather collected from monsters. Used to make armor.",
 	},
 	iron_shard = {
 		name = "Iron Shard",
-		subCategory = "materials",
+		subCategory = "Materials",
 		description = "Small pieces of iron which is usefull for making various armors and weapons.",
 	},
 

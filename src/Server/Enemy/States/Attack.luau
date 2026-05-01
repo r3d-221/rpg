@@ -346,7 +346,8 @@ function private.performAttack(enemy, handler, player, ability)
 		hits = private.getPartsHit(enemy, RootPart, ability)
 	end
 
-	local playerArmor = 20 -- will change later
+	local playerData = PlayerDataHandler.getData(player)
+	local playerArmor = playerData and playerData.stats.armor or 0
 	for humanoid in hits do
 		local damage = private.calculateDamage(stats, playerArmor, ability.damageMultiplier, modifiers)
 		-- print(enemy.Name .. " did " .. damage .. " damage")
