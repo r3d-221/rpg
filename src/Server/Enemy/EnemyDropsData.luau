@@ -107,7 +107,7 @@ public.items = {
 		},
 		ranged = {
 			weapons = {
-				chance = 1,
+				chance = 0.02,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "uncommon" },
 				weaponType = { longBow = 0.3, shortBow = 0.7 },

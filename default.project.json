@@ -13,6 +13,12 @@
           },
           "syncPlayerData": {
             "$className": "RemoteEvent"
+          },
+          "enemySpawned": {
+            "$className": "RemoteEvent"
+          },
+          "getEnemyData": {
+            "$className": "RemoteFunction"
           }
         }
       }

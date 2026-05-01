@@ -3,20 +3,34 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
 
 local EnemyFolder = ServerScriptService.Server.Enemy
+
+local Remotes = ReplicatedStorage.Shared.Remotes
+local getEnemyData = Remotes.getEnemyData
+local enemySpawned = Remotes.enemySpawned
+
 local PlayerDataHandler = require(ServerScriptService.Server.Player.PlayerDataHandler)
 local EnemyDropsHandler = require(script.Parent.EnemyDropsHandler)
 local Enemy = require(EnemyFolder.Enemy)
-local EnemyData = require(EnemyFolder.EnemyData)
+local EnemyData = require(ReplicatedStorage.Shared.Modules.EnemyData)
 
 local enemyTemplates = ReplicatedStorage.enemyTemplates
 
 local SPAWNER_TAG = "spawnPart"
 
+local activeEnemies = {}
 local processedSpawners = {}
 local private = {}
 local public = {}
 
 function public.onStart()
+	getEnemyData.OnServerInvoke = function()
+		local result = {}
+		for enemy, data in activeEnemies do
+			table.insert(result, { enemy = enemy, data = data })
+		end
+		return result
+	end
+
 	for _, spawner in CollectionService:GetTagged(SPAWNER_TAG) do
 		private.spawnEnemy(spawner)
 	end
@@ -90,6 +104,26 @@ function private.getModel(difficultyLevel: string, enemyType: string)
 	return nil
 end
 
+function private.setAttributes(clone, enemyLevel, enemyStats, enemyType, enemySubtype)
+	clone:SetAttribute("enemyType", enemyType)
+	clone:SetAttribute("enemySubtype", table.concat(enemySubtype, ", "))
+	clone:SetAttribute("level", enemyLevel)
+
+	clone:SetAttribute("Health", enemyStats.health)
+	clone:SetAttribute("Damage", enemyStats.damage)
+	clone:SetAttribute("Armor", enemyStats.armor)
+	clone:SetAttribute("CritRate", enemyStats.critRate)
+	clone:SetAttribute("CritDamage", enemyStats.critDamage)
+	clone:SetAttribute("AttackRange", enemyStats.attackRange)
+	clone:SetAttribute("AggroRange", enemyStats.aggroRange)
+	clone:SetAttribute("AggroLoseRange", enemyStats.aggroLoseRange)
+	clone:SetAttribute("BasicAttackCooldown", enemyStats.basicAttackCooldown)
+	clone:SetAttribute("Walkspeed", enemyStats.walkspeed)
+	clone:SetAttribute("ReactionTime", enemyStats.reactionTime)
+	clone:SetAttribute("ArmorPenetration", enemyStats.armorPenetration)
+	clone:SetAttribute("DropRate", enemyStats.dropRate)
+end
+
 function private.spawnEnemy(spawner: BasePart)
 	if processedSpawners[spawner] then
 		return
@@ -118,37 +152,32 @@ function private.spawnEnemy(spawner: BasePart)
 		local enemyLevel = EnemyData.getLevel(difficultyLevel, enemySubtype)
 		local enemyStats = EnemyData.getStats(difficultyLevel, enemyType, enemySubtype, enemyLevel)
 
-		local configName = clone:GetAttribute("attackConfig") or "zombie"
-		local config = require(EnemyFolder.Attacks[configName])
-
-		-- comment it out later and never use the attributes
-		clone:SetAttribute("enemyType", enemyType)
-		clone:SetAttribute("enemySubtype", table.concat(enemySubtype, ", "))
-		clone:SetAttribute("level", enemyLevel)
-
-		clone:SetAttribute("Health", enemyStats.health)
-		clone:SetAttribute("Damage", enemyStats.damage)
-		clone:SetAttribute("Armor", enemyStats.armor)
-		clone:SetAttribute("CritRate", enemyStats.critRate)
-		clone:SetAttribute("CritDamage", enemyStats.critDamage)
-		clone:SetAttribute("AttackRange", enemyStats.attackRange)
-		clone:SetAttribute("AggroRange", enemyStats.aggroRange)
-		clone:SetAttribute("AggroLoseRange", enemyStats.aggroLoseRange)
-		clone:SetAttribute("BasicAttackCooldown", enemyStats.basicAttackCooldown)
-		clone:SetAttribute("Walkspeed", enemyStats.walkspeed)
-		clone:SetAttribute("ReactionTime", enemyStats.reactionTime)
-		clone:SetAttribute("ArmorPenetration", enemyStats.armorPenetration)
-		clone:SetAttribute("DropRate", enemyStats.dropRate)
-
 		clone.Humanoid.MaxHealth = enemyStats.health
 		clone.Humanoid.Health = enemyStats.health
 		clone.Humanoid.WalkSpeed = enemyStats.walkspeed
+
+		local configName = clone:GetAttribute("attackConfig") or "zombie"
+		local config = require(EnemyFolder.Attacks[configName])
+
+		private.setAttributes(clone, enemyLevel, enemyStats, enemyType, enemySubtype)
 
 		clone:PivotTo(spawnCFrame)
 		clone.Parent = workspace.enemies
 		activeCount += 1
 
+		CollectionService:AddTag(clone, "Enemy")
+
+		local enemyData = {
+			level = enemyLevel,
+			name = configName,
+			enemyType = enemyType,
+			enemySubtype = enemySubtype,
+		}
+		activeEnemies[clone] = enemyData
+		enemySpawned:FireAllClients(clone, enemyData)
+
 		Enemy.new(clone, enemyStats, config, function()
+			activeEnemies[clone] = nil
 			local attackerName = clone:GetAttribute("lastAttacker")
 			local lastAttacker = attackerName and game.Players:FindFirstChild(attackerName)
 			local luck = 0
@@ -158,14 +187,14 @@ function private.spawnEnemy(spawner: BasePart)
 				luck = data and data.stats.luck or 0
 			end
 
-			local drops = EnemyDropsHandler.rollDrops(difficultyLevel, enemyType, enemyStats.dropRate, luck) -- enemy drops
-			print(drops)
+			local drops = EnemyDropsHandler.rollDrops(difficultyLevel, enemyType, enemyStats.dropRate, luck)
+			-- print(drops)
 
+			-- adds drops to player inventory
 			if lastAttacker then
 				for _, currency in drops.currency do
 					PlayerDataHandler.addCurrency(lastAttacker, currency.id, currency.amount)
 				end
-
 				for _, item in drops.items do
 					PlayerDataHandler.addItem(lastAttacker, item)
 				end

@@ -39,7 +39,7 @@ function public.show(item)
 	type.Text = "Type: " .. (info.subCategory or "?")
 	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
 
-	if info.subcategory == "Materials" then
+	if info.subCategory == "Materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		stats.Visible = false
 		description.Visible = true

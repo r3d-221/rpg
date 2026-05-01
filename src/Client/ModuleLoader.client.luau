@@ -12,6 +12,7 @@ local screenGui = player:FindFirstChild("PlayerGui"):WaitForChild("ScreenGui")
 local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
 
+local EnemyUI = require(UIFolder["EnemyUI.Client"])
 local PlayerData = require(UIFolder["PlayerData.Client"])
 local Inventory = require(UIFolder["Inventory.Client"])
 local FullInfo = require(UIFolder["FullInfo.Client"])
@@ -48,6 +49,7 @@ CollectionService:GetInstanceAddedSignal(enemyTag):Connect(applyAnimate)
 UserInput.onStart()
 
 PlayerData.onStart()
+EnemyUI.onStart()
 HUD.onStart()
 Inventory.onStart(screenGui)
 FullInfo.onStart(screenGui)

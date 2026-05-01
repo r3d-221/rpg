@@ -89,7 +89,7 @@ function public.addCurrency(player: Player, id: string, amount: number)
 
 	data.currency[id] = (data.currency[id] or 0) + amount
 	private.sync(player)
-	print(data)
+	-- print(data)
 end
 
 function public.addItem(player: Player, item)
@@ -167,7 +167,7 @@ function public.addStorageSlots(player: Player, category: string, amount: number
 
 	data.storageSlots[category] += amount
 	private.sync(player)
-	print(data.storageSlots)
+	-- print(data.storageSlots)
 end
 
 function private.onPlayerAdded(player: Player)
