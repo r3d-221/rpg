@@ -1,15 +1,24 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 
 local Remotes = ReplicatedStorage.Shared.Remotes
 local syncPlayerData = Remotes.syncPlayerData
+local useSprint = Remotes.useSprint
 
-local PROFILE_STORE_KEY = "test_v4"
+local PROFILE_STORE_KEY = "test_v5"
 
 local STACK_CAP = 100
+local STAMINA_REGEN_RATE = 10
+local STAMINA_REGEN_DELAY = 2
+
 local DEFAULT_PLAYER_DATA = {
+	assignableStatPoints = 3,
+	stamina = 100,
+	staminaCost = 15,
+	staminaSpeedMultiplier = 1.25,
 	level = 1,
 
 	stats = {
@@ -18,7 +27,7 @@ local DEFAULT_PLAYER_DATA = {
 		damage = 0,
 		critRate = 0,
 		critDamage = 1.2,
-		walkspeed = 0,
+		walkspeed = 16,
 		armor = 0,
 		attackSpeed = 0,
 		armorPenetration = 0,
@@ -59,8 +68,13 @@ local DEFAULT_PLAYER_DATA = {
 local store = ProfileStore.New(PROFILE_STORE_KEY, DEFAULT_PLAYER_DATA)
 local profiles = {} -- key: player; value: profile
 
+local sprintingPlayers = {}
+local staminaLastUsed = {}
+local stamina = {}
 local private = {}
 local public = {}
+
+local sprintingPlayers = {} -- add with other locals at the top
 
 function public.onStart()
 	Players.PlayerAdded:Connect(private.onPlayerAdded)
@@ -69,6 +83,30 @@ function public.onStart()
 	for _, player in Players:GetPlayers() do
 		task.spawn(private.onPlayerAdded, player)
 	end
+
+	useSprint.OnServerEvent:Connect(function(player, isSprinting)
+		if isSprinting then
+			sprintingPlayers[player] = true
+
+			task.spawn(function()
+				while sprintingPlayers[player] do
+					local data = public.getData(player)
+					if not data then
+						break
+					end
+
+					local success = private.useStamina(player, data.staminaCost)
+					if not success then
+						sprintingPlayers[player] = nil
+						useSprint:FireClient(player, false)
+					end
+					task.wait(1)
+				end
+			end)
+		else
+			sprintingPlayers[player] = nil
+		end
+	end)
 end
 
 function public.getProfile(player: Player)
@@ -88,6 +126,11 @@ function public.addCurrency(player: Player, id: string, amount: number)
 	end
 
 	data.currency[id] = (data.currency[id] or 0) + amount
+
+	if id == "exp" then
+		private.checkLevelUp(data)
+	end
+
 	private.sync(player)
 	-- print(data)
 end
@@ -170,6 +213,39 @@ function public.addStorageSlots(player: Player, category: string, amount: number
 	-- print(data.storageSlots)
 end
 
+-- different from all the other values since it changes frequently
+function public.getStamina(player: Player)
+	return stamina[player] or 100
+end
+
+function private.useStamina(player: Player, amount: number): boolean
+	local data = public.getData(player)
+	if not data then
+		return false
+	end
+
+	local current = stamina[player] or data.stamina
+	if current < amount then
+		return false
+	end
+
+	stamina[player] = current - amount
+	staminaLastUsed[player] = tick()
+	private.sync(player)
+	return true
+end
+
+function private.checkLevelUp(data)
+	local required = PlayerConfig.expToLevel(data.level)
+
+	while data.currency.exp >= required do
+		data.currency.exp -= required
+		data.level += 1
+		data.assignableStatPoints += 1
+		required = PlayerConfig.expToLevel(data.level)
+	end
+end
+
 function private.onPlayerAdded(player: Player)
 	local profile = store:StartSessionAsync("Player_" .. player.UserId, {
 		Cancel = function()
@@ -192,10 +268,35 @@ function private.onPlayerAdded(player: Player)
 		end
 	end)
 
+	stamina[player] = profile.Data.stamina
+
+	-- stamina regen loop
+	task.spawn(function()
+		while player:IsDescendantOf(Players) do
+			task.wait(1)
+			local data = public.getData(player)
+			if not data then
+				continue
+			end
+
+			local max = data.stamina
+			local current = stamina[player] or max
+			local lastUsed = staminaLastUsed[player] or 0
+
+			if current < max and tick() - lastUsed >= STAMINA_REGEN_DELAY then
+				stamina[player] = math.min(current + STAMINA_REGEN_RATE, max)
+				private.sync(player)
+			end
+		end
+	end)
+
 	private.sync(player)
 end
 
 function private.onPlayerRemoved(player: Player)
+	staminaLastUsed[player] = nil
+	stamina[player] = nil
+	sprintingPlayers[player] = nil
 	local profile = profiles[player]
 	if profile then
 		profile:EndSession()
@@ -205,9 +306,11 @@ end
 
 function private.sync(player: Player)
 	local data = public.getData(player)
-	if data then
-		syncPlayerData:FireClient(player, data)
+	if not data then
+		return
 	end
+	data.currentStamina = stamina[player]
+	syncPlayerData:FireClient(player, data)
 end
 
 return public

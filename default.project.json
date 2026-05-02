@@ -17,6 +17,9 @@
           "enemySpawned": {
             "$className": "RemoteEvent"
           },
+          "useSprint": {
+            "$className": "RemoteEvent"
+          },
           "getEnemyData": {
             "$className": "RemoteFunction"
           }

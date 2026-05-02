@@ -36,10 +36,9 @@ function private.setupUI(enemy, data)
 	local level = data.level or 1
 	local configName = data.name or "zombie"
 	local enemyType = data.enemyType or "melee"
-	local enemySubtype = data.enemySubtype or {}
 
 	private.updateUI(info, level, configName, humanoid)
-	private.updateTyping(info, enemyType, enemySubtype)
+	private.updateTyping(info, enemyType)
 end
 
 function private.updateUI(info, level, name, humanoid)
@@ -66,28 +65,10 @@ function private.updateHealth(info, newHealth, maxHealth)
 	healthText.Text = math.floor(newHealth) .. " / " .. math.floor(maxHealth)
 end
 
-function private.updateTyping(info, enemyType, enemySubtype)
-	local types = info:FindFirstChild("types")
-	local typeIcon = types:FindFirstChild("type")
-	local subtype1 = types:FindFirstChild("subtype1")
-	local subtype2 = types:FindFirstChild("subtype2")
-
+function private.updateTyping(info, enemyType)
+	local type = info:FindFirstChild("type")
+	local typeIcon = type:FindFirstChild("typeIcon")
 	typeIcon.Image = EnemyData.typingImages[enemyType]
-
-	if #enemySubtype > 0 then
-		subtype1.Visible = true
-		subtype1.Image = EnemyData.typingImages[enemySubtype[1]]
-
-		if #enemySubtype > 1 then
-			subtype2.Visible = true
-			subtype2.Image = EnemyData.typingImages[enemySubtype[2]]
-		else
-			subtype2.Visible = false
-		end
-	else
-		subtype1.Visible = false
-		subtype2.Visible = false
-	end
 end
 
 return public
