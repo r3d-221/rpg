@@ -13,6 +13,10 @@ local HUD = PlayerGui:WaitForChild("HUD")
 local screens = HUD:FindFirstChild("screens")
 
 local playerBars = HUD:FindFirstChild("playerBars")
+local currency = HUD:FindFirstChild("currency")
+local coinText = currency:FindFirstChild("coin")
+local gemText = currency:FindFirstChild("gem")
+
 local levelIcon = playerBars:FindFirstChild("levelIcon")
 local levelText = levelIcon:FindFirstChild("level")
 
@@ -60,6 +64,7 @@ function public.onStart()
 		private.updateExp(data)
 		private.updateStamina(data)
 		levelText.Text = tostring(data.level)
+		private.updateCurrency(data)
 	end)
 end
 
@@ -105,6 +110,11 @@ function private.updateExp(data)
 	local required = PlayerConfig.expToLevel(data.level)
 	local ratio = data.currency.exp / required
 	currentExpBar.Size = UDim2.fromScale(math.clamp(ratio, 0, 1), 1)
+end
+
+function private.updateCurrency(data)
+	coinText.Text = PlayerConfig.formatNumber(data.currency.coins)
+	gemText.Text = PlayerConfig.formatNumber(data.currency.gems)
 end
 
 return public

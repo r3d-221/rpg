@@ -6,7 +6,7 @@ local MAX_IDLE = 1.3
 local MIN_IDLE = 0.5
 
 function public.onEnter(enemy, handler)
-	print("changed " .. enemy.Name .. " state to: Idle")
+	-- print("changed " .. enemy.Name .. " state to: Idle")
 	handler.data.isRoaming = true
 
 	task.spawn(function()

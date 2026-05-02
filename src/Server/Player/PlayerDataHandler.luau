@@ -68,13 +68,12 @@ local DEFAULT_PLAYER_DATA = {
 local store = ProfileStore.New(PROFILE_STORE_KEY, DEFAULT_PLAYER_DATA)
 local profiles = {} -- key: player; value: profile
 
+local leaderstats = {}
 local sprintingPlayers = {}
 local staminaLastUsed = {}
 local stamina = {}
 local private = {}
 local public = {}
-
-local sprintingPlayers = {} -- add with other locals at the top
 
 function public.onStart()
 	Players.PlayerAdded:Connect(private.onPlayerAdded)
@@ -262,6 +261,19 @@ function private.onPlayerAdded(player: Player)
 	profiles[player] = profile
 	profile:Reconcile()
 
+	local stats = Instance.new("Folder")
+	stats.Name = "leaderstats"
+	stats.Parent = player
+
+	local level = Instance.new("IntValue")
+	level.Name = "Level"
+	level.Value = profile.Data.level
+	level.Parent = stats
+
+	leaderstats[player] = {
+		level = level,
+	}
+
 	player.AncestryChanged:Connect(function()
 		if not player:IsDescendantOf(Players) then
 			private.onPlayerRemoved(player)
@@ -294,6 +306,7 @@ function private.onPlayerAdded(player: Player)
 end
 
 function private.onPlayerRemoved(player: Player)
+	leaderstats[player] = nil
 	staminaLastUsed[player] = nil
 	stamina[player] = nil
 	sprintingPlayers[player] = nil
@@ -311,6 +324,11 @@ function private.sync(player: Player)
 	end
 	data.currentStamina = stamina[player]
 	syncPlayerData:FireClient(player, data)
+
+	local stats = leaderstats[player]
+	if stats then
+		stats.level.Value = data.level
+	end
 end
 
 return public
