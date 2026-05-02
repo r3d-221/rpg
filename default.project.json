@@ -20,6 +20,12 @@
           "useSprint": {
             "$className": "RemoteEvent"
           },
+           "spendStatPoint": {
+            "$className": "RemoteEvent"
+          },
+           "resetStatPoints": {
+            "$className": "RemoteEvent"
+          },
           "getEnemyData": {
             "$className": "RemoteFunction"
           }

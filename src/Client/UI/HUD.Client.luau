@@ -39,9 +39,9 @@ local PlayerData = require(UIFolder["PlayerData.Client"])
 
 local inventoryButton = screens:FindFirstChild("inventory"):FindFirstChild("inventoryIcon")
 local profileButton = screens:FindFirstChild("profile"):FindFirstChild("profileIcon")
-local questButton = screens:FindFirstChild("quest"):FindFirstChild("questIcon")
-local settingsButton = screens:FindFirstChild("store"):FindFirstChild("settingsIcon")
-local storeButton = screens:FindFirstChild("settings"):FindFirstChild("storeIcon")
+-- local questButton = screens:FindFirstChild("quest"):FindFirstChild("questIcon")
+-- local settingsButton = screens:FindFirstChild("settings"):FindFirstChild("settingsIcon")
+-- local storeButton = screens:FindFirstChild("store"):FindFirstChild("storeIcon")
 
 local private = {}
 local public = {}
@@ -76,12 +76,14 @@ function private.setButtons()
 		end
 	end)
 
-	-- profileButton.MouseButton1Click:Connect(function()
-	-- 	UIManager.toggle("profile")
-	-- end)
+	profileButton.MouseButton1Click:Connect(function()
+		local isOpen = UIManager.toggle("profile")
+		if not isOpen then
+			UIManager.fire("profileClosed")
+		end
+	end)
 
 	-- questButton.MouseButton1Click:Connect(function()
-	-- 	UIManager.toggle("quest")
 	-- end)
 
 	-- storeButton.MouseButton1Click:Connect(function()

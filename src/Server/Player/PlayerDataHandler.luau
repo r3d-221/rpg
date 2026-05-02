@@ -7,12 +7,22 @@ local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 local Remotes = ReplicatedStorage.Shared.Remotes
 local syncPlayerData = Remotes.syncPlayerData
 local useSprint = Remotes.useSprint
+local spendStatPoint = Remotes.spendStatPoint
+local resetStatPoints = Remotes.resetStatPoints
 
 local PROFILE_STORE_KEY = "test_v5"
 
 local STACK_CAP = 100
 local STAMINA_REGEN_RATE = 10
 local STAMINA_REGEN_DELAY = 2
+
+local STAT_POINT_VALUES = {
+	health = 10,
+	armor = 2,
+	damage = 3,
+	critRate = 0.01,
+	critDamage = 0.05,
+}
 
 local DEFAULT_PLAYER_DATA = {
 	assignableStatPoints = 3,
@@ -82,6 +92,51 @@ function public.onStart()
 	for _, player in Players:GetPlayers() do
 		task.spawn(private.onPlayerAdded, player)
 	end
+
+	spendStatPoint.OnServerEvent:Connect(function(player, stat)
+		local data = public.getData(player)
+		if not data then
+			return
+		end
+
+		if (data.assignableStatPoints or 0) <= 0 then
+			print("no points to spend")
+			return
+		end
+		if data.statPoints[stat] == nil then
+			print("invalid stat:", stat)
+			return
+		end
+
+		data.assignableStatPoints -= 1
+		data.statPoints[stat] += 1
+		private.applyStatPoints(data)
+		private.sync(player)
+	end)
+
+	resetStatPoints.OnServerEvent:Connect(function(player)
+		local data = public.getData(player)
+		if not data then
+			return
+		end
+
+		local cost = 2
+		if (data.currency.gems or 0) < cost then
+			-- send alert massege
+			return
+		end
+
+		data.currency.gems -= cost
+
+		local total = 0
+		for stat, points in data.statPoints do
+			total += points
+			data.statPoints[stat] = 0
+		end
+		data.assignableStatPoints = (data.assignableStatPoints or 0) + total
+		private.applyStatPoints(data)
+		private.sync(player)
+	end)
 
 	useSprint.OnServerEvent:Connect(function(player, isSprinting)
 		if isSprinting then
@@ -243,6 +298,15 @@ function private.checkLevelUp(data)
 		data.assignableStatPoints += 1
 		required = PlayerConfig.expToLevel(data.level)
 	end
+end
+
+function private.applyStatPoints(data)
+	data.stats.health = DEFAULT_PLAYER_DATA.stats.health + (data.statPoints.health * STAT_POINT_VALUES.health)
+	data.stats.armor = DEFAULT_PLAYER_DATA.stats.armor + (data.statPoints.armor * STAT_POINT_VALUES.armor)
+	data.stats.damage = DEFAULT_PLAYER_DATA.stats.damage + (data.statPoints.damage * STAT_POINT_VALUES.damage)
+	data.stats.critRate = DEFAULT_PLAYER_DATA.stats.critRate + (data.statPoints.critRate * STAT_POINT_VALUES.critRate)
+	data.stats.critDamage = DEFAULT_PLAYER_DATA.stats.critDamage
+		+ (data.statPoints.critDamage * STAT_POINT_VALUES.critDamage)
 end
 
 function private.onPlayerAdded(player: Player)

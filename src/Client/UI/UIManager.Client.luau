@@ -11,6 +11,7 @@ local screens = {
 	inventory = screenGui:WaitForChild("inventory"),
 	fullInfo = screenGui:WaitForChild("fullInfo"),
 	quickInfo = screenGui:WaitForChild("quickInfo"),
+	profile = screenGui:WaitForChild("profile"),
 }
 
 function private.getScreen(name: string)
