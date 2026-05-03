@@ -26,6 +26,12 @@
            "resetStatPoints": {
             "$className": "RemoteEvent"
           },
+          "equipItem": {
+            "$className": "RemoteEvent"
+          },
+          "unequipItem": {
+            "$className": "RemoteEvent"
+          },
           "getEnemyData": {
             "$className": "RemoteFunction"
           }

@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local WeaponHandler = require(script.Parent.WeaponHandler)
 local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 
@@ -9,6 +10,8 @@ local syncPlayerData = Remotes.syncPlayerData
 local useSprint = Remotes.useSprint
 local spendStatPoint = Remotes.spendStatPoint
 local resetStatPoints = Remotes.resetStatPoints
+local equipItem = Remotes.equipItem
+local unequipItem = Remotes.unequipItem
 
 local PROFILE_STORE_KEY = "test_v5"
 
@@ -73,6 +76,15 @@ local DEFAULT_PLAYER_DATA = {
 		misc = 20,
 		materials = 20,
 	},
+
+	equipped = {
+		weapon = nil,
+		helmet = nil,
+		chestplate = nil,
+		leggings = nil,
+		boots = nil,
+		artifects = {},
+	},
 }
 
 local store = ProfileStore.New(PROFILE_STORE_KEY, DEFAULT_PLAYER_DATA)
@@ -92,6 +104,69 @@ function public.onStart()
 	for _, player in Players:GetPlayers() do
 		task.spawn(private.onPlayerAdded, player)
 	end
+
+	equipItem.OnServerEvent:Connect(function(player, itemId, category)
+		local data = public.getData(player)
+		if not data then
+			return
+		end
+
+		local found = false
+		for _, item in data.inventory[category] do
+			if item.id == itemId then
+				found = true
+				break
+			end
+		end
+
+		if not found then
+			warn("Player does not own item: " .. itemId)
+			return
+		end
+
+		data.equipped.weapon = itemId
+		WeaponHandler.equip(player, itemId)
+		private.sync(player)
+	end)
+
+	unequipItem.OnServerEvent:Connect(function(player)
+		local data = public.getData(player)
+		if not data then
+			return
+		end
+
+		data.equipped.weapon = nil
+		WeaponHandler.unequip(player)
+		private.sync(player)
+	end)
+
+	useSprint.OnServerEvent:Connect(function(player, isSprinting)
+		if isSprinting then
+			if sprintingPlayers[player] then
+				return
+			end
+			sprintingPlayers[player] = true
+
+			task.spawn(function()
+				while sprintingPlayers[player] do
+					local data = public.getData(player)
+					if not data then
+						break
+					end
+
+					local success = private.useStamina(player, data.staminaCost)
+					if not success then
+						sprintingPlayers[player] = nil
+						useSprint:FireClient(player, false)
+						break
+					end
+					task.wait(1)
+				end
+			end)
+		else
+			sprintingPlayers[player] = nil
+		end
+	end)
 
 	spendStatPoint.OnServerEvent:Connect(function(player, stat)
 		local data = public.getData(player)
@@ -136,30 +211,6 @@ function public.onStart()
 		data.assignableStatPoints = (data.assignableStatPoints or 0) + total
 		private.applyStatPoints(data)
 		private.sync(player)
-	end)
-
-	useSprint.OnServerEvent:Connect(function(player, isSprinting)
-		if isSprinting then
-			sprintingPlayers[player] = true
-
-			task.spawn(function()
-				while sprintingPlayers[player] do
-					local data = public.getData(player)
-					if not data then
-						break
-					end
-
-					local success = private.useStamina(player, data.staminaCost)
-					if not success then
-						sprintingPlayers[player] = nil
-						useSprint:FireClient(player, false)
-					end
-					task.wait(1)
-				end
-			end)
-		else
-			sprintingPlayers[player] = nil
-		end
 	end)
 end
 
@@ -350,6 +401,7 @@ function private.onPlayerAdded(player: Player)
 	task.spawn(function()
 		while player:IsDescendantOf(Players) do
 			task.wait(1)
+
 			local data = public.getData(player)
 			if not data then
 				continue
@@ -365,6 +417,18 @@ function private.onPlayerAdded(player: Player)
 			end
 		end
 	end)
+
+	player.CharacterAdded:Connect(function()
+		local data = public.getData(player)
+		if data and data.equipped.weapon then
+			WeaponHandler.equip(player, data.equipped.weapon)
+		end
+	end)
+
+	local data = public.getData(player)
+	if data and data.equipped.weapon then
+		WeaponHandler.equip(player, data.equipped.weapon)
+	end
 
 	private.sync(player)
 end

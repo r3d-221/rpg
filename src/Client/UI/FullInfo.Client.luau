@@ -8,11 +8,17 @@ local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
 local Modules = ReplicatedStorage.Shared.Modules
 
+local Remotes = ReplicatedStorage.Shared.Remotes
+local equipItem = Remotes.equipItem
+local unequipItem = Remotes.unequipItem
+
 local ItemData = require(Modules.ItemData)
 local UIManager = require(UIFolder["UIManager.Client"])
+local PlayerData = require(UIFolder["PlayerData.Client"])
 
 local public = {}
 
+local currentItem = nil
 local frame
 local itemName
 local itemText
@@ -22,10 +28,12 @@ local passives
 local type
 local equipButton
 local sellButton
+local unequipButton
 local closeButton
 local description
 local equip
 local sell
+local unequip
 local sellOriginalSize
 local stat1
 local stat2
@@ -42,8 +50,10 @@ function public.onStart(screenGui: ScreenGui)
 	passives = frame:FindFirstChild("passives")
 	type = frame:FindFirstChild("type")
 	equip = frame:FindFirstChild("equip")
+	unequip = frame:FindFirstChild("unequip")
 	sell = frame:FindFirstChild("sell")
 	equipButton = equip:FindFirstChild("equipButton")
+	unequipButton = unequip:FindFirstChild("unequipButton")
 	sellButton = sell:FindFirstChild("sellButton")
 	closeButton = frame:FindFirstChild("close"):FindFirstChild("closeButton")
 	description = frame:FindFirstChild("description")
@@ -63,9 +73,34 @@ function public.onStart(screenGui: ScreenGui)
 		UIManager.fire("inventorySlideBack")
 	end)
 
-	equipButton.MouseButton1Click:Connect(function() end)
+	equipButton.MouseButton1Click:Connect(function()
+		if not currentItem then
+			return
+		end
+		equipItem:FireServer(currentItem.id, currentItem.category)
+	end)
+
+	unequipButton.MouseButton1Click:Connect(function()
+		if not currentItem then
+			return
+		end
+		unequipItem:FireServer()
+	end)
 
 	sellButton.MouseButton1Click:Connect(function() end)
+
+	PlayerData.onChange(function(data)
+		if not currentItem then
+			return
+		end
+		if not frame.Visible then
+			return
+		end
+
+		local isEquipped = data.equipped.weapon == currentItem.id
+		equip.Visible = not isEquipped
+		unequip.Visible = isEquipped
+	end)
 end
 
 function public.hide()
@@ -73,11 +108,18 @@ function public.hide()
 end
 
 function public.show(item)
+	currentItem = item
 	local info = ItemData[item.id] or {}
 
 	itemText.Text = info.name or item.id
 	type.Text = "Type: " .. (info.subCategory or "?")
 	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
+
+	local data = PlayerData.getPlayerData()
+	local isEquipped = data and data.equipped.weapon == item.id
+
+	equip.Visible = not isEquipped
+	unequip.Visible = isEquipped
 
 	if info.subCategory == "Materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
@@ -85,7 +127,7 @@ function public.show(item)
 		stats.Visible = false
 		description.Visible = true
 		description.Text = info.description or "This is a description of the selected item..."
-		equip.Visible = false
+
 		sell.Size = UDim2.new(
 			sellOriginalSize.X.Scale + 0.45,
 			sellOriginalSize.X.Offset,
@@ -94,7 +136,7 @@ function public.show(item)
 		)
 	else
 		stats.Visible = true
-		equip.Visible = true
+
 		sell.Size = sellOriginalSize
 		description.Visible = false
 		level.Text = "Lvl: " .. (item.level or 1)

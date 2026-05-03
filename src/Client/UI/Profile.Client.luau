@@ -6,10 +6,13 @@ local PlayerScripts = player:FindFirstChild("PlayerScripts")
 local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
 
-local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
-local PlayerIconCache = require(ReplicatedStorage.Shared.Modules.PlayerIconCache)
+local Modules = ReplicatedStorage.Shared.Modules
+local PlayerConfig = require(Modules.PlayerConfig)
+local PlayerIconCache = require(Modules.PlayerIconCache)
+local ItemData = require(Modules.ItemData)
 local PlayerData = require(UIFolder["PlayerData.Client"])
 local UIManager = require(UIFolder["UIManager.Client"])
+local QuickInfo = require(UIFolder["QuickInfo.Client"])
 
 local Remotes = ReplicatedStorage.Shared.Remotes
 local spendStatPoint: RemoteEvent = Remotes.spendStatPoint
@@ -44,6 +47,8 @@ local closeButton
 local equipmentSlots
 local equipmentSlotsCloseButton
 local equipmentButton
+local equipmentSlotsList
+local equipmentSlotFrames = {}
 
 -- stat points panel
 local statPointsAmountFrame
@@ -63,6 +68,8 @@ local currentExpBar
 local expText
 local playerNameText
 
+local equipmentSlotsColor = Color3.fromHex("#2c2624")
+
 function public.onStart(screenGui: ScreenGui)
 	frame = screenGui:FindFirstChild("profile")
 	closeButton = frame:FindFirstChild("close"):FindFirstChild("closeButton")
@@ -70,7 +77,13 @@ function public.onStart(screenGui: ScreenGui)
 	equipmentSlots = frame:FindFirstChild("equipmentSlots")
 	equipmentSlotsCloseButton = equipmentSlots:FindFirstChild("close"):FindFirstChild("closeButton")
 	equipmentButton = frame:FindFirstChild("equipment"):FindFirstChild("equipmentButton")
+	equipmentSlotsList = equipmentSlots:FindFirstChild("equipmentSlotsList")
 	equipmentSlots.Visible = false
+
+	local slotNames = { "weapon", "helmet", "chestplate", "leggings", "boots" }
+	for _, slotName in slotNames do
+		equipmentSlotFrames[slotName] = equipmentSlotsList:FindFirstChild(slotName)
+	end
 
 	local statPointsFrame = frame:FindFirstChild("statPoints")
 	statPointsAmountFrame = statPointsFrame:FindFirstChild("amount")
@@ -167,10 +180,28 @@ function private.updateStatPoints(data)
 	end
 end
 
+function private.updateEquipmentSlots(data)
+	local equipped = data.equipped or {}
+
+	for slotName, slotFrame in equipmentSlotFrames do
+		if not slotFrame then
+			continue
+		end
+
+		local item = equipped[slotName]
+		if item then
+			slotFrame.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
+		else
+			slotFrame.BackgroundColor3 = equipmentSlotsColor
+		end
+	end
+end
+
 function private.updateAll(data)
 	private.updateHeader(data)
 	private.updateStats(data)
 	private.updateStatPoints(data)
+	private.updateEquipmentSlots(data)
 end
 
 function private.setupButtons()

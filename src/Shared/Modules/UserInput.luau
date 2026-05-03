@@ -14,6 +14,9 @@ local player = Players.LocalPlayer
 
 local walkspeed
 local isSprinting = false
+local lastSprintToggle = 0
+
+local SPRINT_DEBOUNCE = 0.2
 
 local private = {}
 local public = {}
@@ -62,7 +65,16 @@ function private.sprint(actionName, inputState)
 	end
 
 	local data = PlayerData.getPlayerData()
+
 	if inputState == Enum.UserInputState.Begin then
+		if tick() - lastSprintToggle < SPRINT_DEBOUNCE then
+			return
+		end
+		lastSprintToggle = tick()
+
+		if isSprinting then
+			return
+		end
 		if not data or (data.currentStamina or data.stamina) < data.staminaCost then
 			return
 		end
@@ -72,6 +84,10 @@ function private.sprint(actionName, inputState)
 		humanoid.WalkSpeed = walkspeed * data.staminaSpeedMultiplier
 		useSprint:FireServer(true)
 	elseif inputState == Enum.UserInputState.End then
+		if not isSprinting then
+			return
+		end
+
 		isSprinting = false
 		humanoid.WalkSpeed = walkspeed
 		useSprint:FireServer(false)
