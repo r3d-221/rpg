@@ -1,6 +1,7 @@
 return {
 	setName = "steelSet",
 	setBonus = { armor = 25, passives = "none" },
+	rarity = "uncommon",
 	pieces = {
 		helmet = { id = "steel_helmet", baseArmor = 10, baseHealth = 12, baseLuck = 0 },
 		chestplate = { id = "steel_chestplate", baseArmor = 13, baseHealth = 18, baseLuck = 0, baseCritRate = 0.02 },

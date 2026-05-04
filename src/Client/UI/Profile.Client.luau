@@ -49,6 +49,7 @@ local equipmentSlotsCloseButton
 local equipmentButton
 local equipmentSlotsList
 local equipmentSlotFrames = {}
+local equipmentSlotFrameImages = {}
 
 -- stat points panel
 local statPointsAmountFrame
@@ -82,7 +83,49 @@ function public.onStart(screenGui: ScreenGui)
 
 	local slotNames = { "weapon", "helmet", "chestplate", "leggings", "boots" }
 	for _, slotName in slotNames do
-		equipmentSlotFrames[slotName] = equipmentSlotsList:FindFirstChild(slotName)
+		local slotFrame = equipmentSlotsList:FindFirstChild(slotName)
+		equipmentSlotFrames[slotName] = slotFrame
+		if not slotFrame then
+			continue
+		end
+
+		local slotImage = slotFrame:FindFirstChildOfClass("ImageButton")
+		if not slotImage then
+			continue
+		end
+
+		print("slotImage for", slotName, ":", slotImage)
+
+		slotImage.MouseEnter:Connect(function()
+			local data = PlayerData.getPlayerData()
+			if not data then
+				return
+			end
+			local item = data.equipped and data.equipped[slotName]
+			if not item then
+				return
+			end
+			QuickInfo.show(item)
+		end)
+
+		slotImage.MouseLeave:Connect(function()
+			QuickInfo.hide()
+		end)
+
+		slotImage.MouseButton1Click:Connect(function()
+			QuickInfo.hide()
+			local data = PlayerData.getPlayerData()
+			if not data then
+				return
+			end
+			local item = data.equipped and data.equipped[slotName]
+			if not item then
+				return
+			end
+
+			UIManager.open("inventory")
+			UIManager.fire("showFullInfo", item)
+		end)
 	end
 
 	local statPointsFrame = frame:FindFirstChild("statPoints")

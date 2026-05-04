@@ -1,12 +1,19 @@
 return {
-	id = "iron_knife",
+	id = "rusty_knife",
+	name = "Rusty Knife",
+	category = "weapons",
 	subCategory = "knife",
-	baseDamage = 10,
-	baseAttackSpeed = 1.1,
-	baseArmorPenetration = 3,
+	rarity = "common",
+
+	baseDamage = 12,
+	baseAttackSpeed = 1.0,
+	baseArmorPenetration = 5,
 	baseCritRate = 0.02,
 	baseCritDamage = 1.1,
-	passives = { "none" },
+
+	description = "A rusty knife.",
+	passives = {},
+
 	abilities = {
 		{ name = "slice", cooldown = 4, damageMultiplier = 1.3 },
 		{ name = "backStab", cooldown = 8, damageMultiplier = 1.4, critRateMultiplier = 1.05 },

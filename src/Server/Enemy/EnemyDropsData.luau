@@ -37,51 +37,6 @@ public.rarityWeights = {
 	secret = 0.005,
 }
 
-public.itemList = {
-	---- Weapons Category ----
-	weapons = {
-		sword = { -- sub category
-			{ id = "wooden_sword", rarity = "common" },
-			{ id = "iron_sword", rarity = "common" },
-			{ id = "steel_sword", rarity = "uncommon" },
-		},
-		knife = {
-			{ id = "rusty_knife", rarity = "common" },
-			{ id = "iron_knife", rarity = "common" },
-		},
-		longBow = {
-			{ id = "long_bow", rarity = "common" },
-		},
-		shortBow = {
-			{ id = "short_bow", rarity = "common" },
-		},
-	},
-
-	---- Armors Category ----
-	armors = {
-		heavySet = {
-			{ id = "iron_chestplate", rarity = "common" },
-			{ id = "iron_leggings", rarity = "common" },
-			{ id = "iron_boots", rarity = "common" },
-			{ id = "iron_helmet", rarity = "common" },
-		},
-		lightSet = {
-			{ id = "leather_vest", rarity = "common" },
-			{ id = "leather_leggings", rarity = "common" },
-			{ id = "leather_boots", rarity = "common" },
-			{ id = "leather_cap", rarity = "common" },
-		},
-	},
-
-	---- crafting Ingredients Category ----
-	materials = {
-		{ id = "bone_fragment", rarity = "common", quantity = { min = 1, max = 3 } },
-		{ id = "torn_cloth", rarity = "common", quantity = { min = 1, max = 2 } },
-		{ id = "iron_shard", rarity = "uncommon", quantity = { min = 1, max = 2 } },
-	},
-	artifacts = {},
-}
-
 public.items = {
 	starter = {
 		canDropMultiple = false, -- makes it so that enemies will have a chance to drop 2 or more pieces of armor, weapon or artifect; influenced by luck
@@ -96,7 +51,7 @@ public.items = {
 				chance = 0.025,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "common" },
-				armorType = { heavySet = 0.3, lightSet = 0.7 },
+				armorType = { heavy = 0.3, light = 0.7 },
 			},
 			artifacts = nil,
 			materials = {
@@ -116,7 +71,7 @@ public.items = {
 				chance = 0.025,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "common" },
-				armorType = { heavySet = 0.2, lightSet = 0.8 },
+				armorType = { heavy = 0.2, light = 0.8 },
 			},
 			artifacts = nil,
 			materials = {

@@ -1,5 +1,6 @@
+local ServerScriptService = game:GetService("ServerScriptService")
 local EnemyDropsData = require(script.Parent.EnemyDropsData)
-local ItemRegistry = require(script.Parent.ItemRegistry)
+local ItemRegistry = require(ServerScriptService.Server.Items.ItemRegistry)
 
 local private = {}
 local public = {}

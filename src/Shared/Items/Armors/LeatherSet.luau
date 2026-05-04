@@ -1,6 +1,7 @@
 return {
 	setName = "leatherSet",
 	setBonus = { armor = 15, passives = "none" },
+	rarity = "common",
 	pieces = {
 		helmet = { id = "leather_cap", baseArmor = 5, baseHealth = 8, baseLuck = 0 },
 		chestplate = { id = "leather_vest", baseArmor = 12, baseHealth = 12, baseLuck = 0, baseCritRate = 0 },

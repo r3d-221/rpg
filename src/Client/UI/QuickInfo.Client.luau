@@ -33,8 +33,14 @@ function public.onStart(screenGui: ScreenGui)
 end
 
 function public.show(item)
-	local info = ItemData[item.id] or {}
+	if not frame or not item then
+		return
+	end
+	if not item.id or not item.category then
+		return
+	end
 
+	local info = ItemData[item.id] or {}
 	itemText.Text = info.name or item.id
 	type.Text = "Type: " .. (info.subCategory or "?")
 	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
