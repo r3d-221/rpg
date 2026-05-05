@@ -1,16 +1,9 @@
-local ServerScriptService = game:GetService("ServerScriptService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local EnemyDropsData = require(script.Parent.EnemyDropsData)
-local ItemRegistry = require(ServerScriptService.Server.Items.ItemRegistry)
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 
 local private = {}
 local public = {}
-
---==== NOTE ====--
--- category: weapons, armors, etc.
--- sub category: sword, chestplate, etc.
--- player luck will influence the rarity, min level
--- drop rate will influence the min and max quantity
--- rolls rarity, sub category, items, quantity, levels for EVERY category
 
 function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: number, luck: number): {}
 	local itemDropPool = EnemyDropsData.items[difficultyLevel] and EnemyDropsData.items[difficultyLevel][enemyType]
@@ -195,30 +188,22 @@ end
 
 -- gets a random item from the sub category
 function private.pickItemFromSubCategory(category: string, subCategory: string?, rarity: string): {}?
-	local categoryList = EnemyDropsData.itemList[category]
-	if not categoryList then
-		return nil
-	end
-
-	-- if a sub category doesn't have the rolled rarity items then it will select another sub category
-	local subCategoryList = if subCategory then categoryList[subCategory] else categoryList
+	local allItems = ItemRegistry.getCategory(category)
 
 	local candidates = {}
-	if subCategoryList then
-		for _, item in subCategoryList do
-			if item.rarity == rarity then
-				table.insert(candidates, item)
-			end
+	for _, item in allItems do
+		local matchesRarity = item.rarity == rarity
+		local matchesSubCategory = not subCategory
+			or (item.subCategory and item.subCategory:lower() == subCategory:lower())
+		if matchesRarity and matchesSubCategory then
+			table.insert(candidates, item)
 		end
 	end
 
-	-- searches ALL sub-categories for the rolled rarity
 	if #candidates == 0 and subCategory then
-		for _, subList in categoryList do
-			for _, item in subList do
-				if item.rarity == rarity then
-					table.insert(candidates, item)
-				end
+		for _, item in allItems do
+			if item.rarity == rarity then
+				table.insert(candidates, item)
 			end
 		end
 	end
@@ -230,10 +215,6 @@ function private.pickItemFromSubCategory(category: string, subCategory: string?,
 
 	local item = candidates[math.random(1, #candidates)]
 	local info = private.rollStats(item, category)
-	-- print("rollStats returned:", info)
-	-- print("rolls:", info and info.rolls)
-	-- print("stats:", info and info.stats)
-
 	if not info then
 		return nil
 	end
@@ -241,7 +222,7 @@ function private.pickItemFromSubCategory(category: string, subCategory: string?,
 	return { item = item, rolls = info.rolls, stats = info.stats }
 end
 
-function private.rollStats(item, category): {}?
+function private.rollStats(item, category)
 	local stats = {}
 	local rolls = {}
 
@@ -250,22 +231,6 @@ function private.rollStats(item, category): {}?
 	end
 
 	if category == "weapons" then
-		local info = ItemRegistry.getItemInfo(item.id)
-
-		if not info then
-			warn("ItemRegistry: no entry for id:", item.id)
-			return { rolls = {}, stats = {} }
-		end
-
-		-- print(
-		-- 	"info fields for: " .. item.id,
-		-- 	info.baseDamage,
-		-- 	info.baseCritRate,
-		-- 	info.baseCritDamage,
-		-- 	info.baseAttackSpeed,
-		-- 	info.baseArmorPenetration
-		-- )
-
 		rolls = {
 			private.pickRank(),
 			private.pickRank(),
@@ -273,48 +238,30 @@ function private.rollStats(item, category): {}?
 			private.pickRank(),
 			private.pickRank(),
 		}
-
 		stats = {
-			damage = (info.baseDamage or 0) * EnemyDropsData.statRank[rolls[1]],
-			critRate = (info.baseCritRate or 0) * EnemyDropsData.statRank[rolls[2]],
-			critDamage = (info.baseCritDamage or 0) * EnemyDropsData.statRank[rolls[3]],
-			attackSpeed = (info.baseAttackSpeed or 0) * EnemyDropsData.statRank[rolls[4]],
-			armorPenetration = (info.baseArmorPenetration or 0) * EnemyDropsData.statRank[rolls[5]],
+			damage = (item.baseDamage or 0) * EnemyDropsData.statRank[rolls[1]],
+			critRate = (item.baseCritRate or 0) * EnemyDropsData.statRank[rolls[2]],
+			critDamage = (item.baseCritDamage or 0) * EnemyDropsData.statRank[rolls[3]],
+			attackSpeed = (item.baseAttackSpeed or 0) * EnemyDropsData.statRank[rolls[4]],
+			armorPenetration = (item.baseArmorPenetration or 0) * EnemyDropsData.statRank[rolls[5]],
 		}
-
 		return { rolls = rolls, stats = stats }
 	end
 
 	if category == "armors" then
-		local info = ItemRegistry.getItemInfo(item.id)
-
-		if not info then
-			warn("ItemRegistry: no entry for id:", item.id)
-			return { rolls = {}, stats = {} }
-		end
-
-		-- print("info fields for : " .. item.id, info.baseHealth, info.baseArmor, info.baseLuck)
-
 		rolls = {
 			private.pickRank(),
 			private.pickRank(),
 			private.pickRank(),
 			private.pickRank(),
 		}
-
 		stats = {
-			health = (info.baseHealth or 0) * EnemyDropsData.statRank[rolls[1]],
-			armor = (info.baseArmor or 0) * EnemyDropsData.statRank[rolls[2]],
-			luck = (info.baseLuck or 0) * EnemyDropsData.statRank[rolls[3]],
-			walkspeed = 1,
+			health = (item.baseHealth or 0) * EnemyDropsData.statRank[rolls[1]],
+			armor = (item.baseArmor or 0) * EnemyDropsData.statRank[rolls[2]],
+			luck = (item.baseLuck or 0) * EnemyDropsData.statRank[rolls[3]],
+			walkspeed = (item.baseSpeed and item.baseSpeed > 0) and item.baseSpeed * EnemyDropsData.statRank[rolls[4]]
+				or 0,
 		}
-
-		if info.baseSpeed and info.baseSpeed > 0 then
-			stats.walkspeed = info.baseSpeed * EnemyDropsData.statRank[rolls[4]]
-		else
-			stats.walkspeed = 0
-		end
-
 		return { rolls = rolls, stats = stats }
 	end
 

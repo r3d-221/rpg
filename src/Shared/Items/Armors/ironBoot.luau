@@ -1,0 +1,12 @@
+return {
+	id = "iron_boots",
+	name = "Iron boots",
+	category = "armors",
+	subCategory = "heavy",
+	rarity = "common",
+	setName = "ironSet",
+	baseArmor = 6,
+	baseHealth = 8,
+	baseLuck = 0,
+	baseSpeed = 2,
+}
