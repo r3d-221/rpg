@@ -7,9 +7,9 @@ local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
 
 local Modules = ReplicatedStorage.Shared.Modules
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local PlayerConfig = require(Modules.PlayerConfig)
 local PlayerIconCache = require(Modules.PlayerIconCache)
-local ItemData = require(Modules.ItemData)
 local PlayerData = require(UIFolder["PlayerData.Client"])
 local UIManager = require(UIFolder["UIManager.Client"])
 local QuickInfo = require(UIFolder["QuickInfo.Client"])
@@ -234,7 +234,7 @@ function private.updateEquipmentSlots(data)
 
 		local item = equipped[slotName]
 		if item then
-			slotFrame.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
+			slotFrame.BackgroundColor3 = ItemRegistry.rarity[item.rarity] or ItemRegistry.rarity.common
 		else
 			slotFrame.BackgroundColor3 = equipmentSlotsColor
 		end

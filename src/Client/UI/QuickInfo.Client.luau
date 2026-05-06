@@ -1,10 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
-local Modules = ReplicatedStorage.Shared.Modules
-
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
-local ItemData = require(Modules.ItemData)
 
 local public = {}
 
@@ -44,16 +41,15 @@ function public.show(id)
 		return
 	end
 
-	local info = ItemData[item] or {}
-	itemText.Text = info.name or item.id
-	type.Text = "Type: " .. (info.subCategory or "?")
-	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
+	itemText.Text = item.name or item.id
+	type.Text = "Type: " .. (item.subCategory or "?")
+	itemName.BackgroundColor3 = ItemRegistry.rarity[item.rarity] or ItemRegistry.rarity.common
 
-	if info.category == "materials" then
+	if item.category == "materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		stats.Visible = false
 		description.Visible = true
-		description.Text = info.description or "This is a description of the selected item..."
+		description.Text = item.description or "This is a description of the selected item..."
 	else
 		stats.Visible = true
 		description.Visible = false
@@ -92,6 +88,11 @@ function public.show(id)
 	end
 
 	frame.Visible = true
+
+	if moveConnection then
+		moveConnection:Disconnect()
+		moveConnection = nil
+	end
 
 	moveConnection = UserInputService.InputChanged:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseMovement then

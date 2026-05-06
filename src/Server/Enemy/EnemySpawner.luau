@@ -11,7 +11,7 @@ local enemySpawned = Remotes.enemySpawned
 local PlayerDataHandler = require(ServerScriptService.Server.Player.PlayerDataHandler)
 local EnemyDropsHandler = require(script.Parent.EnemyDropsHandler)
 local Enemy = require(EnemyFolder.Enemy)
-local EnemyData = require(ReplicatedStorage.Shared.Modules.EnemyData)
+local EnemyData = require(EnemyFolder.EnemyData)
 
 local enemyTemplates = ReplicatedStorage.enemyTemplates
 

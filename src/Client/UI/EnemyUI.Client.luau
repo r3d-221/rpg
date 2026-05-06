@@ -6,7 +6,7 @@ local enemySpawned = Remotes.enemySpawned
 
 local UITemplates = ReplicatedStorage.UITemplates
 local enemyUI = UITemplates.enemyUI
-local EnemyData = require(ReplicatedStorage.Shared.Modules.EnemyData)
+local EnemyUIData = require(ReplicatedStorage.Shared.Modules.EnemyUIData)
 
 local private = {}
 local public = {}
@@ -68,7 +68,7 @@ end
 function private.updateTyping(info, enemyType)
 	local type = info:FindFirstChild("type")
 	local typeIcon = type:FindFirstChild("typeIcon")
-	typeIcon.Image = EnemyData.typingImages[enemyType]
+	typeIcon.Image = EnemyUIData.typingImages[enemyType]
 end
 
 return public

@@ -7,6 +7,7 @@ local PlayerScripts = player:FindFirstChild("PlayerScripts")
 
 local Shared = ReplicatedStorage:FindFirstChild("Shared")
 local Modules = Shared:FindFirstChild("Modules")
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local PlayerIconCache = require(Modules:FindFirstChild("PlayerIconCache"))
 local UserInput = require(Modules:FindFirstChild("UserInput"))
 
@@ -53,6 +54,7 @@ UserInput.onStart()
 
 PlayerIconCache.onStart()
 PlayerData.onStart()
+ItemRegistry.onStart()
 EnemyUI.onStart()
 HUD.onStart()
 Inventory.onStart(screenGui)

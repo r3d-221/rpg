@@ -18,6 +18,18 @@ public.rarity = {
 	secretText = Color3.fromHex("#b83a2d"),
 }
 
+function public.onStart()
+	private.loadFolder(Items)
+end
+
+function public.get(id: string)
+	return registry[id]
+end
+
+function public.getCategory(category: string)
+	return byCategory[category] or {}
+end
+
 function private.loadFolder(folder)
 	for _, module in folder:GetChildren() do
 		if module:IsA("ModuleScript") then
@@ -36,16 +48,6 @@ function private.loadFolder(folder)
 			private.loadFolder(module)
 		end
 	end
-end
-
-private.loadFolder(Items)
-
-function public.get(id: string)
-	return registry[id]
-end
-
-function public.getCategory(category: string)
-	return byCategory[category] or {}
 end
 
 return public

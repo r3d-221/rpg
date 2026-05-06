@@ -92,11 +92,21 @@ function public.onStart(screenGui: ScreenGui)
 		if not currentItem then
 			return
 		end
+
 		if not frame.Visible then
 			return
 		end
 
-		local isEquipped = data.equipped.weapon == currentItem.id
+		local isEquipped = false
+		if data and data.equipped then
+			for _, equippedId in data.equipped do
+				if equippedId == currentItem.id then
+					isEquipped = true
+					break
+				end
+			end
+		end
+
 		equip.Visible = not isEquipped
 		unequip.Visible = isEquipped
 	end)
@@ -117,12 +127,22 @@ function public.show(id)
 		return
 	end
 
+	currentItem = item
+
 	itemText.Text = item.name or id
 	type.Text = "Type: " .. (item.subCategory or "?")
 	itemName.BackgroundColor3 = ItemRegistry.rarity[item.rarity] or ItemRegistry.rarity.common
 
 	local data = PlayerData.getPlayerData()
-	local isEquipped = data and data.equipped.weapon == id
+	local isEquipped = false
+	if data and data.equipped then
+		for _, equippedId in data.equipped do
+			if equippedId == id then
+				isEquipped = true
+				break
+			end
+		end
+	end
 
 	equip.Visible = not isEquipped
 	unequip.Visible = isEquipped
@@ -142,6 +162,8 @@ function public.show(id)
 		)
 	else
 		stats.Visible = true
+		stat4.Visible = false
+		stat5.Visible = false
 
 		sell.Size = sellOriginalSize
 		description.Visible = false

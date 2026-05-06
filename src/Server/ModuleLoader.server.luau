@@ -1,14 +1,17 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local ServerModules = ServerScriptService.Server
 local EnemyFolder = ServerModules.Enemy
 local PlayerFolder = ServerModules.Player
 
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local PlayerDataHandler = require(PlayerFolder.PlayerDataHandler)
 local EnemySpawner = require(EnemyFolder.EnemySpawner)
 local PlayerCombat = require(PlayerFolder.PlayerCombat)
 
 PlayerDataHandler.onStart()
+ItemRegistry.onStart()
 EnemySpawner.onStart()
 PlayerCombat.onStart()
 
