@@ -4,6 +4,7 @@ return {
 	category = "weapons",
 	subCategory = "knife",
 	rarity = "common",
+	level = 1,
 
 	baseDamage = 10,
 	baseAttackSpeed = 1.1,

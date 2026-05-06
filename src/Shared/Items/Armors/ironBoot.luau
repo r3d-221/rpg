@@ -5,6 +5,8 @@ return {
 	subCategory = "heavy",
 	rarity = "common",
 	setName = "ironSet",
+	level = 1,
+
 	baseArmor = 6,
 	baseHealth = 8,
 	baseLuck = 0,

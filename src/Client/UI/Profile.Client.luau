@@ -90,22 +90,23 @@ function public.onStart(screenGui: ScreenGui)
 		end
 
 		local slotImage = slotFrame:FindFirstChildOfClass("ImageButton")
+		equipmentSlotFrameImages[slotName] = slotImage
 		if not slotImage then
 			continue
 		end
-
-		print("slotImage for", slotName, ":", slotImage)
 
 		slotImage.MouseEnter:Connect(function()
 			local data = PlayerData.getPlayerData()
 			if not data then
 				return
 			end
-			local item = data.equipped and data.equipped[slotName]
-			if not item then
+			local itemId = data.equipped and data.equipped[slotName]
+			if not itemId then
 				return
 			end
-			QuickInfo.show(item)
+
+			print("Player data in client: ")
+			QuickInfo.show(itemId)
 		end)
 
 		slotImage.MouseLeave:Connect(function()

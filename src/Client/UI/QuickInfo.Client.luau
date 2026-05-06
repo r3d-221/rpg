@@ -3,6 +3,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Modules = ReplicatedStorage.Shared.Modules
 
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local ItemData = require(Modules.ItemData)
 
 local public = {}
@@ -32,20 +33,23 @@ function public.onStart(screenGui: ScreenGui)
 	stat3 = stats:FindFirstChild("stat3")
 end
 
-function public.show(item)
-	if not frame or not item then
-		return
-	end
-	if not item.id or not item.category then
+function public.show(id)
+	if not frame or not id then
 		return
 	end
 
-	local info = ItemData[item.id] or {}
+	local item = ItemRegistry.get(id)
+	print(item)
+	if not item or not item.category then
+		return
+	end
+
+	local info = ItemData[item] or {}
 	itemText.Text = info.name or item.id
 	type.Text = "Type: " .. (info.subCategory or "?")
 	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
 
-	if info.subCategory == "Materials" then
+	if info.category == "materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		stats.Visible = false
 		description.Visible = true

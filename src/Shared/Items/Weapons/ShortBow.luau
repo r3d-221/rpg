@@ -4,6 +4,7 @@ return {
 	category = "weapons",
 	subCategory = "shortBow",
 	rarity = "common",
+	level = 1,
 
 	baseDamage = 12,
 	baseAttackSpeed = 1.0,

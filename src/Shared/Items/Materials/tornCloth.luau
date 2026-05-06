@@ -4,4 +4,5 @@ return {
 	rarity = "common",
 	category = "materials",
 	description = "Scraps of leather collected from monsters. Used to make armor.",
+	amount = 0,
 }

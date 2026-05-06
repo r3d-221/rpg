@@ -6,13 +6,12 @@ local PlayerScripts = player:FindFirstChild("PlayerScripts")
 
 local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
-local Modules = ReplicatedStorage.Shared.Modules
 
 local Remotes = ReplicatedStorage.Shared.Remotes
 local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
 
-local ItemData = require(Modules.ItemData)
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local UIManager = require(UIFolder["UIManager.Client"])
 local PlayerData = require(UIFolder["PlayerData.Client"])
 
@@ -107,26 +106,33 @@ function public.hide()
 	UIManager.close("fullInfo")
 end
 
-function public.show(item)
-	currentItem = item
-	local info = ItemData[item.id] or {}
+function public.show(id)
+	if not frame or not id then
+		return
+	end
 
-	itemText.Text = info.name or item.id
-	type.Text = "Type: " .. (info.subCategory or "?")
-	itemName.BackgroundColor3 = ItemData.rarity[item.rarity] or ItemData.rarity.common
+	local item = ItemRegistry.get(id)
+	print(item)
+	if not item or not item.category then
+		return
+	end
+
+	itemText.Text = item.name or id
+	type.Text = "Type: " .. (item.subCategory or "?")
+	itemName.BackgroundColor3 = ItemRegistry.rarity[item.rarity] or ItemRegistry.rarity.common
 
 	local data = PlayerData.getPlayerData()
-	local isEquipped = data and data.equipped.weapon == item.id
+	local isEquipped = data and data.equipped.weapon == id
 
 	equip.Visible = not isEquipped
 	unequip.Visible = isEquipped
 
-	if info.subCategory == "Materials" then
+	if item.category == "materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		passives.Visible = false
 		stats.Visible = false
 		description.Visible = true
-		description.Text = info.description or "This is a description of the selected item..."
+		description.Text = item.description or "This is a description of the selected item..."
 
 		sell.Size = UDim2.new(
 			sellOriginalSize.X.Scale + 0.45,
