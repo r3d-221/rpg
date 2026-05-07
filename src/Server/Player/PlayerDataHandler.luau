@@ -1,7 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local WeaponHandler = require(ServerScriptService.Server.WeaponHandler)
+local WeaponHandler = require(ServerScriptService.Server.Modules.WeaponHandler)
 local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 

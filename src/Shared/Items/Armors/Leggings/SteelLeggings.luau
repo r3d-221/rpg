@@ -1,8 +1,9 @@
 return {
-	id = "steel_chestplate",
-	name = "Steel Chestplate",
+	id = "steel_leggings",
+	name = "Steel Leggings",
 	category = "armors",
-	subCategory = "heavy",
+	subCategory = "leggings",
+	class = "heavy",
 	rarity = "uncommon",
 	setName = "steelSet",
 	level = 1,
@@ -11,4 +12,6 @@ return {
 	baseHealth = 10,
 	baseLuck = 0,
 	baseSpeed = 0,
+	stats = {},
+	rolls = {},
 }

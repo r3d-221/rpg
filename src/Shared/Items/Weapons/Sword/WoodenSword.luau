@@ -14,6 +14,8 @@ return {
 
 	description = "A basic iron sword.",
 	passives = {},
+	stats = {},
+	rolls = {},
 
 	abilities = {
 		{ name = "slash", cooldown = 4, damageMultiplier = 1.3 },

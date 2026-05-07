@@ -2,8 +2,8 @@ return {
 	id = "iron_chestplate",
 	name = "Iron Chestplate",
 	category = "armors",
-	subCategory = "heavy",
-	rarity = "common",
+	subCategory = "chestplate",
+	class = "heavy",
 	setName = "ironSet",
 	level = 1,
 
@@ -11,4 +11,6 @@ return {
 	baseHealth = 12,
 	baseLuck = 0,
 	baseSpeed = 0,
+	stats = {},
+	rolls = {},
 }

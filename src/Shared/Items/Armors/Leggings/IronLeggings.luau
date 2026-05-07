@@ -2,7 +2,8 @@ return {
 	id = "iron_leggings",
 	name = "Iron Leggings",
 	category = "armors",
-	subCategory = "heavy",
+	subCategory = "leggings",
+	class = "heavy",
 	rarity = "common",
 	setName = "ironSet",
 	level = 1,
@@ -11,4 +12,6 @@ return {
 	baseHealth = 11,
 	baseLuck = 0,
 	baseSpeed = 0,
+	stats = {},
+	rolls = {},
 }

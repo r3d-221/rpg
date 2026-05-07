@@ -1,8 +1,9 @@
 return {
-	id = "leather_helmet",
-	name = "Leather Helmet",
+	id = "leather_leggings",
+	name = "Leather Leggings",
 	category = "armors",
-	subCategory = "light",
+	subCategory = "leggings",
+	class = "light",
 	rarity = "common",
 	setName = "leatherSet",
 	level = 1,
@@ -11,4 +12,6 @@ return {
 	baseHealth = 10,
 	baseLuck = 0,
 	baseSpeed = 0,
+	stats = {},
+	rolls = {},
 }

@@ -1,9 +1,9 @@
 return {
-	id = "short_bow",
-	name = "Short Bow",
+	id = "steel_sword",
+	name = "Steel Sword",
 	category = "weapons",
-	subCategory = "shortBow",
-	rarity = "common",
+	subCategory = "sword",
+	rarity = "uncommon",
 	level = 1,
 
 	baseDamage = 12,
@@ -12,8 +12,10 @@ return {
 	baseCritRate = 0.02,
 	baseCritDamage = 1.1,
 
-	description = "A basic iron sword.",
+	description = "A basic steel sword.",
 	passives = {},
+	stats = {},
+	rolls = {},
 
 	abilities = {
 		{ name = "slash", cooldown = 4, damageMultiplier = 1.3 },

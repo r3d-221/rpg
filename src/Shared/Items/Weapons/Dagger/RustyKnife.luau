@@ -2,7 +2,7 @@ return {
 	id = "rusty_knife",
 	name = "Rusty Knife",
 	category = "weapons",
-	subCategory = "knife",
+	subCategory = "dagger",
 	rarity = "common",
 	level = 1,
 
@@ -14,6 +14,8 @@ return {
 
 	description = "A rusty knife.",
 	passives = {},
+	stats = {},
+	rolls = {},
 
 	abilities = {
 		{ name = "slice", cooldown = 4, damageMultiplier = 1.3 },

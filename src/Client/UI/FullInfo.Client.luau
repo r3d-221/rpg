@@ -7,11 +7,12 @@ local PlayerScripts = player:FindFirstChild("PlayerScripts")
 local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
 
-local Remotes = ReplicatedStorage.Shared.Remotes
+local Shared = ReplicatedStorage.Shared
+local Remotes = Shared.Remotes
 local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
 
-local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
+local ItemRegistry = require(Shared.Items.ItemRegistry)
 local UIManager = require(UIFolder["UIManager.Client"])
 local PlayerData = require(UIFolder["PlayerData.Client"])
 
@@ -63,8 +64,8 @@ function public.onStart(screenGui: ScreenGui)
 	stat4 = stats:FindFirstChild("stat4")
 	stat5 = stats:FindFirstChild("stat5")
 
-	UIManager.onEvent("showFullInfo", function(item)
-		public.show(item)
+	UIManager.onEvent("showFullInfo", function(id)
+		public.show(id)
 	end)
 
 	closeButton.MouseButton1Click:Connect(function()
@@ -116,28 +117,24 @@ function public.hide()
 	UIManager.close("fullInfo")
 end
 
-function public.show(id)
-	if not frame or not id then
+function public.show(item)
+	if not frame or not item then
 		return
 	end
 
-	local item = ItemRegistry.get(id)
-	print(item)
-	if not item or not item.category then
-		return
-	end
+	local defaultItemData = ItemRegistry.get(item.id)
 
 	currentItem = item
 
-	itemText.Text = item.name or id
-	type.Text = "Type: " .. (item.subCategory or "?")
-	itemName.BackgroundColor3 = ItemRegistry.rarity[item.rarity] or ItemRegistry.rarity.common
+	itemText.Text = defaultItemData.name or item.id
+	type.Text = "Type: " .. (defaultItemData.class or defaultItemData.subCategory or "?")
+	itemName.BackgroundColor3 = ItemRegistry.rarity[defaultItemData.rarity] or ItemRegistry.rarity.common
 
 	local data = PlayerData.getPlayerData()
 	local isEquipped = false
 	if data and data.equipped then
 		for _, equippedId in data.equipped do
-			if equippedId == id then
+			if equippedId == item.id then
 				isEquipped = true
 				break
 			end
@@ -147,12 +144,12 @@ function public.show(id)
 	equip.Visible = not isEquipped
 	unequip.Visible = isEquipped
 
-	if item.category == "materials" then
+	if defaultItemData.category == "materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		passives.Visible = false
 		stats.Visible = false
 		description.Visible = true
-		description.Text = item.description or "This is a description of the selected item..."
+		description.Text = defaultItemData.description or "This is a description of the selected item..."
 
 		sell.Size = UDim2.new(
 			sellOriginalSize.X.Scale + 0.45,
@@ -170,14 +167,14 @@ function public.show(id)
 		level.Text = "Lvl: " .. (item.level or 1)
 
 		-- passives
-		if not item.passives or #item.passives == 0 then
+		if not defaultItemData.passives or #defaultItemData.passives == 0 then
 			passives.Visible = false
 		else
 			passives.Visible = true
-			passives.Text = "Passives: " .. table.concat(item.passives, ", ")
+			passives.Text = "Passives: " .. table.concat(defaultItemData.passives, ", ")
 		end
 
-		if item.category == "weapons" then
+		if defaultItemData.category == "weapons" then
 			local itemStats = item.stats or {}
 			local itemRolls = item.rolls or {}
 
@@ -203,7 +200,7 @@ function public.show(id)
 			stat5:FindFirstChild("statInfo").Text = "Armor Pierce: " .. math.floor(itemStats.armorPenetration or 0)
 		end
 
-		if item.category == "armors" then
+		if defaultItemData.category == "armors" then
 			local itemStats = item.stats or {}
 			local itemRolls = item.rolls or {}
 

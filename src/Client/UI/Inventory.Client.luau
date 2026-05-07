@@ -54,6 +54,10 @@ function public.onStart(screenGui: ScreenGui)
 		public.slideBack()
 	end)
 
+	UIManager.onEvent("inventorySlide", function()
+		public.slide()
+	end)
+
 	for _, tab in tabs:GetChildren() do
 		if tab:IsA("Frame") then
 			local tabButton
@@ -112,6 +116,7 @@ end
 
 function private.addSlots(inventory)
 	local itemList = inventory[currentTab]
+	print(currentTab)
 
 	if not itemList then
 		warn("No items were found in cache.")

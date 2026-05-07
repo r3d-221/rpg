@@ -105,8 +105,15 @@ function public.onStart(screenGui: ScreenGui)
 				return
 			end
 
-			print("Player data in client: ")
-			QuickInfo.show(itemId)
+			local info = ItemRegistry.get(itemId)
+			local category = data.inventory[info.category]
+
+			for _, item in category do
+				if item.id == itemId then
+					QuickInfo.show(item)
+					break
+				end
+			end
 		end)
 
 		slotImage.MouseLeave:Connect(function()
@@ -119,13 +126,15 @@ function public.onStart(screenGui: ScreenGui)
 			if not data then
 				return
 			end
-			local item = data.equipped and data.equipped[slotName]
-			if not item then
+			local itemId = data.equipped and data.equipped[slotName]
+			if not itemId then
 				return
 			end
 
+			UIManager.closeAll()
 			UIManager.open("inventory")
-			UIManager.fire("showFullInfo", item)
+			UIManager.fire("inventorySlide")
+			UIManager.fire("showFullInfo", itemId)
 		end)
 	end
 

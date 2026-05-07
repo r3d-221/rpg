@@ -2,7 +2,8 @@ return {
 	id = "steel_boots",
 	name = "Steel Boots",
 	category = "armors",
-	subCategory = "heavy",
+	subCategory = "boots",
+	class = "heavy",
 	rarity = "uncommon",
 	setName = "steelSet",
 	level = 1,
@@ -11,4 +12,6 @@ return {
 	baseHealth = 10,
 	baseLuck = 0,
 	baseSpeed = 0,
+	stats = {},
+	rolls = {},
 }

@@ -55,6 +55,18 @@ function public.open(name: string)
 	end
 end
 
+function public.openExclusive(name: string)
+	for screenName, screen in screens do
+		if screenName ~= name then
+			screen.Visible = false
+		end
+	end
+	local screen = screens[name]
+	if screen then
+		screen.Visible = true
+	end
+end
+
 function public.close(name: string)
 	local screen = private.getScreen(name)
 	if screen then

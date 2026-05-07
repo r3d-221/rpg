@@ -71,14 +71,22 @@ end
 function private.setButtons()
 	inventoryButton.MouseButton1Click:Connect(function()
 		local isOpen = UIManager.toggle("inventory")
-		if not isOpen then
+		print(isOpen)
+		if isOpen then
+			UIManager.closeAll()
+			UIManager.openExclusive("inventory")
+		else
 			UIManager.fire("inventoryClosed")
 		end
 	end)
 
 	profileButton.MouseButton1Click:Connect(function()
 		local isOpen = UIManager.toggle("profile")
-		if not isOpen then
+		print(isOpen)
+		if isOpen then
+			UIManager.closeAll()
+			UIManager.openExclusive("profile")
+		else
 			UIManager.fire("profileClosed")
 		end
 	end)

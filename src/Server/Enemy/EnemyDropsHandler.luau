@@ -27,15 +27,13 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 		local adjustedRange = private.applyLuck(weaponConfig.rarityRange, luck)
 		local rarity = private.pickRarity(adjustedRange)
 
-		local weaponType = private.pickSubCategory(weaponConfig.weaponType)
-		local info = weaponType and private.pickItemFromSubCategory("weapons", weaponType, rarity)
+		local weaponType = private.pickItemType(weaponConfig.weaponType)
+		local info = weaponType and private.pickItem("weapons", weaponType, rarity)
 
 		if info and info.item then
 			local level = math.random(weaponConfig.levelRange.min, weaponConfig.levelRange.max)
 			table.insert(droppedItems, {
 				id = info.item.id,
-				category = "weapons",
-				rarity = rarity,
 				rolls = info.rolls,
 				stats = info.stats,
 				level = level,
@@ -49,15 +47,13 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 		local adjustedRange = private.applyLuck(armorConfig.rarityRange, luck)
 		local rarity = private.pickRarity(adjustedRange)
 
-		local armorType = private.pickSubCategory(armorConfig.armorType)
-		local info = armorType and private.pickItemFromSubCategory("armors", armorType, rarity)
+		local armorType = private.pickItemType(armorConfig.armorType)
+		local info = armorType and private.pickItem("armors", armorType, rarity)
 
 		if info and info.item then
 			local level = math.random(armorConfig.levelRange.min, armorConfig.levelRange.max)
 			table.insert(droppedItems, {
 				id = info.item.id,
-				category = "armors",
-				rarity = rarity,
 				rolls = info.rolls,
 				stats = info.stats,
 				level = level,
@@ -71,17 +67,14 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 		local adjustedRange = private.applyLuck(ingredientConfig.rarityRange, luck)
 		local rarity = private.pickRarity(adjustedRange)
 
-		local info = private.pickItemFromSubCategory("materials", nil, rarity)
+		local info = private.pickItem("materials", nil, rarity)
 
 		if info and info.item then
 			local scaledMax =
 				math.max(ingredientConfig.quantity.min, math.floor(ingredientConfig.quantity.max * dropRate))
 			local quantity = math.random(ingredientConfig.quantity.min, scaledMax)
 
-			table.insert(
-				droppedItems,
-				{ id = info.item.id, category = "materials", rarity = rarity, quantity = quantity }
-			)
+			table.insert(droppedItems, { id = info.item.id, quantity = quantity })
 		end
 	end
 
@@ -169,7 +162,7 @@ function private.pickRank(): string
 end
 
 -- gets the sub category
-function private.pickSubCategory(typeTable: {}): string?
+function private.pickItemType(typeTable: {}): string?
 	local totalWeight = 0
 	for _, weight in typeTable do
 		totalWeight += weight
@@ -187,20 +180,26 @@ function private.pickSubCategory(typeTable: {}): string?
 end
 
 -- gets a random item from the sub category
-function private.pickItemFromSubCategory(category: string, subCategory: string?, rarity: string): {}?
+function private.pickItem(category: string, type: string?, rarity: string): {}?
 	local allItems = ItemRegistry.getCategory(category)
 
 	local candidates = {}
 	for _, item in allItems do
 		local matchesRarity = item.rarity == rarity
-		local matchesSubCategory = not subCategory
-			or (item.subCategory and item.subCategory:lower() == subCategory:lower())
+
+		local matchesSubCategory
+		if not type then
+			matchesSubCategory = true
+		else
+			matchesSubCategory = item.type and item.type:lower() == type:lower()
+		end
+
 		if matchesRarity and matchesSubCategory then
 			table.insert(candidates, item)
 		end
 	end
 
-	if #candidates == 0 and subCategory then
+	if #candidates == 0 and type then
 		for _, item in allItems do
 			if item.rarity == rarity then
 				table.insert(candidates, item)
@@ -209,7 +208,7 @@ function private.pickItemFromSubCategory(category: string, subCategory: string?,
 	end
 
 	if #candidates == 0 then
-		warn("No candidates for:", category, subCategory, rarity)
+		warn("No candidates for:", category, type, rarity)
 		return nil
 	end
 

@@ -45,7 +45,7 @@ public.items = {
 				chance = 0.02,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "uncommon" },
-				weaponType = { sword = 0.3, knife = 0.7 },
+				weaponType = { sword = 0.3, dagger = 0.7 },
 			},
 			armors = {
 				chance = 0.025,
@@ -58,6 +58,7 @@ public.items = {
 				chance = 0.50,
 				rarityRange = { min = "common", max = "common" },
 				quantity = { min = 1, max = 3 },
+				materialType = { mob = 0.6, ore = 0.2, fabric = 0.2 },
 			},
 		},
 		ranged = {
@@ -65,7 +66,7 @@ public.items = {
 				chance = 0.02,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "uncommon" },
-				weaponType = { longBow = 0.3, shortBow = 0.7 },
+				weaponType = { bow = 1 },
 			},
 			armors = {
 				chance = 0.025,
@@ -78,6 +79,7 @@ public.items = {
 				chance = 0.50,
 				rarityRange = { min = "common", max = "common" },
 				quantity = { min = 1, max = 3 },
+				materialType = { mob = 0.6, ore = 0.2, fabric = 0.2 },
 			},
 		},
 	},

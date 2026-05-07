@@ -2,7 +2,8 @@ return {
 	id = "iron_helmet",
 	name = "Iron Helmet",
 	category = "armors",
-	subCategory = "heavy",
+	subCategory = "helmet",
+	class = "heavy",
 	rarity = "common",
 	setName = "ironSet",
 	level = 1,
@@ -11,4 +12,6 @@ return {
 	baseHealth = 10,
 	baseLuck = 0,
 	baseSpeed = 0,
+	stats = {},
+	rolls = {},
 }

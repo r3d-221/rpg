@@ -2,7 +2,7 @@ return {
 	id = "long_bow",
 	name = "Long Bow",
 	category = "weapons",
-	subCategory = "longBow",
+	subCategory = "bow",
 	rarity = "common",
 	level = 1,
 
@@ -14,6 +14,8 @@ return {
 
 	description = "A basic iron sword.",
 	passives = {},
+	stats = {},
+	rolls = {},
 
 	abilities = {
 		{ name = "slash", cooldown = 4, damageMultiplier = 1.3 },

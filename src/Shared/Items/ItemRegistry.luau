@@ -37,6 +37,7 @@ function private.loadFolder(folder)
 			if ok and data and data.id then
 				registry[data.id] = data
 				if byCategory[data.category] then
+					print(module.Name)
 					table.insert(byCategory[data.category], data)
 				end
 			elseif module.Name == "ItemRegistry" or module.Name == "SetBonus" then

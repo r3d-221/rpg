@@ -30,33 +30,29 @@ function public.onStart(screenGui: ScreenGui)
 	stat3 = stats:FindFirstChild("stat3")
 end
 
-function public.show(id)
-	if not frame or not id then
+function public.show(item)
+	if not frame or not item then
 		return
 	end
 
-	local item = ItemRegistry.get(id)
-	print(item)
-	if not item or not item.category then
-		return
-	end
+	local defaultItemData = ItemRegistry.get(item.id)
 
-	itemText.Text = item.name or item.id
-	type.Text = "Type: " .. (item.subCategory or "?")
-	itemName.BackgroundColor3 = ItemRegistry.rarity[item.rarity] or ItemRegistry.rarity.common
+	itemText.Text = defaultItemData.name or item.id
+	type.Text = "Type: " .. (defaultItemData.class or defaultItemData.subCategory or "?")
+	itemName.BackgroundColor3 = ItemRegistry.rarity[defaultItemData.rarity] or ItemRegistry.rarity.common
 
-	if item.category == "materials" then
+	if defaultItemData.category == "materials" then
 		level.Text = "Qty: " .. (item.quantity or 1)
 		stats.Visible = false
 		description.Visible = true
-		description.Text = item.description or "This is a description of the selected item..."
+		description.Text = defaultItemData.description or "This is a description of the selected item..."
 	else
 		stats.Visible = true
 		description.Visible = false
 		level.Text = "Lvl: " .. (item.level or 1)
 
 		-- set stats
-		if item.category == "weapons" then
+		if defaultItemData.category == "weapons" then
 			local itemStats = item.stats or {}
 			local itemRolls = item.rolls or {}
 
@@ -73,7 +69,7 @@ function public.show(id)
 				.. "%"
 		end
 
-		if item.category == "armors" then
+		if defaultItemData.category == "armors" then
 			local itemStats = item.stats or {}
 			local itemRolls = item.rolls or {}
 
