@@ -37,6 +37,9 @@ local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local UIManager = require(UIFolder["UIManager.Client"])
 local PlayerData = require(UIFolder["PlayerData.Client"])
 
+local Remotes = ReplicatedStorage.Shared.Remotes
+local syncStamina = Remotes.syncStamina
+
 local inventoryButton = screens:FindFirstChild("inventory"):FindFirstChild("inventoryIcon")
 local profileButton = screens:FindFirstChild("profile"):FindFirstChild("profileIcon")
 -- local questButton = screens:FindFirstChild("quest"):FindFirstChild("questIcon")
@@ -52,6 +55,11 @@ function public.onStart()
 
 	private.updateHealth(humanoid.Health)
 	humanoid.HealthChanged:Connect(private.updateHealth)
+
+	syncStamina.OnClientEvent:Connect(function(current, max)
+		local ratio = current / max
+		currentStaminaBar.Size = UDim2.fromScale(math.clamp(ratio, 0, 1), 1)
+	end)
 
 	player.CharacterAdded:Connect(function(newCharacter)
 		character = newCharacter
@@ -71,7 +79,6 @@ end
 function private.setButtons()
 	inventoryButton.MouseButton1Click:Connect(function()
 		local isOpen = UIManager.toggle("inventory")
-		print(isOpen)
 		if isOpen then
 			UIManager.closeAll()
 			UIManager.openExclusive("inventory")
@@ -82,7 +89,6 @@ function private.setButtons()
 
 	profileButton.MouseButton1Click:Connect(function()
 		local isOpen = UIManager.toggle("profile")
-		print(isOpen)
 		if isOpen then
 			UIManager.closeAll()
 			UIManager.openExclusive("profile")

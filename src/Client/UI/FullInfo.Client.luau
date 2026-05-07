@@ -25,7 +25,7 @@ local itemText
 local stats
 local level
 local passives
-local type
+local typeText
 local equipButton
 local sellButton
 local unequipButton
@@ -48,7 +48,7 @@ function public.onStart(screenGui: ScreenGui)
 	stats = frame:FindFirstChild("stats")
 	level = frame:FindFirstChild("level")
 	passives = frame:FindFirstChild("passives")
-	type = frame:FindFirstChild("type")
+	typeText = frame:FindFirstChild("type")
 	equip = frame:FindFirstChild("equip")
 	unequip = frame:FindFirstChild("unequip")
 	sell = frame:FindFirstChild("sell")
@@ -100,8 +100,8 @@ function public.onStart(screenGui: ScreenGui)
 
 		local isEquipped = false
 		if data and data.equipped then
-			for _, equippedId in data.equipped do
-				if equippedId == currentItem.id then
+			for _, equippedEntry in data.equipped do
+				if type(equippedEntry) == "table" and equippedEntry.id == currentItem.id then
 					isEquipped = true
 					break
 				end
@@ -122,19 +122,20 @@ function public.show(item)
 		return
 	end
 
+	print(item)
 	local defaultItemData = ItemRegistry.get(item.id)
 
 	currentItem = item
 
 	itemText.Text = defaultItemData.name or item.id
-	type.Text = "Type: " .. (defaultItemData.class or defaultItemData.subCategory or "?")
+	typeText.Text = "Type: " .. (defaultItemData.class or defaultItemData.subCategory or "?")
 	itemName.BackgroundColor3 = ItemRegistry.rarity[defaultItemData.rarity] or ItemRegistry.rarity.common
 
 	local data = PlayerData.getPlayerData()
 	local isEquipped = false
 	if data and data.equipped then
-		for _, equippedId in data.equipped do
-			if equippedId == item.id then
+		for _, equippedEntry in data.equipped do
+			if type(equippedEntry) == "table" and equippedEntry.id == currentItem.id then
 				isEquipped = true
 				break
 			end

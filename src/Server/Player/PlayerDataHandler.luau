@@ -12,8 +12,9 @@ local spendStatPoint = Remotes.spendStatPoint
 local resetStatPoints = Remotes.resetStatPoints
 local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
+local syncStamina = Remotes.syncStamina
 
-local PROFILE_STORE_KEY = "test_v5"
+local PROFILE_STORE_KEY = "test_v6"
 
 local STACK_CAP = 100
 local STAMINA_REGEN_RATE = 10
@@ -124,8 +125,19 @@ function public.onStart()
 			return
 		end
 
-		data.equipped.weapon = itemId
-		WeaponHandler.equip(player, itemId)
+		local equippedItem = nil
+		for _, item in data.inventory[category] do
+			if item.id == itemId then
+				equippedItem = item
+				break
+			end
+		end
+		if not equippedItem then
+			warn("Could not find item entry for: " .. itemId)
+			return
+		end
+		data.equipped.weapon = equippedItem
+		WeaponHandler.equip(player, equippedItem.id)
 		private.sync(player)
 	end)
 
@@ -336,7 +348,7 @@ function private.useStamina(player: Player, amount: number): boolean
 
 	stamina[player] = current - amount
 	staminaLastUsed[player] = tick()
-	private.sync(player)
+	syncStamina:FireClient(player, stamina[player], data.stamina)
 	return true
 end
 
@@ -413,7 +425,7 @@ function private.onPlayerAdded(player: Player)
 
 			if current < max and tick() - lastUsed >= STAMINA_REGEN_DELAY then
 				stamina[player] = math.min(current + STAMINA_REGEN_RATE, max)
-				private.sync(player)
+				syncStamina:FireClient(player, stamina[player], data.stamina)
 			end
 		end
 	end)
@@ -421,13 +433,17 @@ function private.onPlayerAdded(player: Player)
 	player.CharacterAdded:Connect(function()
 		local data = public.getData(player)
 		if data and data.equipped.weapon then
-			WeaponHandler.equip(player, data.equipped.weapon)
+			print(data.equipped.weapon.id)
+			print(data.equipped)
+			WeaponHandler.equip(player, data.equipped.weapon.id)
 		end
 	end)
 
 	local data = public.getData(player)
 	if data and data.equipped.weapon then
-		WeaponHandler.equip(player, data.equipped.weapon)
+		print(data.equipped.weapon.id)
+		print(data.equipped)
+		WeaponHandler.equip(player, data.equipped.weapon.id)
 	end
 
 	private.sync(player)

@@ -37,6 +37,8 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 				rolls = info.rolls,
 				stats = info.stats,
 				level = level,
+				category = "weapons",
+				rarity = rarity,
 			})
 		end
 	end
@@ -57,6 +59,8 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 				rolls = info.rolls,
 				stats = info.stats,
 				level = level,
+				category = "armors",
+				rarity = rarity,
 			})
 		end
 	end
@@ -67,14 +71,18 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 		local adjustedRange = private.applyLuck(ingredientConfig.rarityRange, luck)
 		local rarity = private.pickRarity(adjustedRange)
 
-		local info = private.pickItem("materials", nil, rarity)
+		local materialType = private.pickItemType(ingredientConfig.materialType)
+		local info = private.pickItem("materials", materialType, rarity)
 
 		if info and info.item then
 			local scaledMax =
 				math.max(ingredientConfig.quantity.min, math.floor(ingredientConfig.quantity.max * dropRate))
 			local quantity = math.random(ingredientConfig.quantity.min, scaledMax)
 
-			table.insert(droppedItems, { id = info.item.id, quantity = quantity })
+			table.insert(
+				droppedItems,
+				{ id = info.item.id, category = "materials", rarity = rarity, quantity = quantity }
+			)
 		end
 	end
 
@@ -182,21 +190,19 @@ end
 -- gets a random item from the sub category
 function private.pickItem(category: string, type: string?, rarity: string): {}?
 	local allItems = ItemRegistry.getCategory(category)
-
 	local candidates = {}
+
 	for _, item in allItems do
-		local matchesRarity = item.rarity == rarity
-
-		local matchesSubCategory
-		if not type then
-			matchesSubCategory = true
-		else
-			matchesSubCategory = item.type and item.type:lower() == type:lower()
+		if item.rarity ~= rarity then
+			continue
 		end
-
-		if matchesRarity and matchesSubCategory then
-			table.insert(candidates, item)
+		if type then
+			local itemType = (category == "armors") and item.class or item.subCategory
+			if not itemType or itemType:lower() ~= type:lower() then
+				continue
+			end
 		end
+		table.insert(candidates, item)
 	end
 
 	if #candidates == 0 and type then

@@ -100,20 +100,12 @@ function public.onStart(screenGui: ScreenGui)
 			if not data then
 				return
 			end
-			local itemId = data.equipped and data.equipped[slotName]
-			if not itemId then
+			local item = data.equipped and data.equipped[slotName]
+			if not item then
 				return
 			end
 
-			local info = ItemRegistry.get(itemId)
-			local category = data.inventory[info.category]
-
-			for _, item in category do
-				if item.id == itemId then
-					QuickInfo.show(item)
-					break
-				end
-			end
+			QuickInfo.show(item)
 		end)
 
 		slotImage.MouseLeave:Connect(function()
@@ -126,15 +118,15 @@ function public.onStart(screenGui: ScreenGui)
 			if not data then
 				return
 			end
-			local itemId = data.equipped and data.equipped[slotName]
-			if not itemId then
+			local item = data.equipped and data.equipped[slotName]
+			if not item then
 				return
 			end
 
 			UIManager.closeAll()
 			UIManager.open("inventory")
 			UIManager.fire("inventorySlide")
-			UIManager.fire("showFullInfo", itemId)
+			UIManager.fire("showFullInfo", item)
 		end)
 	end
 
@@ -241,9 +233,18 @@ function private.updateEquipmentSlots(data)
 			continue
 		end
 
-		local item = equipped[slotName]
-		if item then
-			slotFrame.BackgroundColor3 = ItemRegistry.rarity[item.rarity] or ItemRegistry.rarity.common
+		local itemId = equipped[slotName]
+		if itemId then
+			local rarity = "common"
+			for _, category in data.inventory do
+				for _, entry in category do
+					if entry.id == itemId then
+						rarity = entry.rarity or "common"
+						break
+					end
+				end
+			end
+			slotFrame.BackgroundColor3 = ItemRegistry.rarity[rarity]
 		else
 			slotFrame.BackgroundColor3 = equipmentSlotsColor
 		end

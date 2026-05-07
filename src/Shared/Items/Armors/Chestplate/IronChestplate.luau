@@ -4,6 +4,7 @@ return {
 	category = "armors",
 	subCategory = "chestplate",
 	class = "heavy",
+	rarity = "common",
 	setName = "ironSet",
 	level = 1,
 
