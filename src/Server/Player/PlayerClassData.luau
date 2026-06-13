@@ -1,0 +1,97 @@
+local public = {}
+
+public.baseStats = {
+	swordsman = {
+		luck = 0,
+		health = 100,
+		damage = 0,
+		critRate = 5,
+		critDamage = 1.2,
+		walkspeed = 16,
+		armor = 0,
+		attackSpeed = 0,
+		armorPenetration = 0,
+		cooldownReduction = 0,
+	},
+	archer = {
+		luck = 0,
+		health = 80,
+		damage = 0,
+		critRate = 5,
+		critDamage = 1.5,
+		walkspeed = 18,
+		armor = 0,
+		attackSpeed = 0,
+		armorPenetration = 0,
+		cooldownReduction = 0,
+	},
+	mage = {
+		luck = 0,
+		health = 100,
+		damage = 0,
+		critRate = 5,
+		critDamage = 1.3,
+		walkspeed = 16,
+		armor = 0,
+		attackSpeed = 0,
+		armorPenetration = 10,
+		cooldownReduction = 0,
+	},
+	paladin = {
+		luck = 0,
+		health = 140,
+		damage = 0,
+		critRate = 5,
+		critDamage = 1.2,
+		walkspeed = 12,
+		armor = 5,
+		attackSpeed = 0,
+		armorPenetration = 0,
+		cooldownReduction = 0,
+	},
+	berserker = {},
+	necromencer = {},
+	assassin = {},
+	grandPrist = {},
+	deadEye = {},
+	duelist = {},
+	dragonborn = {},
+	shadow = {},
+}
+
+public.filter = {
+	swordsman = {
+		armors = { "ironSet", "steelSet" },
+		weapons = { "sword" },
+	},
+	archer = {
+		armors = { "leatherSet" },
+		weapons = { "bow", "crossbow" },
+	},
+	mage = {
+		armors = { "blueStringSet" },
+		weapons = { "staff", "wand" },
+	},
+	paladin = {
+		armors = { "ironSet", "steelSet" },
+		weapons = { "greatSword" },
+	},
+}
+
+public.defaultDrops = {
+	armors = {
+		swordsman = "ironSet",
+		archer = "leatherSet",
+		mage = "blueStringSet",
+		paladin = "ironSet",
+	},
+	weapons = {
+		swordsman = "iron_sword",
+		archer = "long_bow",
+		mage = "",
+		paladin = "",
+	},
+	artifacts = {},
+}
+
+return public

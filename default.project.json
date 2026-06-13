@@ -35,6 +35,9 @@
           "syncStamina": {
             "$className": "RemoteEvent"
           },
+          "swtichClass": {
+            "$className": "RemoteEvent"
+          },
           "getEnemyData": {
             "$className": "RemoteFunction"
           }

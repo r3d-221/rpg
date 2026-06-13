@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local PlayerClassData = require(script.Parent.PlayerClassData)
 local WeaponHandler = require(ServerScriptService.Server.Modules.WeaponHandler)
 local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
@@ -29,37 +30,18 @@ local STAT_POINT_VALUES = {
 }
 
 local DEFAULT_PLAYER_DATA = {
-	assignableStatPoints = 3,
+	rankLevel = 1, -- rank = F =  1-5, E = 6-10, D = 11-15, ...
+	class = "swordsman",
+
+	-- Shared
 	stamina = 100,
 	staminaCost = 15,
 	staminaSpeedMultiplier = 1.25,
-	level = 1,
-
-	stats = {
-		luck = 0,
-		health = 100,
-		damage = 0,
-		critRate = 0,
-		critDamage = 1.2,
-		walkspeed = 16,
-		armor = 0,
-		attackSpeed = 0,
-		armorPenetration = 0,
-		cooldownReduction = 0,
-	},
-
-	statPoints = {
-		health = 0,
-		damage = 0,
-		armor = 0,
-		critRate = 0,
-		critDamage = 0,
-	},
 
 	currency = {
 		coins = 0,
 		gems = 0,
-		exp = 0,
+		rankExp = 0,
 	},
 
 	inventory = {
@@ -85,6 +67,72 @@ local DEFAULT_PLAYER_DATA = {
 		leggings = nil,
 		boots = nil,
 		artifects = {},
+	},
+
+	classes = {
+		swordsman = {
+			assignableStatPoints = 3,
+			classLevel = 1,
+			classExp = 0,
+
+			stats = {},
+
+			statPoints = {
+				health = 0,
+				damage = 0,
+				armor = 0,
+				critRate = 0,
+				critDamage = 0,
+			},
+		},
+
+		archer = {
+			assignableStatPoints = 3,
+			classLevel = 1,
+			classExp = 0,
+
+			stats = {},
+
+			statPoints = {
+				health = 0,
+				damage = 0,
+				armor = 0,
+				critRate = 0,
+				critDamage = 0,
+			},
+		},
+
+		mage = {
+			assignableStatPoints = 3,
+			classLevel = 1,
+			classExp = 0,
+
+			stats = {},
+
+			statPoints = {
+				health = 0,
+				damage = 0,
+				armor = 0,
+				critRate = 0,
+				critDamage = 0,
+			},
+		},
+
+		paladin = {
+			assignableStatPoints = 3,
+			classLevel = 1,
+			classExp = 0,
+
+			stats = {},
+
+			statPoints = {
+				health = 0,
+				damage = 0,
+				armor = 0,
+				critRate = 0,
+				critDamage = 0,
+			},
+		},
 	},
 }
 
@@ -186,7 +234,7 @@ function public.onStart()
 			return
 		end
 
-		if (data.assignableStatPoints or 0) <= 0 then
+		if (data.classes[data.class].assignableStatPoints or 0) <= 0 then
 			print("no points to spend")
 			return
 		end
@@ -230,7 +278,7 @@ function public.getProfile(player: Player)
 	return profiles[player]
 end
 
-function public.getData(player: Player)
+function public.getData(player: Player): {}
 	local profile = profiles[player]
 	return profile and profile.Data
 end
@@ -244,8 +292,12 @@ function public.addCurrency(player: Player, id: string, amount: number)
 
 	data.currency[id] = (data.currency[id] or 0) + amount
 
-	if id == "exp" then
-		private.checkLevelUp(data)
+	if id == "rankExp" then
+		private.checkLevelUp(data, "rank")
+	end
+
+	if id == "classExp" then
+		private.checkLevelUp(data, "class")
 	end
 
 	private.sync(player)
@@ -313,6 +365,22 @@ function public.addItem(player: Player, item)
 	private.sync(player)
 end
 
+function public.changeClass(player: Player, class: string)
+	local data = public.getData(player)
+	if not data then
+		warn("Couldn't add item to player data.")
+		return
+	end
+
+	for _, v in data.classes do
+		if v == class then
+			data.class = class
+			private.sync(player)
+			break
+		end
+	end
+end
+
 function public.addStorageSlots(player: Player, category: string, amount: number)
 	local data = public.getData(player)
 	if not data then
@@ -352,24 +420,43 @@ function private.useStamina(player: Player, amount: number): boolean
 	return true
 end
 
-function private.checkLevelUp(data)
-	local required = PlayerConfig.expToLevel(data.level)
+function private.checkLevelUp(data, type: string)
+	if type == "class" then
+		local required = PlayerConfig.expToClassLevel(data.classes[data.class].classLevel) -- exp required to level up
 
-	while data.currency.exp >= required do
-		data.currency.exp -= required
-		data.level += 1
-		data.assignableStatPoints += 1
-		required = PlayerConfig.expToLevel(data.level)
+		while data.classes[data.class].classExp >= required do
+			data.classes[data.class].classExp -= required
+			data.classes[data.class].classLevel += 1
+			data.classes[data.class].assignableStatPoints += 1
+			required = PlayerConfig.expToClassLevel(data.classes[data.class].classLevel)
+		end
+	end
+
+	if type == "rank" then
+		local required = PlayerConfig.expToClassLevel(data.rankLevel) -- exp required to level up
+
+		while data.currency.rankExp >= required do
+			data.currency.rankExp -= required
+			data.rankLevel += 1
+			required = PlayerConfig.expToClassLevel(data.rankLevel)
+		end
+
+		private.rankUp()
 	end
 end
 
-function private.applyStatPoints(data)
-	data.stats.health = DEFAULT_PLAYER_DATA.stats.health + (data.statPoints.health * STAT_POINT_VALUES.health)
-	data.stats.armor = DEFAULT_PLAYER_DATA.stats.armor + (data.statPoints.armor * STAT_POINT_VALUES.armor)
-	data.stats.damage = DEFAULT_PLAYER_DATA.stats.damage + (data.statPoints.damage * STAT_POINT_VALUES.damage)
-	data.stats.critRate = DEFAULT_PLAYER_DATA.stats.critRate + (data.statPoints.critRate * STAT_POINT_VALUES.critRate)
-	data.stats.critDamage = DEFAULT_PLAYER_DATA.stats.critDamage
-		+ (data.statPoints.critDamage * STAT_POINT_VALUES.critDamage)
+function private.rankUp() end
+
+function private.applyStatPoints(data) -- needs to be fixed
+	local classData = data.classes[data.class]
+	local baseStats = PlayerClassData.baseStats[data.class]
+	local points = classData.statPoints
+
+	classData.stats.health = baseStats.health + (points.health * STAT_POINT_VALUES.health)
+	classData.stats.armor = baseStats.armor + (points.armor * STAT_POINT_VALUES.armor)
+	classData.stats.damage = baseStats.damage + (points.damage * STAT_POINT_VALUES.damage)
+	classData.stats.critRate = baseStats.critRate + (points.critRate * STAT_POINT_VALUES.critRate)
+	classData.stats.critDamage = baseStats.critDamage + (points.critDamage * STAT_POINT_VALUES.critDamage)
 end
 
 function private.onPlayerAdded(player: Player)
@@ -394,11 +481,17 @@ function private.onPlayerAdded(player: Player)
 
 	local level = Instance.new("IntValue")
 	level.Name = "Level"
-	level.Value = profile.Data.level
+	level.Value = profile.Data.rankLevel
 	level.Parent = stats
+
+	local class = Instance.new("StringValue")
+	class.Name = "Class"
+	class.Value = profile.Data.class
+	class.Parent = stats
 
 	leaderstats[player] = {
 		level = level,
+		class = class,
 	}
 
 	player.AncestryChanged:Connect(function()
@@ -466,12 +559,15 @@ function private.sync(player: Player)
 	if not data then
 		return
 	end
+
+	-- needs to be changed
 	data.currentStamina = stamina[player]
 	syncPlayerData:FireClient(player, data)
 
 	local stats = leaderstats[player]
 	if stats then
-		stats.level.Value = data.level
+		stats.level.Value = data.rankLevel
+		stats.class.Value = data.class
 	end
 end
 
