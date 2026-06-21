@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local player = Players.LocalPlayer
 local PlayerScripts = player:FindFirstChild("PlayerScripts")
@@ -8,20 +9,17 @@ local PlayerScripts = player:FindFirstChild("PlayerScripts")
 local Shared = ReplicatedStorage:FindFirstChild("Shared")
 local Modules = Shared:FindFirstChild("Modules")
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
-local PlayerIconCache = require(Modules:FindFirstChild("PlayerIconCache"))
 local UserInput = require(Modules:FindFirstChild("UserInput"))
 
-local screenGui = player:FindFirstChild("PlayerGui"):WaitForChild("ScreenGui")
+local screens = player:FindFirstChild("PlayerGui"):WaitForChild("Screens")
 local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
 
 local EnemyUI = require(UIFolder["EnemyUI.Client"])
-local PlayerData = require(UIFolder["PlayerData.Client"])
-local Inventory = require(UIFolder["Inventory.Client"])
-local Profile = require(UIFolder["Profile.Client"])
-local FullInfo = require(UIFolder["FullInfo.Client"])
-local QuickInfo = require(UIFolder["QuickInfo.Client"])
-local HUD = require(UIFolder["HUD.Client"])
+local PlayerData = require(UIFolder.PlayerData)
+
+local Menu = require(UIFolder.Menu)
+local Inventory = require(UIFolder.Inventory)
 
 local animate = ReplicatedStorage:FindFirstChild("IgnoredFolder"):FindFirstChild("Animate")
 
@@ -49,15 +47,11 @@ for _, object in CollectionService:GetTagged(enemyTag) do
 	applyAnimate(object)
 end
 
+PlayerData.onStart()
+
 CollectionService:GetInstanceAddedSignal(enemyTag):Connect(applyAnimate)
 UserInput.onStart()
 
-PlayerIconCache.onStart()
+Menu.onStart(screens)
 ItemRegistry.onStart()
-PlayerData.onStart()
-EnemyUI.onStart()
-HUD.onStart()
-Inventory.onStart(screenGui)
-Profile.onStart(screenGui)
-FullInfo.onStart(screenGui)
-QuickInfo.onStart(screenGui)
+Inventory.onStart(screens)

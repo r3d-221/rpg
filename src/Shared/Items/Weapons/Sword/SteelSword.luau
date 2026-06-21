@@ -3,12 +3,12 @@ return {
 	name = "Steel Sword",
 	category = "weapons",
 	subCategory = "sword",
-	rarity = "uncommon",
+	rarity = "rare",
 	level = 1,
 
 	baseDamage = 12,
 	baseAttackSpeed = 1.0,
-	baseArmorPenetration = 5,
+	baseArmorPierce = 5,
 	baseCritRate = 0.02,
 	baseCritDamage = 1.1,
 

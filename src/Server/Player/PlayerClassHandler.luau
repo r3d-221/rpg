@@ -3,13 +3,13 @@ local PlayerClassData = require(script.Parent.PlayerClassData)
 local PlayerDataHandler = require(script.Parent.PlayerDataHandler)
 
 local Remotes = ReplicatedStorage.Shared.Remotes
-local swtichClass = Remotes.swtichClass
+local switchClass = Remotes.switchClass
 
 local public = {}
 local private = {}
 
 function public.onStart()
-	swtichClass.OnServerEvent.Connect(function(player, class)
+	switchClass.OnServerEvent:Connect(function(player, class)
 		if private.verifyClassChange() then
 			PlayerDataHandler.changeClass(player, class)
 		end

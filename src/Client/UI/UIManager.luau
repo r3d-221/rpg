@@ -5,17 +5,14 @@ local public = {}
 local callbacks = {}
 
 local player = Players.LocalPlayer
-local screenGui = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+local Screens = player:WaitForChild("PlayerGui"):WaitForChild("Screens")
 
 local screens = {
-	inventory = screenGui:WaitForChild("inventory"),
-	fullInfo = screenGui:WaitForChild("fullInfo"),
-	quickInfo = screenGui:WaitForChild("quickInfo"),
-	profile = screenGui:WaitForChild("profile"),
+	inventory = Screens:WaitForChild("inventory"),
 }
 
 function private.getScreen(name: string)
-	return screenGui:FindFirstChild(name)
+	return Screens:FindFirstChild(name)
 end
 
 function public.onEvent(name: string, fn: (...any) -> ())

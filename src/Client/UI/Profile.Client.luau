@@ -96,11 +96,11 @@ function public.onStart(screenGui: ScreenGui)
 		end
 
 		slotImage.MouseEnter:Connect(function()
-			local data = PlayerData.getPlayerData()
-			if not data then
+			local playerData = PlayerData.getPlayerData()
+			if not playerData then
 				return
 			end
-			local item = data.equipped and data.equipped[slotName]
+			local item = playerData.equipped and playerData.equipped[slotName]
 			if not item then
 				return
 			end
@@ -114,11 +114,11 @@ function public.onStart(screenGui: ScreenGui)
 
 		slotImage.MouseButton1Click:Connect(function()
 			QuickInfo.hide()
-			local data = PlayerData.getPlayerData()
-			if not data then
+			local playerData = PlayerData.getPlayerData()
+			if not playerData then
 				return
 			end
-			local item = data.equipped and data.equipped[slotName]
+			local item = playerData.equipped and playerData.equipped[slotName]
 			if not item then
 				return
 			end
@@ -179,7 +179,7 @@ function private.updateHeader(data)
 	levelText.Text = "lvl: " .. tostring(data.level)
 	playerNameText.Text = player.DisplayName
 
-	local required = PlayerConfig.expToLevel(data.level)
+	local required = PlayerConfig.expToClassLevel(data.level)
 	local ratio = math.clamp((data.currency.exp or 0) / required, 0, 1)
 	currentExpBar.Size = UDim2.fromScale(ratio, 1)
 	expText.Text = math.floor(data.currency.exp or 0) .. " / " .. required
@@ -252,9 +252,9 @@ function private.updateEquipmentSlots(data)
 end
 
 function private.updateAll(data)
-	private.updateHeader(data)
-	private.updateStats(data)
-	private.updateStatPoints(data)
+	-- private.updateHeader(data)
+	-- private.updateStats(data)
+	-- private.updateStatPoints(data)
 	private.updateEquipmentSlots(data)
 end
 

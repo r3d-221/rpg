@@ -77,7 +77,7 @@ end
 -- calculates the damage after the damage reduction
 function private.calculateDamage(stats, playerArmor, damageMultiplier, modifiers)
 	local rawDamage = private.calculateCrit(stats, damageMultiplier, modifiers)
-	local effectiveArmor = math.max(0, playerArmor - stats.armorPenetration)
+	local effectiveArmor = math.max(0, playerArmor - stats.armorPierce)
 	local damageReduction = math.min(effectiveArmor / (effectiveArmor + 100), 0.75)
 	return math.floor(rawDamage * (1 - damageReduction))
 end
@@ -274,7 +274,7 @@ function private.fireRaycast(handler, player, ability)
 	end
 
 	local playerData = PlayerDataHandler.getData(player)
-	local playerArmor = playerData and playerData.stats.armor or 0
+	local playerArmor = playerData and playerData.classes[playerData.class].stats.armor or 0
 	local damage = private.calculateDamage(stats, playerArmor, ability.damageMultiplier, ability.modifiers or {})
 	-- print(enemy.Name .. " did " .. damage .. " damage")
 	humanoid:TakeDamage(damage)
@@ -347,7 +347,7 @@ function private.performAttack(enemy, handler, player, ability)
 	end
 
 	local playerData = PlayerDataHandler.getData(player)
-	local playerArmor = playerData and playerData.stats.armor or 0
+	local playerArmor = playerData and playerData.classes[playerData.class].stats.armor or 0
 	for humanoid in hits do
 		local damage = private.calculateDamage(stats, playerArmor, ability.damageMultiplier, modifiers)
 		-- print(enemy.Name .. " did " .. damage .. " damage")

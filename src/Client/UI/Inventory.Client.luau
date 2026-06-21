@@ -108,9 +108,9 @@ end
 
 function private.switchTab(name: string)
 	currentTab = name
-	local data = PlayerData.getPlayerData()
-	if data then
-		private.addSlots(data.inventory)
+	local playerData = PlayerData.getPlayerData()
+	if playerData then
+		private.addSlots(playerData.inventory)
 	end
 end
 

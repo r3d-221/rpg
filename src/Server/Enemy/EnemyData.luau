@@ -12,7 +12,7 @@ export type Multipliers = {
 	aggroRangeMultiplier: number,
 	attackRangeMultiplier: number,
 	dropMultiplier: number,
-	armorPenetrationMultiplier: number,
+	armorPierceMultiplier: number,
 	damageMultiplier: number,
 	minimumLevelRange: number,
 }
@@ -30,7 +30,7 @@ export type BaseStats = {
 	critRate: number,
 	critDamage: number,
 	reactionTime: number,
-	armorPenetration: number,
+	armorPierce: number,
 	dropRate: number,
 	level: number,
 	levelRange: {},
@@ -50,7 +50,7 @@ public.type = {
 		aggroLoseRangeMultiplier = 1,
 		aggroRangeMultiplier = 1,
 		dropMultiplier = 1,
-		armorPenetrationMultiplier = 1,
+		armorPierceMultiplier = 1,
 		damageMultiplier = 1,
 		minimumLevelRange = 1,
 	},
@@ -66,7 +66,7 @@ public.type = {
 		aggroLoseRangeMultiplier = 2,
 		aggroRangeMultiplier = 2,
 		dropMultiplier = 1,
-		armorPenetrationMultiplier = 1.2,
+		armorPierceMultiplier = 1.2,
 		damageMultiplier = 0.9,
 		minimumLevelRange = 1,
 	},
@@ -82,7 +82,7 @@ public.type = {
 		aggroLoseRangeMultiplier = 1.2,
 		aggroRangeMultiplier = 1.2,
 		dropMultiplier = 1,
-		armorPenetrationMultiplier = 1.1,
+		armorPierceMultiplier = 1.1,
 		damageMultiplier = 0.95,
 		minimumLevelRange = 1,
 	},
@@ -98,7 +98,7 @@ public.type = {
 		aggroLoseRangeMultiplier = 1.1,
 		aggroRangeMultiplier = 1.5,
 		dropMultiplier = 1,
-		armorPenetrationMultiplier = 1.5,
+		armorPierceMultiplier = 1.5,
 		damageMultiplier = 1.2,
 		minimumLevelRange = 1,
 	},
@@ -118,7 +118,7 @@ public.subtype = {
 		aggroLoseRangeMultiplier = 1,
 		aggroRangeMultiplier = 1,
 		dropMultiplier = 1.1,
-		armorPenetrationMultiplier = 1,
+		armorPierceMultiplier = 1,
 		damageMultiplier = 1.1,
 		minimumLevelRange = 5,
 	},
@@ -134,7 +134,7 @@ public.subtype = {
 		aggroLoseRangeMultiplier = 1.05,
 		aggroRangeMultiplier = 1.05,
 		dropMultiplier = 1.2,
-		armorPenetrationMultiplier = 1.2,
+		armorPierceMultiplier = 1.2,
 		damageMultiplier = 1.2,
 		minimumLevelRange = 8,
 	},
@@ -150,7 +150,7 @@ public.subtype = {
 		aggroLoseRangeMultiplier = 1.1,
 		aggroRangeMultiplier = 1.1,
 		dropMultiplier = 1.5,
-		armorPenetrationMultiplier = 1.3,
+		armorPierceMultiplier = 1.3,
 		damageMultiplier = 1.4,
 		minimumLevelRange = 12,
 	},
@@ -171,7 +171,7 @@ public.enemyDifficultyLevel = {
 		armor = 10,
 		reactionTime = 0.1,
 		attackRange = 8,
-		armorPenetration = 10,
+		armorPierce = 10,
 		dropRate = 1,
 		doubleSubtypeChance = 0,
 		level = 1,
@@ -250,7 +250,7 @@ function public.getStats(difficultyLevel: string, type: string, subtypes: { stri
 		critRate = base.critRate * typeMultiplier.critRateMultiplier,
 		critDamage = base.critDamage * typeMultiplier.critDamageMultiplier,
 		reactionTime = base.reactionTime * typeMultiplier.reactionTimeMultiplier,
-		armorPenetration = base.armorPenetration * typeMultiplier.armorPenetrationMultiplier,
+		armorPierce = base.armorPierce * typeMultiplier.armorPierceMultiplier,
 		dropRate = base.dropRate * typeMultiplier.dropMultiplier,
 	}
 
@@ -275,7 +275,7 @@ function public.getStats(difficultyLevel: string, type: string, subtypes: { stri
 		enemyStats.critRate = enemyStats.critRate * subtypeMultiplier.critRateMultiplier
 		enemyStats.critDamage = enemyStats.critDamage * subtypeMultiplier.critDamageMultiplier
 		enemyStats.reactionTime = enemyStats.reactionTime * subtypeMultiplier.reactionTimeMultiplier
-		enemyStats.armorPenetration = enemyStats.armorPenetration * subtypeMultiplier.armorPenetrationMultiplier
+		enemyStats.armorPierce = enemyStats.armorPierce * subtypeMultiplier.armorPierceMultiplier
 		enemyStats.dropRate = enemyStats.dropRate * subtypeMultiplier.dropMultiplier
 	end
 
@@ -283,7 +283,7 @@ function public.getStats(difficultyLevel: string, type: string, subtypes: { stri
 	enemyStats.health = enemyStats.health * levelScale
 	enemyStats.damage = enemyStats.damage * levelScale
 	enemyStats.armor = enemyStats.armor * levelScale
-	enemyStats.armorPenetration = enemyStats.armorPenetration * levelScale
+	enemyStats.armorPierce = enemyStats.armorPierce * levelScale
 	enemyStats.dropRate = enemyStats.dropRate * (1 + (level - 1) * 0.02) -- 2% per level
 
 	enemyStats.level = level

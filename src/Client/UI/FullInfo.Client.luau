@@ -131,7 +131,8 @@ function public.show(item)
 	typeText.Text = "Type: " .. (defaultItemData.class or defaultItemData.subCategory or "?")
 	itemName.BackgroundColor3 = ItemRegistry.rarity[defaultItemData.rarity] or ItemRegistry.rarity.common
 
-	local data = PlayerData.getPlayerData()
+	local playerData = PlayerData.getPlayerData()
+	local data = playerData.classes[playerData.class]
 	local isEquipped = false
 	if data and data.equipped then
 		for _, equippedEntry in data.equipped do

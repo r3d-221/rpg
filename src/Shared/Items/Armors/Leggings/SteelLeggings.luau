@@ -4,7 +4,7 @@ return {
 	category = "armors",
 	subCategory = "leggings",
 	class = "heavy",
-	rarity = "uncommon",
+	rarity = "rare",
 	setName = "steelSet",
 	level = 1,
 

@@ -10,7 +10,7 @@ public.baseStats = {
 		walkspeed = 16,
 		armor = 0,
 		attackSpeed = 0,
-		armorPenetration = 0,
+		armorPierce = 0,
 		cooldownReduction = 0,
 	},
 	archer = {
@@ -22,7 +22,7 @@ public.baseStats = {
 		walkspeed = 18,
 		armor = 0,
 		attackSpeed = 0,
-		armorPenetration = 0,
+		armorPierce = 0,
 		cooldownReduction = 0,
 	},
 	mage = {
@@ -34,7 +34,7 @@ public.baseStats = {
 		walkspeed = 16,
 		armor = 0,
 		attackSpeed = 0,
-		armorPenetration = 10,
+		armorPierce = 10,
 		cooldownReduction = 0,
 	},
 	paladin = {
@@ -46,7 +46,7 @@ public.baseStats = {
 		walkspeed = 12,
 		armor = 5,
 		attackSpeed = 0,
-		armorPenetration = 0,
+		armorPierce = 0,
 		cooldownReduction = 0,
 	},
 	berserker = {},
@@ -57,6 +57,7 @@ public.baseStats = {
 	duelist = {},
 	dragonborn = {},
 	shadow = {},
+	samurai = {},
 }
 
 public.filter = {
@@ -91,7 +92,7 @@ public.defaultDrops = {
 		mage = "",
 		paladin = "",
 	},
-	artifacts = {},
+	artifects = {},
 }
 
 return public

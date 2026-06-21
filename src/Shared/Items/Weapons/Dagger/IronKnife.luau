@@ -8,7 +8,7 @@ return {
 
 	baseDamage = 10,
 	baseAttackSpeed = 1.1,
-	baseArmorPenetration = 3,
+	baseArmorPierce = 3,
 	baseCritRate = 0.02,
 	baseCritDamage = 1.1,
 

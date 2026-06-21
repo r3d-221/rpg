@@ -1,7 +1,7 @@
 return {
 	id = "iron_shard",
 	name = "Iron Shard",
-	rarity = "uncommon",
+	rarity = "rare",
 	category = "materials",
 	subCategory = "ore",
 	description = "Small pieces of iron which is usefull for making various armors and weapons.",

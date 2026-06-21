@@ -15,7 +15,7 @@ local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
 local syncStamina = Remotes.syncStamina
 
-local PROFILE_STORE_KEY = "test_v6"
+local PROFILE_STORE_KEY = "test_v7"
 
 local STACK_CAP = 100
 local STAMINA_REGEN_RATE = 10
@@ -55,7 +55,7 @@ local DEFAULT_PLAYER_DATA = {
 	storageSlots = {
 		weapons = 20,
 		armors = 20,
-		artifects = 20,
+		artifacts = 20,
 		misc = 20,
 		materials = 20,
 	},
@@ -66,7 +66,7 @@ local DEFAULT_PLAYER_DATA = {
 		chestplate = nil,
 		leggings = nil,
 		boots = nil,
-		artifects = {},
+		artifacts = {},
 	},
 
 	classes = {
@@ -184,6 +184,8 @@ function public.onStart()
 			warn("Could not find item entry for: " .. itemId)
 			return
 		end
+
+		-- only handles the weapons
 		data.equipped.weapon = equippedItem
 		WeaponHandler.equip(player, equippedItem.id)
 		private.sync(player)
@@ -234,17 +236,19 @@ function public.onStart()
 			return
 		end
 
-		if (data.classes[data.class].assignableStatPoints or 0) <= 0 then
+		local classData = data.classes[data.class]
+
+		if (classData.assignableStatPoints or 0) <= 0 then
 			print("no points to spend")
 			return
 		end
-		if data.statPoints[stat] == nil then
+		if classData.statPoints[stat] == nil then
 			print("invalid stat:", stat)
 			return
 		end
 
-		data.assignableStatPoints -= 1
-		data.statPoints[stat] += 1
+		classData.assignableStatPoints -= 1
+		classData.statPoints[stat] += 1
 		private.applyStatPoints(data)
 		private.sync(player)
 	end)
@@ -254,6 +258,7 @@ function public.onStart()
 		if not data then
 			return
 		end
+		local classData = data.classes[data.class]
 
 		local cost = 2
 		if (data.currency.gems or 0) < cost then
@@ -266,9 +271,9 @@ function public.onStart()
 		local total = 0
 		for stat, points in data.statPoints do
 			total += points
-			data.statPoints[stat] = 0
+			classData.statPoints[stat] = 0
 		end
-		data.assignableStatPoints = (data.assignableStatPoints or 0) + total
+		classData.assignableStatPoints = (data.assignableStatPoints or 0) + total
 		private.applyStatPoints(data)
 		private.sync(player)
 	end)
@@ -283,25 +288,24 @@ function public.getData(player: Player): {}
 	return profile and profile.Data
 end
 
-function public.addCurrency(player: Player, id: string, amount: number)
+function public.addCurrency(player, id, amount)
 	local data = public.getData(player)
 	if not data then
-		warn("Couldn't add currency to player data.")
 		return
 	end
 
-	data.currency[id] = (data.currency[id] or 0) + amount
-
-	if id == "rankExp" then
-		private.checkLevelUp(data, "rank")
-	end
-
 	if id == "classExp" then
+		local classData = data.classes[data.class]
+		classData.classExp += amount
 		private.checkLevelUp(data, "class")
+	elseif id == "rankExp" then
+		data.currency.rankExp += amount
+		private.checkLevelUp(data, "rank")
+	else
+		data.currency[id] = (data.currency[id] or 0) + amount
 	end
 
 	private.sync(player)
-	-- print(data)
 end
 
 function public.addItem(player: Player, item)
@@ -372,12 +376,9 @@ function public.changeClass(player: Player, class: string)
 		return
 	end
 
-	for _, v in data.classes do
-		if v == class then
-			data.class = class
-			private.sync(player)
-			break
-		end
+	if data.classes[class] then
+		data.class = class
+		private.sync(player)
 	end
 end
 
@@ -452,11 +453,15 @@ function private.applyStatPoints(data) -- needs to be fixed
 	local baseStats = PlayerClassData.baseStats[data.class]
 	local points = classData.statPoints
 
-	classData.stats.health = baseStats.health + (points.health * STAT_POINT_VALUES.health)
-	classData.stats.armor = baseStats.armor + (points.armor * STAT_POINT_VALUES.armor)
-	classData.stats.damage = baseStats.damage + (points.damage * STAT_POINT_VALUES.damage)
-	classData.stats.critRate = baseStats.critRate + (points.critRate * STAT_POINT_VALUES.critRate)
-	classData.stats.critDamage = baseStats.critDamage + (points.critDamage * STAT_POINT_VALUES.critDamage)
+	for stat, value in baseStats do
+		classData.stats[stat] = value
+	end
+
+	classData.stats.health += points.health * STAT_POINT_VALUES.health
+	classData.stats.armor += points.armor * STAT_POINT_VALUES.armor
+	classData.stats.damage += points.damage * STAT_POINT_VALUES.damage
+	classData.stats.critRate += points.critRate * STAT_POINT_VALUES.critRate
+	classData.stats.critDamage += points.critDamage * STAT_POINT_VALUES.critDamage
 end
 
 function private.onPlayerAdded(player: Player)
@@ -474,6 +479,8 @@ function private.onPlayerAdded(player: Player)
 	profile:AddUserId(player.UserId)
 	profiles[player] = profile
 	profile:Reconcile()
+
+	private.applyStatPoints(profile.Data)
 
 	local stats = Instance.new("Folder")
 	stats.Name = "leaderstats"

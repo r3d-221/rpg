@@ -9,7 +9,6 @@ local byCategory = { weapons = {}, armors = {}, materials = {} }
 
 public.rarity = {
 	common = Color3.fromHex("#c4cfc8"),
-	uncommon = Color3.fromHex("#86a7ac"),
 	rare = Color3.fromHex("#4b7cb7"),
 	epic = Color3.fromHex("#7255a1"),
 	legendary = Color3.fromHex("#ffb155"),

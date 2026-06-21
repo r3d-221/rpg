@@ -2,7 +2,6 @@ local public = {}
 
 public.rarityTiers = {
 	"common",
-	"uncommon",
 	"rare",
 	"epic",
 	"legendary",
@@ -28,11 +27,10 @@ public.statRankWeights = {
 }
 
 public.rarityWeights = {
-	common = 0.50,
-	uncommon = 0.25,
-	rare = 0.13,
-	epic = 0.07,
-	legendary = 0.03,
+	common = 0.63,
+	rare = 0.2,
+	epic = 0.12,
+	legendary = 0.02,
 	mythic = 0.015,
 	secret = 0.005,
 }
@@ -42,9 +40,9 @@ public.items = {
 		canDropMultiple = false, -- makes it so that enemies will have a chance to drop 2 or more pieces of armor, weapon or artifect; influenced by luck
 		melee = {
 			weapons = {
-				chance = 0.02,
+				chance = 1,
 				levelRange = { min = 1, max = 5 },
-				rarityRange = { min = "common", max = "uncommon" },
+				rarityRange = { min = "common", max = "rare" },
 				weaponType = { sword = 0.3, dagger = 0.7 },
 			},
 			armors = {
@@ -65,7 +63,7 @@ public.items = {
 			weapons = {
 				chance = 0.02,
 				levelRange = { min = 1, max = 5 },
-				rarityRange = { min = "common", max = "uncommon" },
+				rarityRange = { min = "common", max = "rare" },
 				weaponType = { bow = 1 },
 			},
 			armors = {
@@ -90,6 +88,7 @@ public.currency = {
 		{ id = "coins", chance = 1.0, min = 5, max = 15 },
 		{ id = "gems", chance = 0.1, min = 1, max = 3 },
 		{ id = "classExp", chance = 1.0, min = 10, max = 20 },
+		{ id = "rankExp", chance = 0.1, min = 3, max = 5 },
 	},
 }
 

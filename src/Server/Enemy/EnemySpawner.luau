@@ -120,7 +120,7 @@ function private.setAttributes(clone, enemyLevel, enemyStats, enemyType, enemySu
 	clone:SetAttribute("BasicAttackCooldown", enemyStats.basicAttackCooldown)
 	clone:SetAttribute("Walkspeed", enemyStats.walkspeed)
 	clone:SetAttribute("ReactionTime", enemyStats.reactionTime)
-	clone:SetAttribute("ArmorPenetration", enemyStats.armorPenetration)
+	clone:SetAttribute("ArmorPierce", enemyStats.armorPierce)
 	clone:SetAttribute("DropRate", enemyStats.dropRate)
 end
 
@@ -184,7 +184,7 @@ function private.spawnEnemy(spawner: BasePart)
 
 			if lastAttacker then
 				local data = PlayerDataHandler.getData(lastAttacker)
-				luck = data and data.stats.luck or 0
+				luck = data and data.classes[data.class].stats.luck or 0
 			end
 
 			local drops = EnemyDropsHandler.rollDrops(difficultyLevel, enemyType, enemyStats.dropRate, luck)

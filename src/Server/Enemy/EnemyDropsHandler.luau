@@ -248,7 +248,7 @@ function private.rollStats(item, category)
 			critRate = (item.baseCritRate or 0) * EnemyDropsData.statRank[rolls[2]],
 			critDamage = (item.baseCritDamage or 0) * EnemyDropsData.statRank[rolls[3]],
 			attackSpeed = (item.baseAttackSpeed or 0) * EnemyDropsData.statRank[rolls[4]],
-			armorPenetration = (item.baseArmorPenetration or 0) * EnemyDropsData.statRank[rolls[5]],
+			armorPierce = (item.baseArmorPierce or 0) * EnemyDropsData.statRank[rolls[5]],
 		}
 		return { rolls = rolls, stats = stats }
 	end

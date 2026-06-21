@@ -6,7 +6,7 @@ local Modules = ReplicatedStorage.Shared.Modules
 local Remotes = ReplicatedStorage.Shared.Remotes
 
 local HitboxManager = require(Modules.HitboxManager)
-local PlayerData = require(Players.LocalPlayer.PlayerScripts.Client.UI["PlayerData.Client"])
+local PlayerData = require(Players.LocalPlayer.PlayerScripts.Client.UI.PlayerData)
 
 local useSprint = Remotes.useSprint
 
@@ -23,7 +23,7 @@ local public = {}
 
 function public.onStart()
 	ContextActionService:BindAction("primary", private.primary, true, Enum.UserInputType.MouseButton1)
-	ContextActionService:BindAction("sprint", private.sprint, true, Enum.KeyCode.LeftShift)
+	-- ContextActionService:BindAction("sprint", private.sprint, true, Enum.KeyCode.LeftShift)
 
 	useSprint.OnClientEvent:Connect(function(sprintAllowed)
 		if not sprintAllowed then
