@@ -10,7 +10,7 @@ return {
 	baseAttackSpeed = 1.1,
 	baseArmorPierce = 3,
 	baseCritRate = 0.02,
-	baseCritDamage = 1.1,
+	baseCritDamage = 0.1,
 
 	description = "A basic iron knife.",
 	passives = {},

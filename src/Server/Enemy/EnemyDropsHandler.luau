@@ -219,7 +219,7 @@ function private.pickItem(category: string, type: string?, rarity: string): {}?
 	end
 
 	local item = candidates[math.random(1, #candidates)]
-	local info = private.rollStats(item, category)
+	local info = public.rollStats(item, category)
 	if not info then
 		return nil
 	end
@@ -227,7 +227,7 @@ function private.pickItem(category: string, type: string?, rarity: string): {}?
 	return { item = item, rolls = info.rolls, stats = info.stats }
 end
 
-function private.rollStats(item, category)
+function public.rollStats(item, category)
 	local stats = {}
 	local rolls = {}
 

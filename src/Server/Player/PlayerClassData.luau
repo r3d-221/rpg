@@ -1,7 +1,7 @@
 local public = {}
 
 public.baseStats = {
-	swordsman = {
+	warrior = {
 		luck = 0,
 		health = 100,
 		damage = 0,
@@ -61,7 +61,7 @@ public.baseStats = {
 }
 
 public.filter = {
-	swordsman = {
+	warrior = {
 		armors = { "ironSet", "steelSet" },
 		weapons = { "sword" },
 	},
@@ -81,13 +81,13 @@ public.filter = {
 
 public.defaultDrops = {
 	armors = {
-		swordsman = "ironSet",
+		warrior = "ironSet",
 		archer = "leatherSet",
 		mage = "blueStringSet",
 		paladin = "ironSet",
 	},
 	weapons = {
-		swordsman = "iron_sword",
+		warrior = "iron_sword",
 		archer = "long_bow",
 		mage = "",
 		paladin = "",

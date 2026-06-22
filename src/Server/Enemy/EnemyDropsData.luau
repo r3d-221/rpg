@@ -40,7 +40,7 @@ public.items = {
 		canDropMultiple = false, -- makes it so that enemies will have a chance to drop 2 or more pieces of armor, weapon or artifect; influenced by luck
 		melee = {
 			weapons = {
-				chance = 1,
+				chance = 0.2,
 				levelRange = { min = 1, max = 5 },
 				rarityRange = { min = "common", max = "rare" },
 				weaponType = { sword = 0.3, dagger = 0.7 },

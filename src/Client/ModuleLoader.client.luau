@@ -8,6 +8,7 @@ local PlayerScripts = player:FindFirstChild("PlayerScripts")
 
 local Shared = ReplicatedStorage:FindFirstChild("Shared")
 local Modules = Shared:FindFirstChild("Modules")
+local Profile = require(StarterPlayer.StarterPlayerScripts.Client.UI.Profile)
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local UserInput = require(Modules:FindFirstChild("UserInput"))
 
@@ -15,7 +16,7 @@ local screens = player:FindFirstChild("PlayerGui"):WaitForChild("Screens")
 local ClientFolder = PlayerScripts:WaitForChild("Client")
 local UIFolder = ClientFolder.UI
 
-local EnemyUI = require(UIFolder["EnemyUI.Client"])
+local EnemyUI = require(UIFolder.EnemyUI)
 local PlayerData = require(UIFolder.PlayerData)
 
 local Menu = require(UIFolder.Menu)
@@ -54,4 +55,5 @@ UserInput.onStart()
 
 Menu.onStart(screens)
 ItemRegistry.onStart()
+Profile.onStart(screens)
 Inventory.onStart(screens)

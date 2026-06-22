@@ -8,7 +8,8 @@ local player = Players.LocalPlayer
 local Screens = player:WaitForChild("PlayerGui"):WaitForChild("Screens")
 
 local screens = {
-	inventory = Screens:WaitForChild("inventory"),
+	Inventory = Screens:WaitForChild("Inventory"),
+	Profile = Screens:WaitForChild("Profile"),
 }
 
 function private.getScreen(name: string)

@@ -11,9 +11,9 @@ local PlayerDataHandler = require(PlayerFolder.PlayerDataHandler)
 local EnemySpawner = require(EnemyFolder.EnemySpawner)
 local PlayerCombat = require(PlayerFolder.PlayerCombat)
 
+ItemRegistry.onStart()
 PlayerDataHandler.onStart()
 PlayerClassHandler.onStart()
-ItemRegistry.onStart()
 EnemySpawner.onStart()
 PlayerCombat.onStart()
 

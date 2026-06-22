@@ -1,8 +1,11 @@
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
+local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local Inventory = require(script.Parent.Inventory)
 local PlayerData = require(script.Parent.PlayerData)
+local Profile = require(script.Parent.Profile)
 local UIManager = require(script.Parent.UIManager)
 
 local menu
@@ -37,7 +40,7 @@ function public.onStart(screenGui: ScreenGui)
 	storeButton = buttons:FindFirstChild("inventory"):FindFirstChild("button")
 	playerInfo = slider:FindFirstChild("player_info")
 	rankExpBar = playerInfo:FindFirstChild("rank_exp_bar")
-	rankExpProgressBar = playerInfo:FindFirstChild("rank_exp_progress_bar")
+	rankExpProgressBar = rankExpBar:FindFirstChild("rank_exp_progress_bar")
 	profileBackGround = playerInfo:FindFirstChild("profile_background")
 	playerName = playerInfo:FindFirstChild("player_name")
 	level = playerInfo:FindFirstChild("level")
@@ -61,29 +64,41 @@ function private.buttonConnections()
 	end)
 
 	inventoryButton.MouseButton1Click:Connect(function()
-		local isOpen = UIManager.toggle("inventory")
+		local isOpen = UIManager.toggle("Inventory")
 		if isOpen then
 			UIManager.closeAll()
-			UIManager.openExclusive("inventory")
+			UIManager.openExclusive("Inventory")
 			PlayerData.onChange(Inventory.updateSlots)
 			local data = PlayerData.getPlayerData()
 			if data then
 				Inventory.updateSlots(data)
 			end
 		else
-			UIManager.fire("inventoryClosed")
 			Inventory.clearSlots()
 		end
 	end)
 
-	profileButton.MouseButton1Click:Connect(function() end)
+	profileButton.MouseButton1Click:Connect(function()
+		local isOpen = UIManager.toggle("Profile")
+		if isOpen then
+			UIManager.closeAll()
+			UIManager.openExclusive("Profile")
+			PlayerData.onChange(Profile.updateAll)
+			local data = PlayerData.getPlayerData()
+			if data then
+				Profile.updateAll(data)
+			end
+		end
+	end)
 	questButton.MouseButton1Click:Connect(function() end)
 	storeButton.MouseButton1Click:Connect(function() end)
 end
 
 function private.updatePlayerInfo(data)
-	-- update rank level
-	-- update profile image
+	local max = PlayerConfig.expToRankLevel(data.rankLevel)
+	local ratio = math.clamp((data.currency.rankExp or 0) / max, 0, 1)
+	rankExpProgressBar.Size = UDim2.fromScale(ratio, 1)
+	level.Text = "Lvl: " .. data.rankLevel
 end
 
 function private.sliderToggle()

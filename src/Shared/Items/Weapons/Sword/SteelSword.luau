@@ -10,7 +10,7 @@ return {
 	baseAttackSpeed = 1.0,
 	baseArmorPierce = 5,
 	baseCritRate = 0.02,
-	baseCritDamage = 1.1,
+	baseCritDamage = 0.1,
 
 	description = "A basic steel sword.",
 	passives = {},

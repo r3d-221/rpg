@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local EnemyDropsHandler = require(ServerScriptService.Server.Enemy.EnemyDropsHandler)
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local PlayerClassData = require(script.Parent.PlayerClassData)
 local WeaponHandler = require(ServerScriptService.Server.Modules.WeaponHandler)
 local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
@@ -15,7 +17,7 @@ local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
 local syncStamina = Remotes.syncStamina
 
-local PROFILE_STORE_KEY = "test_v7"
+local PROFILE_STORE_KEY = "test_v8"
 
 local STACK_CAP = 100
 local STAMINA_REGEN_RATE = 10
@@ -31,7 +33,7 @@ local STAT_POINT_VALUES = {
 
 local DEFAULT_PLAYER_DATA = {
 	rankLevel = 1, -- rank = F =  1-5, E = 6-10, D = 11-15, ...
-	class = "swordsman",
+	class = "warrior",
 
 	-- Shared
 	stamina = 100,
@@ -70,7 +72,7 @@ local DEFAULT_PLAYER_DATA = {
 	},
 
 	classes = {
-		swordsman = {
+		warrior = {
 			assignableStatPoints = 3,
 			classLevel = 1,
 			classExp = 0,
@@ -319,6 +321,13 @@ function public.addItem(player: Player, item)
 	if not data.inventory[category] then
 		warn("Item category not found in player data")
 		return
+	end
+
+	if (category == "weapons" or item.category == "armors") and not item.stats then
+		local registryItem = ItemRegistry.get(item.id)
+		local info = EnemyDropsHandler.rollStats(registryItem, item.category)
+		item.stats = info.stats
+		item.rolls = info.rolls
 	end
 
 	local slots = data.inventory[category]

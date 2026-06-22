@@ -7,9 +7,36 @@ local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local statTemplate = UITemplates.stat_template
 local slotTemplate = UITemplates.slot_template
 
-local connections = {}
 local private = {}
 local public = {}
+
+local STAT_ORDER = {
+	weapons = { "damage", "critRate", "critDamage", "attackSpeed", "armorPierce" },
+	armors = { "health", "armor", "luck", "walkspeed" },
+}
+
+local RANK_RARITY = {
+	D = "common",
+	C = "rare",
+	B = "epic",
+	A = "legendary",
+	S = "mythic",
+}
+
+local STAT_DISPLAY_NAMES = {
+	damage = "Damage",
+	critRate = "Crit Rate",
+	critDamage = "Crit Damage",
+	attackSpeed = "Attack Speed",
+	armorPierce = "Armor Pierce",
+	health = "Health",
+	armor = "Armor",
+	luck = "Luck",
+	walkspeed = "Walkspeed",
+}
+
+local infoPanels
+local infoTabFrames
 
 local category = "weapons"
 local currentSlot = nil
@@ -40,6 +67,7 @@ local statsInfo
 local tagsInfo
 local passivesInfo
 local descriptionInfo
+local descriptionInfoText
 local infoTabs
 local statsTab
 local statsTabText
@@ -56,6 +84,7 @@ local descriptionTabButton
 local title
 local titleText
 local glow
+local amount
 
 local slotAmount
 local slotAmountText
@@ -67,22 +96,8 @@ local equipButton
 local sellButton
 local unequipButton
 
-local infoPanels = {
-	stats = statsInfo,
-	tags = tagsInfo,
-	passives = passivesInfo,
-	description = descriptionInfo,
-}
-
-local infoTabFrames = {
-	stats = { frame = statsTab, text = statsTabText },
-	tags = { frame = tagsTab, text = tagsTabText },
-	passives = { frame = passivesTab, text = passivesTabText },
-	description = { frame = descriptionTab, text = descriptionTabText },
-}
-
 function public.onStart(screenGui: ScreenGui)
-	inventory = screenGui:FindFirstChild("inventory")
+	inventory = screenGui:FindFirstChild("Inventory")
 	slots = inventory:FindFirstChild("slots")
 	tabs = inventory:FindFirstChild("tabs")
 	slotAmount = inventory:FindFirstChild("slot_amount")
@@ -96,7 +111,9 @@ function public.onStart(screenGui: ScreenGui)
 	tagsInfo = contents:FindFirstChild("tags_info")
 	passivesInfo = contents:FindFirstChild("passives_info")
 	descriptionInfo = contents:FindFirstChild("description_info")
+	descriptionInfoText = descriptionInfo:FindFirstChild("text")
 	glow = contents:FindFirstChild("glow")
+	amount = contents:FindFirstChild("amount"):FindFirstChild("text")
 	infoTabs = contents:FindFirstChild("tabs")
 	title = contents:FindFirstChild("title")
 	titleText = title:FindFirstChild("text")
@@ -129,6 +146,20 @@ function public.onStart(screenGui: ScreenGui)
 	miscTabButton = miscTab:FindFirstChild("button")
 	slotAmountText = slotAmount:FindFirstChild("amount")
 	addButton = slotAmount:FindFirstChild("add_button"):FindFirstChild("button")
+
+	infoPanels = {
+		stats = statsInfo,
+		tags = tagsInfo,
+		passives = passivesInfo,
+		description = descriptionInfo,
+	}
+
+	infoTabFrames = {
+		stats = { frame = statsTab, text = statsTabText },
+		tags = { frame = tagsTab, text = tagsTabText },
+		passives = { frame = passivesTab, text = passivesTabText },
+		description = { frame = descriptionTab, text = descriptionTabText },
+	}
 
 	closeButton.MouseButton1Click:Connect(function()
 		private.close()
@@ -276,12 +307,26 @@ function private.updateInfo(item)
 	local defaultInfo = ItemRegistry.get(item.id)
 	local rarity = defaultInfo.rarity
 	title.BackgroundColor3 = ItemRegistry.rarity[rarity]
+	titleText.Text = defaultInfo.name
 	glow.ImageColor3 = ItemRegistry.rarity[rarity]
 	if rarity == "secret" then
 		titleText.TextColor3 = ItemRegistry.rarity[rarity]
 	end
 
-	private.updateStats(item.stats)
+	if category == "materials" then
+		currentInfoTab = "description"
+		amount.Text = "x" .. item.quantity
+		statsTab.Visible = false
+		tagsTab.Visible = false
+		passivesTab.Visible = false
+	else
+		amount.Text = "Lvl: " .. item.level
+		statsTab.Visible = true
+		tagsTab.Visible = true
+		passivesTab.Visible = true
+	end
+
+	private.updateStats(item)
 	private.updateTags(item)
 	private.updatePassives(item)
 	private.updateDescription(item)
@@ -317,19 +362,58 @@ function private.changeInfoTab(tabName: string)
 end
 
 function private.updateStats(item)
-	if currentInfoTab == infoPanels.stats then
+	for _, child in statsInfo:GetChildren() do
+		if child:IsA("Frame") then
+			child:Destroy()
+		end
+	end
+
+	local order = STAT_ORDER[item.category]
+	if not order then
+		return
+	end
+
+	for index, name in order do
+		local value = item.stats[name]
+		if value then
+			local rank = item.rolls[index] or "D"
+
+			local newStat = statTemplate:Clone()
+			local statAmount = newStat:FindFirstChild("amount")
+			local statName = newStat:FindFirstChild("name")
+			local statRank = newStat:FindFirstChild("rank")
+
+			newStat.Parent = statsInfo
+			newStat.Name = name
+			statAmount.Text = private.formatStatValue(name, value)
+			statName.Text = STAT_DISPLAY_NAMES[name] or name
+			statRank.Text = "[" .. rank .. "]"
+			statRank.TextColor3 = ItemRegistry.rarity[RANK_RARITY[rank]] or ItemRegistry.rarity.common
+		end
 	end
 end
 
-function private.createStat() end
-
 function private.updateTags(item) end
 
-function private.updatePassives(item) end
+function private.updatePassives(item)
+	local defaultInfo = ItemRegistry.get(item.id)
+
+	descriptionInfoText.Text = defaultInfo.description
+end
 
 function private.updateDescription(item) end
 
 function private.showStatBoost() end
+
+function private.formatStatValue(key, value)
+	if key == "critRate" then
+		return string.format("%.1f%%", value * 100)
+	elseif key == "critDamage" then
+		return string.format("%.0f%%", value * 100)
+	else
+		return string.format("%.1f", value)
+	end
+end
 
 ---- BUTTONS ----
 
