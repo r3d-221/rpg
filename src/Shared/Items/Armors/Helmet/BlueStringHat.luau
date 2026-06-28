@@ -7,6 +7,7 @@ return {
 	rarity = "common",
 	setName = "blueStringSet",
 	level = 1,
+	uid = nil,
 
 	baseArmor = 5,
 	baseHealth = 10,
@@ -14,4 +15,5 @@ return {
 	baseSpeed = 2,
 	stats = {},
 	rolls = {},
+	discription = "A piece of armor that does what you would think it does.",
 }

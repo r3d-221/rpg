@@ -1,6 +1,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local HttpService = game:GetService("HttpService")
+
 local EnemyDropsHandler = require(ServerScriptService.Server.Enemy.EnemyDropsHandler)
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local PlayerClassData = require(script.Parent.PlayerClassData)
@@ -17,7 +19,7 @@ local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
 local syncStamina = Remotes.syncStamina
 
-local PROFILE_STORE_KEY = "test_v8"
+local PROFILE_STORE_KEY = "test_v9"
 
 local STACK_CAP = 100
 local STAMINA_REGEN_RATE = 10
@@ -32,8 +34,10 @@ local STAT_POINT_VALUES = {
 }
 
 local DEFAULT_PLAYER_DATA = {
-	rankLevel = 1, -- rank = F =  1-5, E = 6-10, D = 11-15, ...
+	rankLevel = 1,
 	class = "warrior",
+	title = "None",
+	rank = "D",
 
 	-- Shared
 	stamina = 100,
@@ -188,7 +192,7 @@ function public.onStart()
 		end
 
 		-- only handles the weapons
-		data.equipped.weapon = equippedItem
+		data.equipped.weapon = equippedItem.uid
 		WeaponHandler.equip(player, equippedItem.id)
 		private.sync(player)
 	end)
@@ -262,7 +266,7 @@ function public.onStart()
 		end
 		local classData = data.classes[data.class]
 
-		local cost = 2
+		local cost = 0
 		if (data.currency.gems or 0) < cost then
 			-- send alert massege
 			return
@@ -271,11 +275,11 @@ function public.onStart()
 		data.currency.gems -= cost
 
 		local total = 0
-		for stat, points in data.statPoints do
+		for stat, points in classData.statPoints do
 			total += points
 			classData.statPoints[stat] = 0
 		end
-		classData.assignableStatPoints = (data.assignableStatPoints or 0) + total
+		classData.assignableStatPoints = (classData.assignableStatPoints or 0) + total
 		private.applyStatPoints(data)
 		private.sync(player)
 	end)
@@ -328,6 +332,7 @@ function public.addItem(player: Player, item)
 		local info = EnemyDropsHandler.rollStats(registryItem, item.category)
 		item.stats = info.stats
 		item.rolls = info.rolls
+		item.uid = HttpService:GenerateGUID(false)
 	end
 
 	local slots = data.inventory[category]

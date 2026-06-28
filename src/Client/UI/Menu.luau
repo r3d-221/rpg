@@ -68,7 +68,6 @@ function private.buttonConnections()
 		if isOpen then
 			UIManager.closeAll()
 			UIManager.openExclusive("Inventory")
-			PlayerData.onChange(Inventory.updateSlots)
 			local data = PlayerData.getPlayerData()
 			if data then
 				Inventory.updateSlots(data)
@@ -83,13 +82,14 @@ function private.buttonConnections()
 		if isOpen then
 			UIManager.closeAll()
 			UIManager.openExclusive("Profile")
-			PlayerData.onChange(Profile.updateAll)
 			local data = PlayerData.getPlayerData()
+			print(data)
 			if data then
 				Profile.updateAll(data)
 			end
 		end
 	end)
+
 	questButton.MouseButton1Click:Connect(function() end)
 	storeButton.MouseButton1Click:Connect(function() end)
 end

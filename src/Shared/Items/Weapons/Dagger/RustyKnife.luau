@@ -5,6 +5,7 @@ return {
 	subCategory = "dagger",
 	rarity = "common",
 	level = 1,
+	uid = nil,
 
 	baseDamage = 12,
 	baseAttackSpeed = 1.0,

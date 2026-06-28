@@ -1,45 +1,46 @@
-local LocalizationService = game:GetService("LocalizationService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Inventory = require(script.Parent.Inventory)
+local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
+local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
+local PlayerData = require(script.Parent.PlayerData)
+local Utils = require(script.Parent.Utils)
+
+local Remotes = ReplicatedStorage.Shared.Remotes
+local spendStatPoint = Remotes.spendStatPoint
+local resetStatPoints = Remotes.resetStatPoints
+
 local public = {}
 local private = {}
+local equipments = {
+	weapon = "weapon_slot",
+	helmet = "helmet_slot",
+	chestplate = "chestplate_slot",
+	leggings = "leggings_slot",
+	boots = "boots_slot",
+}
+
+local initialized = false
+local originalPosition = UDim2.fromScale(0.834, 0.5)
 
 local profile
-local class = "warrior"
 
 local info
+local assignablePoints
 local assignablePointsAmount
+local resetStatPointsFrame
+local resetStatPointsButton
 
 local playerInfo
 local classText
 local rankText
 local titleText
 
-local stats
-local healthAmount
-local armorAmount
-local luckAmount
-local damageAmount
-local critRateAmount
-local critDamageAmount
-local armorPierceAmount
-local attackSpeedAmount
-local cooldownReductionAmount
+local Stats
+
+local currentTab = "stats"
 
 local statPoints
-local healthStatPoint
-local healthStatPointAmount
-local healthStatPointAddButton
-local armorStatPoint
-local armorStatPointAmount
-local armorStatPointAddButton
-local damageStatPoint
-local damageStatPointAmount
-local damageStatPointAddButton
-local critRateStatPoint
-local critRateStatPointAmount
-local critRateStatPointAddButton
-local critDamageStatPoint
-local critDamageStatPointAmount
-local critDamageStatPointAddButton
 
 local tabs
 local statsTab
@@ -51,19 +52,22 @@ local infoTabButton
 local statPointTab
 local statPointTabText
 local statPointTabButton
+local passivesTab
+local passivesTabText
+local passivesTabButton
+local activesTab
+local activesTabText
+local activesTabButton
+local statusTab
+local statusTabText
+local statusTabButton
+
+local classLevel
+local level
+local classExpBar
+local classExpProgressBar
 
 local equipmentsList
-local weaponSlot
-local weaponSlotGlow
-local helmetSlot
-local helmetSlotGlow
-local chestplateSlot
-local chestplateSlotGlow
-local leggingsSlot
-local leggingsSlotGlow
-local bootsSlot
-local bootsSlotGlow
-
 local weaponSlotButton
 local helmetSlotButton
 local chestplateSlotButton
@@ -75,53 +79,20 @@ function public.onStart(screenGui: ScreenGui)
 	profile = screenGui:FindFirstChild("Profile")
 	closeButton = profile:FindFirstChild("close"):FindFirstChild("button")
 	equipmentsList = profile:FindFirstChild("equipments"):FindFirstChild("list")
-	weaponSlot = equipmentsList:FindFirstChild("weapon_slot")
-	weaponSlotButton = weaponSlot:FindFirstChild("button")
-	weaponSlotGlow = weaponSlot:FindFirstChild("glow")
-	helmetSlot = equipmentsList:FindFirstChild("helmet_slot")
-	helmetSlotButton = helmetSlot:FindFirstChild("button")
-	helmetSlotGlow = helmetSlot:FindFirstChild("glow")
-	chestplateSlot = equipmentsList:FindFirstChild("chestplate_slot")
-	chestplateSlotButton = chestplateSlot:FindFirstChild("button")
-	chestplateSlotGlow = chestplateSlot:FindFirstChild("glow")
-	leggingsSlot = equipmentsList:FindFirstChild("leggings_slot")
-	leggingsSlotButton = weaponSlot:FindFirstChild("button")
-	leggingsSlotGlow = leggingsSlot:FindFirstChild("glow")
-	bootsSlot = equipmentsList:FindFirstChild("boots_slot")
-	bootsSlotButton = bootsSlot:FindFirstChild("button")
-	bootsSlotGlow = bootsSlot:FindFirstChild("glow")
+	weaponSlotButton = equipmentsList:FindFirstChild("weapon_slot"):FindFirstChild("button")
+	helmetSlotButton = equipmentsList:FindFirstChild("helmet_slot"):FindFirstChild("button")
+	chestplateSlotButton = equipmentsList:FindFirstChild("chestplate_slot"):FindFirstChild("button")
+	leggingsSlotButton = equipmentsList:FindFirstChild("leggings_slot"):FindFirstChild("button")
+	bootsSlotButton = equipmentsList:FindFirstChild("boots_slot"):FindFirstChild("button")
 	info = profile:FindFirstChild("info")
-	assignablePointsAmount = info:FindFirstChild("assignable_points"):FindFirstChild("amount")
+	assignablePoints = info:FindFirstChild("assignable_points")
+	assignablePointsAmount = assignablePoints:FindFirstChild("amount")
 	playerInfo = info:FindFirstChild("player_info")
 	classText = playerInfo:FindFirstChild("class"):FindFirstChild("text")
 	rankText = playerInfo:FindFirstChild("rank"):FindFirstChild("text")
 	titleText = playerInfo:FindFirstChild("title"):FindFirstChild("text")
-	stats = info:FindFirstChild("stats")
-	healthAmount = stats:FindFirstChild("health"):FindFirstChild("amount")
-	armorAmount = stats:FindFirstChild("armor"):FindFirstChild("amount")
-	luckAmount = stats:FindFirstChild("luck"):FindFirstChild("amount")
-	damageAmount = stats:FindFirstChild("damage"):FindFirstChild("amount")
-	critRateAmount = stats:FindFirstChild("crit_rate"):FindFirstChild("amount")
-	critDamageAmount = stats:FindFirstChild("crit_damage"):FindFirstChild("amount")
-	armorPierceAmount = stats:FindFirstChild("armor_pierce"):FindFirstChild("amount")
-	attackSpeedAmount = stats:FindFirstChild("attack_speed"):FindFirstChild("amount")
-	cooldownReductionAmount = stats:FindFirstChild("cooldown_reduction"):FindFirstChild("amount")
-	statPoints = info:FindFirstChild("stat_point")
-	healthStatPoint = statPoints:FindFirstChild("health")
-	healthStatPointAmount = healthStatPoint:FindFirstChild("amount")
-	healthStatPointAddButton = healthStatPoint:FindFirstChild("add_button"):FindFirstChild("button")
-	armorStatPoint = statPoints:FindFirstChild("armor")
-	armorStatPointAmount = armorStatPoint:FindFirstChild("amount")
-	armorStatPointAddButton = armorStatPoint:FindFirstChild("add_button"):FindFirstChild("button")
-	damageStatPoint = statPoints:FindFirstChild("damage")
-	damageStatPointAmount = damageStatPoint:FindFirstChild("amount")
-	damageStatPointAddButton = damageStatPoint:FindFirstChild("add_button"):FindFirstChild("button")
-	critRateStatPoint = statPoints:FindFirstChild("crit_rate")
-	critRateStatPointAmount = critRateStatPoint:FindFirstChild("amount")
-	critRateStatPointAddButton = critRateStatPoint:FindFirstChild("add_button"):FindFirstChild("button")
-	critDamageStatPoint = statPoints:FindFirstChild("crit_damage")
-	critDamageStatPointAmount = critDamageStatPoint:FindFirstChild("amount")
-	critDamageStatPointAddButton = critDamageStatPoint:FindFirstChild("add_button"):FindFirstChild("button")
+	Stats = info:FindFirstChild("stats")
+	statPoints = info:FindFirstChild("stat_points")
 	tabs = info:FindFirstChild("tabs")
 	infoTab = tabs:FindFirstChild("info")
 	infoTabText = infoTab:FindFirstChild("text")
@@ -130,67 +101,248 @@ function public.onStart(screenGui: ScreenGui)
 	statsTabText = statsTab:FindFirstChild("text")
 	statsTabButton = statsTab:FindFirstChild("button")
 	statPointTab = tabs:FindFirstChild("stat_points")
-	statsTabText = statPointTab:FindFirstChild("text")
+	statPointTabText = statPointTab:FindFirstChild("text")
 	statPointTabButton = statPointTab:FindFirstChild("button")
+	passivesTab = tabs:FindFirstChild("passives")
+	passivesTabText = passivesTab:FindFirstChild("text")
+	passivesTabButton = passivesTab:FindFirstChild("button")
+	activesTab = tabs:FindFirstChild("actives")
+	activesTabText = activesTab:FindFirstChild("text")
+	activesTabButton = activesTab:FindFirstChild("button")
+	statusTab = tabs:FindFirstChild("status")
+	statusTabText = statusTab:FindFirstChild("text")
+	statusTabButton = statusTab:FindFirstChild("button")
+	resetStatPointsFrame = info:FindFirstChild("reset_stat_points")
+	resetStatPointsButton = resetStatPointsFrame:FindFirstChild("button")
+	classLevel = profile:FindFirstChild("class_level")
+	level = classLevel:FindFirstChild("level")
+	classExpBar = classLevel:FindFirstChild("class_exp_bar")
+	classExpProgressBar = classExpBar:FindFirstChild("class_exp_progress_bar")
 
 	private.setupButtons()
+
+	initialized = true
+
+	PlayerData.onChange(function(data)
+		if not profile.Visible then
+			return
+		end
+		public.updateAll(data)
+	end)
 end
 
 function public.updateAll(data)
-	private.updateClassLevel(data)
+	if not initialized then
+		return
+	end
+	private.updateStats(data, data.class)
+	private.updateStatPoints(data, data.class)
+	private.updateClassLevel(data, data.class)
 	private.updateEquipments(data)
-	private.updateStatPoints(data)
-	private.updateEquipments(data)
-	private.updateStats(data)
-	class = data.class
+	private.updatePlayerInfo(data)
 end
 
-function private.updatePlayerInfo(data) end
-
-function private.updateStatPoints(data) end
-
-function private.updateEquipments(data) end
-
-function private.updateStats(data)
-	local Stats = data.classes[class].stats
-	print(profile)
-	print(info)
-	print(stats)
-	print(stats:FindFirstChild("health"))
-	print(healthAmount)
-	healthAmount.Text = Stats.health
-	armorAmount.Text = Stats.armor
-	luckAmount.Text = Stats.luck
-	damageAmount.Text = Stats.damage
-	critRateAmount.Text = Stats.critRate
-	critDamageAmount.Text = Stats.critDamage
-	armorPierceAmount.Text = Stats.armorPierce
-	attackSpeedAmount.Text = Stats.attackSpeed
-	cooldownReductionAmount.Text = Stats.cooldownReduction
+function private.updatePlayerInfo(data)
+	titleText.Text = data.title
+	classText.Text = data.class
+	rankText.Text = data.rank
 end
 
-function private.updateClassLevel(data) end
+function private.updateStatPoints(data, class)
+	assignablePointsAmount.Text = data.classes[class].assignableStatPoints
+
+	for stat, frame in Utils.statPoints do
+		local statFrame = statPoints:FindFirstChild(frame)
+		if not statFrame then
+			warn("Frame not found for: " .. stat)
+			continue
+		end
+
+		local text = statFrame:FindFirstChild("amount")
+		if not text then
+			warn("TextLabel not found for: " .. stat)
+			continue
+		end
+
+		local addButton = statFrame:FindFirstChild("add_button")
+		if not addButton then
+			warn("Add button not found for: " .. stat)
+			continue
+		end
+
+		text.Text = data.classes[class].statPoints[stat] or 0
+
+		if data.classes[class].assignableStatPoints == 0 then
+			text.Position = addButton.Position
+			addButton.Visible = false
+		else
+			text.Position = originalPosition
+			addButton.Visible = true
+		end
+	end
+end
+
+function private.updateEquipments(data)
+	for name, frame in equipments do
+		local slotFrame = equipmentsList:FindFirstChild(frame)
+		if not slotFrame then
+			warn("Frame not found for: " .. name)
+			continue
+		end
+
+		local glow = slotFrame:FindFirstChild("glow")
+		if not glow then
+			warn("Frame not found for: " .. name)
+			continue
+		end
+
+		local uid = data.equipped[name]
+		if not uid then
+			continue
+		end
+
+		local item = uid and Utils.findItemByUid(data.inventory, uid)
+		local defaultInfo = ItemRegistry.get(item.id)
+		glow.TextColor3 = ItemRegistry.rarity[defaultInfo.rarity]
+	end
+end
+
+function private.updateStats(data, class)
+	for stat, frame in Utils.uiNames do
+		local statFrame = Stats:FindFirstChild(frame)
+		if not statFrame then
+			warn("Frame not found for: " .. stat)
+			continue
+		end
+
+		local text = statFrame:FindFirstChild("amount")
+		if not text then
+			warn("TextLabel not found for: " .. stat)
+			continue
+		end
+
+		text.Text = Utils.format(stat, data.classes[class].stats[stat] or 0)
+	end
+end
+
+function private.updateClassLevel(data, class)
+	local max = PlayerConfig.expToClassLevel(data.classes[class].classExp)
+	local ratio = math.clamp((data.currency.rankExp or 0) / max, 0, 1)
+	classExpProgressBar.Size = UDim2.fromScale(ratio, 1)
+	level.Text = "Class Lvl: " .. data.classes[class].classLevel
+end
 
 function private.setupButtons()
 	closeButton.MouseButton1Click:Connect(function()
 		profile.Visible = false
 	end)
 
-	weaponSlotButton.MouseButton1Click:Connect(function() end)
-	helmetSlotButton.MouseButton1Click:Connect(function() end)
-	chestplateSlotButton.MouseButton1Click:Connect(function() end)
-	leggingsSlotButton.MouseButton1Click:Connect(function() end)
-	bootsSlotButton.MouseButton1Click:Connect(function() end)
+	for stat, frame in Utils.statPoints do
+		local statFrame = statPoints:FindFirstChild(frame)
+		if not statFrame then
+			warn("Frame not found for: " .. stat)
+			continue
+		end
 
-	healthStatPointAddButton.MouseButton1Click:Connect(function() end)
-	armorStatPointAddButton.MouseButton1Click:Connect(function() end)
-	damageStatPointAddButton.MouseButton1Click:Connect(function() end)
-	critRateStatPointAddButton.MouseButton1Click:Connect(function() end)
-	critDamageStatPointAddButton.MouseButton1Click:Connect(function() end)
+		local button = statFrame:FindFirstChild("add_button"):FindFirstChild("button")
+		if not button then
+			warn("Add button not found for: " .. stat)
+			continue
+		end
+
+		button.MouseButton1Click:Connect(function()
+			spendStatPoint:FireServer(stat)
+		end)
+	end
+
+	resetStatPointsButton.MouseButton1Click:Connect(function()
+		resetStatPoints:FireServer()
+	end)
+
+	weaponSlotButton.MouseButton1Click:Connect(function()
+		local data = PlayerData.getPlayerData()
+		Inventory.openSlot(data.equipped.weapon, data)
+	end)
+
+	infoTabButton.MouseButton1Click:Connect(function()
+		private.clearInfo()
+		private.resetTabColor()
+
+		infoTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
+		infoTabText.TextColor3 = Color3.fromHex("2c2624")
+
+		playerInfo.Visible = true
+
+		currentTab = "info"
+	end)
+
+	statsTabButton.MouseButton1Click:Connect(function()
+		private.clearInfo()
+		private.resetTabColor()
+
+		statsTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
+		statsTabText.TextColor3 = Color3.fromHex("2c2624")
+
+		Stats.Visible = true
+
+		currentTab = "stats"
+	end)
+
+	statPointTabButton.MouseButton1Click:Connect(function()
+		private.clearInfo()
+		private.resetTabColor()
+
+		statPointTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
+		statPointTabText.TextColor3 = Color3.fromHex("2c2624")
+
+		statPoints.Visible = true
+		assignablePoints.Visible = true
+		resetStatPointsFrame.Visible = true
+
+		currentTab = "statPoints"
+	end)
+
+	passivesTabButton.MouseButton1Click:Connect(function()
+		private.clearInfo()
+		private.resetTabColor()
+
+		passivesTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
+		passivesTabText.TextColor3 = Color3.fromHex("2c2624")
+
+		currentTab = "passives"
+	end)
+
+	activesTabButton.MouseButton1Click:Connect(function()
+		private.clearInfo()
+		private.resetTabColor()
+
+		activesTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
+		activesTabText.TextColor3 = Color3.fromHex("2c2624")
+
+		currentTab = "actives"
+	end)
+
+	statusTabButton.MouseButton1Click:Connect(function()
+		private.clearInfo()
+		private.resetTabColor()
+
+		statusTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
+		statusTabText.TextColor3 = Color3.fromHex("2c2624")
+
+		currentTab = "status"
+	end)
 end
 
-function private.resetTabColor(tab)
-	for _, child in tab:GetChildren() do
+function private.clearInfo()
+	for _, child in info:GetChildren() do
+		if child:IsA("Frame") then
+			child.Visible = false
+		end
+	end
+end
+
+function private.resetTabColor()
+	for _, child in tabs:GetChildren() do
 		if child:IsA("Frame") then
 			child.BackgroundColor3 = Color3.fromHex("24201e")
 

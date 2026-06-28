@@ -1,10 +1,11 @@
 return {
-	id = "iron_sword",
-	name = "Iron Sword",
+	id = "iron_sword", -- type ID
+	name = "Iron Sword", -- for UI only
 	category = "weapons",
 	subCategory = "sword",
 	rarity = "common",
 	level = 1,
+	uid = nil, -- instance ID
 
 	baseDamage = 12,
 	baseAttackSpeed = 1.0,

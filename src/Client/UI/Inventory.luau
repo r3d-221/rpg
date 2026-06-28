@@ -2,7 +2,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local UITemplates = ReplicatedStorage.UITemplates
 local PlayerData = require(script.Parent.PlayerData)
+local UIManager = require(script.Parent.UIManager)
+local Utils = require(script.Parent.Utils)
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
+
+local Remotes = ReplicatedStorage.Shared.Remotes
+local equipItem = Remotes.equipItem
+local unequipItem = Remotes.unequipItem
 
 local statTemplate = UITemplates.stat_template
 local slotTemplate = UITemplates.slot_template
@@ -10,37 +16,13 @@ local slotTemplate = UITemplates.slot_template
 local private = {}
 local public = {}
 
-local STAT_ORDER = {
-	weapons = { "damage", "critRate", "critDamage", "attackSpeed", "armorPierce" },
-	armors = { "health", "armor", "luck", "walkspeed" },
-}
-
-local RANK_RARITY = {
-	D = "common",
-	C = "rare",
-	B = "epic",
-	A = "legendary",
-	S = "mythic",
-}
-
-local STAT_DISPLAY_NAMES = {
-	damage = "Damage",
-	critRate = "Crit Rate",
-	critDamage = "Crit Damage",
-	attackSpeed = "Attack Speed",
-	armorPierce = "Armor Pierce",
-	health = "Health",
-	armor = "Armor",
-	luck = "Luck",
-	walkspeed = "Walkspeed",
-}
-
 local infoPanels
 local infoTabFrames
 
+local currentInfoTab = "stats"
 local category = "weapons"
 local currentSlot = nil
-local currentInfoTab = "stats"
+local currentItem = nil
 
 local inventory
 
@@ -88,6 +70,9 @@ local amount
 
 local slotAmount
 local slotAmountText
+local equipFrame
+local sellFrame
+local unequipFrame
 
 local addButton
 local closeButton
@@ -104,9 +89,12 @@ function public.onStart(screenGui: ScreenGui)
 	filterButton = inventory:FindFirstChild("filter"):FindFirstChild("button")
 	closeButton = inventory:FindFirstChild("close"):FindFirstChild("button")
 	contents = inventory:FindFirstChild("info"):FindFirstChild("contents")
-	equipButton = contents:FindFirstChild("equip"):FindFirstChild("button")
-	sellButton = contents:FindFirstChild("sell"):FindFirstChild("button")
-	unequipButton = contents:FindFirstChild("unequip"):FindFirstChild("button")
+	equipFrame = contents:FindFirstChild("equip")
+	equipButton = equipFrame:FindFirstChild("button")
+	sellFrame = contents:FindFirstChild("sell")
+	sellButton = sellFrame:FindFirstChild("button")
+	unequipFrame = contents:FindFirstChild("unequip")
+	unequipButton = unequipFrame:FindFirstChild("button")
 	statsInfo = contents:FindFirstChild("stats_info")
 	tagsInfo = contents:FindFirstChild("tags_info")
 	passivesInfo = contents:FindFirstChild("passives_info")
@@ -161,12 +149,15 @@ function public.onStart(screenGui: ScreenGui)
 		description = { frame = descriptionTab, text = descriptionTabText },
 	}
 
-	closeButton.MouseButton1Click:Connect(function()
-		private.close()
-	end)
-
-	private.setupInfoTabs()
+	private.setupButtons()
 	private.changeTabs()
+
+	PlayerData.onChange(function(data)
+		if not inventory.Visible then
+			return
+		end
+		public.updateSlots(data)
+	end)
 end
 
 ---- SLOTS ----
@@ -179,6 +170,7 @@ function public.clearSlots()
 	end
 
 	currentSlot = nil
+	currentItem = nil
 	contents.Visible = false
 end
 
@@ -192,14 +184,15 @@ function public.updateSlots(data)
 		end
 	end
 	private.updateSlotAmount(data)
+	private.toggleButtons(data)
+	-- clear filters
+	print(data)
 end
-
--- big maybe
-function private.createEmptySlot() end
 
 function private.createItemSlot(item)
 	local defaultInfo = ItemRegistry.get(item.id)
 	local newSlot = slotTemplate:Clone()
+	newSlot:SetAttribute("uid", item.uid)
 
 	newSlot.Parent = slots
 	newSlot.Name = item.id
@@ -210,13 +203,26 @@ function private.createItemSlot(item)
 	button.MouseButton1Click:Connect(function()
 		if currentSlot == newSlot then
 			currentSlot = nil
+			currentItem = nil
 			contents.Visible = false
 		else
 			currentSlot = newSlot
+			currentItem = item
 			private.updateInfo(item)
 			contents.Visible = true
 		end
 	end)
+end
+
+function public.openSlot(targetUid, data)
+	for _, slot in slots:GetChildren() do
+		if slot:GetAttribute("uid") == targetUid then
+			UIManager.closeAll()
+			UIManager.openExclusive("Inventory")
+			currentSlot = slot
+			public.updateSlots(data)
+		end
+	end
 end
 
 ---- MISC. ----
@@ -301,6 +307,49 @@ function private.updateSlotAmount(data)
 	slotAmountText.Text = amount .. "/" .. storageSlots
 end
 
+function private.setupButtons()
+	closeButton.MouseButton1Click:Connect(function()
+		inventory.Visible = false
+		public.clearSlots()
+	end)
+
+	equipButton.MouseButton1Click:Connect(function()
+		equipItem:FireServer(currentItem.id, category)
+	end)
+
+	statsTabButton.MouseButton1Click:Connect(function()
+		private.changeInfoTab("stats")
+	end)
+	tagsTabButton.MouseButton1Click:Connect(function()
+		private.changeInfoTab("tags")
+	end)
+	passivesTabButton.MouseButton1Click:Connect(function()
+		private.changeInfoTab("passives")
+	end)
+	descriptionTabButton.MouseButton1Click:Connect(function()
+		private.changeInfoTab("description")
+	end)
+end
+
+function private.toggleButtons(data)
+	for _, item in data.equipped do
+		if not currentItem then
+			return
+		end
+		if currentItem.id == item.id then
+			equipFrame.Visible = false
+			sellFrame.Visible = false
+			unequipFrame.Visible = true
+		else
+			equipFrame.Visible = true
+			sellFrame.Visible = true
+			unequipFrame.Visible = false
+		end
+	end
+end
+
+function private.increaseTotalSlots() end
+
 ---- INFO ----
 
 function private.updateInfo(item)
@@ -319,11 +368,13 @@ function private.updateInfo(item)
 		statsTab.Visible = false
 		tagsTab.Visible = false
 		passivesTab.Visible = false
+		equipFrame.Visible = false
 	else
 		amount.Text = "Lvl: " .. item.level
 		statsTab.Visible = true
 		tagsTab.Visible = true
 		passivesTab.Visible = true
+		equipFrame.Visible = true
 	end
 
 	private.updateStats(item)
@@ -331,21 +382,6 @@ function private.updateInfo(item)
 	private.updatePassives(item)
 	private.updateDescription(item)
 	private.changeInfoTab(currentInfoTab)
-end
-
-function private.setupInfoTabs()
-	statsTabButton.MouseButton1Click:Connect(function()
-		private.changeInfoTab("stats")
-	end)
-	tagsTabButton.MouseButton1Click:Connect(function()
-		private.changeInfoTab("tags")
-	end)
-	passivesTabButton.MouseButton1Click:Connect(function()
-		private.changeInfoTab("passives")
-	end)
-	descriptionTabButton.MouseButton1Click:Connect(function()
-		private.changeInfoTab("description")
-	end)
 end
 
 function private.changeInfoTab(tabName: string)
@@ -368,7 +404,7 @@ function private.updateStats(item)
 		end
 	end
 
-	local order = STAT_ORDER[item.category]
+	local order = Utils.statOrder[item.category]
 	if not order then
 		return
 	end
@@ -385,49 +421,28 @@ function private.updateStats(item)
 
 			newStat.Parent = statsInfo
 			newStat.Name = name
-			statAmount.Text = private.formatStatValue(name, value)
-			statName.Text = STAT_DISPLAY_NAMES[name] or name
+			statAmount.Text = Utils.format(name, value)
+			statName.Text = Utils.uiNames[name] or name
 			statRank.Text = "[" .. rank .. "]"
-			statRank.TextColor3 = ItemRegistry.rarity[RANK_RARITY[rank]] or ItemRegistry.rarity.common
+			statRank.TextColor3 = ItemRegistry.rarity[Utils.rankRarity[rank]] or ItemRegistry.rarity.common
 		end
 	end
 end
 
 function private.updateTags(item) end
 
-function private.updatePassives(item)
+function private.updatePassives(item) end
+
+function private.updateDescription(item)
 	local defaultInfo = ItemRegistry.get(item.id)
 
+	if not defaultInfo.description then
+		warn("No description found for: " .. item.id)
+		return
+	end
 	descriptionInfoText.Text = defaultInfo.description
 end
 
-function private.updateDescription(item) end
-
 function private.showStatBoost() end
-
-function private.formatStatValue(key, value)
-	if key == "critRate" then
-		return string.format("%.1f%%", value * 100)
-	elseif key == "critDamage" then
-		return string.format("%.0f%%", value * 100)
-	else
-		return string.format("%.1f", value)
-	end
-end
-
----- BUTTONS ----
-
-function private.lockItem() end
-
-function private.sellItem() end
-
-function private.equipItem() end
-
-function private.close()
-	inventory.Visible = false
-	public.clearSlots()
-end
-
-function private.increaseTotalSlots(category: string) end
 
 return public
