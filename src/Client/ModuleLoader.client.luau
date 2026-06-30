@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CollectionService = game:GetService("CollectionService")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local player = Players.LocalPlayer
 local PlayerScripts = player:FindFirstChild("PlayerScripts")
@@ -19,6 +20,7 @@ local EnemyUI = require(UIFolder.EnemyUI)
 local PlayerData = require(UIFolder.PlayerData)
 
 local Menu = require(UIFolder.Menu)
+local Class = require(UIFolder.Class)
 local Profile = require(UIFolder.Profile)
 local Inventory = require(UIFolder.Inventory)
 
@@ -52,6 +54,7 @@ PlayerData.onStart()
 Profile.onStart(screens)
 ItemRegistry.onStart()
 Inventory.onStart(screens)
+Class.onStart(screens)
 Menu.onStart(screens)
 EnemyUI.onStart()
 

@@ -196,14 +196,16 @@ function private.updateEquipments(data)
 			continue
 		end
 
+		glow.Visible = false
 		local uid = data.equipped[name]
 		if not uid then
 			continue
 		end
 
+		glow.Visible = true
 		local item = uid and Utils.findItemByUid(data.inventory, uid)
 		local defaultInfo = ItemRegistry.get(item.id)
-		glow.TextColor3 = ItemRegistry.rarity[defaultInfo.rarity]
+		glow.ImageColor3 = ItemRegistry.rarity[defaultInfo.rarity]
 	end
 end
 

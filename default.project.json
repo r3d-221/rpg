@@ -35,7 +35,7 @@
           "syncStamina": {
             "$className": "RemoteEvent"
           },
-          "switchClass": {
+          "changeClass": {
             "$className": "RemoteEvent"
           },
           "getEnemyData": {

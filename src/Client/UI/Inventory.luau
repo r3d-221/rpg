@@ -180,25 +180,31 @@ function public.updateSlots(data)
 	local list = data.inventory[category]
 	if list then
 		for _, item in list do
-			private.createItemSlot(item)
+			private.createItemSlot(data, item)
 		end
 	end
 	private.updateSlotAmount(data)
-	private.toggleButtons(data)
 	-- clear filters
-	print(data)
 end
 
-function private.createItemSlot(item)
+function private.createItemSlot(data, item)
 	local defaultInfo = ItemRegistry.get(item.id)
 	local newSlot = slotTemplate:Clone()
 	newSlot:SetAttribute("uid", item.uid)
 
 	newSlot.Parent = slots
 	newSlot.Name = item.id
+	newSlot.LayoutOrder = 6
 	local newGlow = newSlot:FindFirstChild("glow")
 	local button = newSlot:FindFirstChild("button")
+	local equippedIndicator = newSlot:FindFirstChild("equipped")
 	newGlow.ImageColor3 = ItemRegistry.rarity[defaultInfo.rarity]
+	equippedIndicator.Visible = false
+
+	if item.uid == data.equipped[category == "weapons" and "weapon" or category] then
+		newSlot.LayoutOrder = 1
+		equippedIndicator.Visible = true
+	end
 
 	button.MouseButton1Click:Connect(function()
 		if currentSlot == newSlot then
@@ -209,6 +215,7 @@ function private.createItemSlot(item)
 			currentSlot = newSlot
 			currentItem = item
 			private.updateInfo(item)
+			private.toggleButtons(data)
 			contents.Visible = true
 		end
 	end)
@@ -317,6 +324,11 @@ function private.setupButtons()
 		equipItem:FireServer(currentItem.id, category)
 	end)
 
+	unequipButton.MouseButton1Click:Connect(function()
+		unequipItem:FireServer(currentItem.id, category)
+		public.updateSlots(PlayerData.getPlayerData())
+	end)
+
 	statsTabButton.MouseButton1Click:Connect(function()
 		private.changeInfoTab("stats")
 	end)
@@ -332,19 +344,19 @@ function private.setupButtons()
 end
 
 function private.toggleButtons(data)
-	for _, item in data.equipped do
-		if not currentItem then
-			return
-		end
-		if currentItem.id == item.id then
-			equipFrame.Visible = false
-			sellFrame.Visible = false
-			unequipFrame.Visible = true
-		else
-			equipFrame.Visible = true
-			sellFrame.Visible = true
-			unequipFrame.Visible = false
-		end
+	if not currentItem then
+		warn("No current item entry set")
+		return
+	end
+	local equippedUid = data.equipped[category == "weapons" and "weapon" or category]
+	if equippedUid and equippedUid == currentItem.uid then
+		equipFrame.Visible = false
+		sellFrame.Visible = false
+		unequipFrame.Visible = true
+	else
+		equipFrame.Visible = true
+		sellFrame.Visible = true
+		unequipFrame.Visible = false
 	end
 end
 

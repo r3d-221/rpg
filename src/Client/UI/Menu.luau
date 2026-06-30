@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
+local Class = require(script.Parent.Class)
 local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local Inventory = require(script.Parent.Inventory)
 local PlayerData = require(script.Parent.PlayerData)
@@ -14,6 +15,7 @@ local buttons
 local inventoryButton
 local profileButton
 local questButton
+local classButton
 local storeButton
 
 local playerInfo
@@ -37,6 +39,7 @@ function public.onStart(screenGui: ScreenGui)
 	inventoryButton = buttons:FindFirstChild("inventory"):FindFirstChild("button")
 	profileButton = buttons:FindFirstChild("profile"):FindFirstChild("button")
 	questButton = buttons:FindFirstChild("quest"):FindFirstChild("button")
+	classButton = buttons:FindFirstChild("class"):FindFirstChild("button")
 	storeButton = buttons:FindFirstChild("inventory"):FindFirstChild("button")
 	playerInfo = slider:FindFirstChild("player_info")
 	rankExpBar = playerInfo:FindFirstChild("rank_exp_bar")
@@ -83,13 +86,23 @@ function private.buttonConnections()
 			UIManager.closeAll()
 			UIManager.openExclusive("Profile")
 			local data = PlayerData.getPlayerData()
-			print(data)
 			if data then
 				Profile.updateAll(data)
 			end
 		end
 	end)
 
+	classButton.MouseButton1Click:Connect(function()
+		local isOpen = UIManager.toggle("Class")
+		if isOpen then
+			UIManager.closeAll()
+			UIManager.openExclusive("Class")
+			local data = PlayerData.getPlayerData()
+			if data then
+				Class.updateSlots(data)
+			end
+		end
+	end)
 	questButton.MouseButton1Click:Connect(function() end)
 	storeButton.MouseButton1Click:Connect(function() end)
 end

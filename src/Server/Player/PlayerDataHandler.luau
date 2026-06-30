@@ -19,7 +19,7 @@ local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
 local syncStamina = Remotes.syncStamina
 
-local PROFILE_STORE_KEY = "test_v9"
+local PROFILE_STORE_KEY = "test_v10"
 
 local STACK_CAP = 100
 local STAMINA_REGEN_RATE = 10
@@ -43,6 +43,15 @@ local DEFAULT_PLAYER_DATA = {
 	stamina = 100,
 	staminaCost = 15,
 	staminaSpeedMultiplier = 1.25,
+
+	quests = {
+		classes = {
+			warrior = true,
+			archer = true,
+			mage = true,
+			paladin = false,
+		},
+	},
 
 	currency = {
 		coins = 0,
@@ -327,12 +336,16 @@ function public.addItem(player: Player, item)
 		return
 	end
 
-	if (category == "weapons" or item.category == "armors") and not item.stats then
-		local registryItem = ItemRegistry.get(item.id)
-		local info = EnemyDropsHandler.rollStats(registryItem, item.category)
-		item.stats = info.stats
-		item.rolls = info.rolls
-		item.uid = HttpService:GenerateGUID(false)
+	if category == "weapons" or category == "armors" then
+		if not item.stats then
+			local registryItem = ItemRegistry.get(item.id)
+			local info = EnemyDropsHandler.rollStats(registryItem, item.category)
+			item.stats = info.stats
+			item.rolls = info.rolls
+		end
+		if not item.uid then
+			item.uid = HttpService:GenerateGUID(false)
+		end
 	end
 
 	local slots = data.inventory[category]
@@ -392,6 +405,8 @@ function public.changeClass(player: Player, class: string)
 
 	if data.classes[class] then
 		data.class = class
+		-- update the player stats
+		print("Changed the class to: " .. data.class)
 		private.sync(player)
 	end
 end
@@ -547,17 +562,21 @@ function private.onPlayerAdded(player: Player)
 	player.CharacterAdded:Connect(function()
 		local data = public.getData(player)
 		if data and data.equipped.weapon then
-			print(data.equipped.weapon.id)
-			print(data.equipped)
-			WeaponHandler.equip(player, data.equipped.weapon.id)
+			local item = private.findItemByUid(data.inventory, data.equipped.weapon)
+			if item then
+				WeaponHandler.equip(player, item.id)
+			end
 		end
 	end)
 
 	local data = public.getData(player)
 	if data and data.equipped.weapon then
-		print(data.equipped.weapon.id)
-		print(data.equipped)
-		WeaponHandler.equip(player, data.equipped.weapon.id)
+		local item = private.findItemByUid(data.inventory, data.equipped.weapon)
+		if item then
+			WeaponHandler.equip(player, item.id)
+			print(item.id)
+			print(data.equipped)
+		end
 	end
 
 	private.sync(player)
@@ -590,6 +609,17 @@ function private.sync(player: Player)
 		stats.level.Value = data.rankLevel
 		stats.class.Value = data.class
 	end
+end
+
+function private.findItemByUid(itemList, uid)
+	for _, list in itemList do
+		for _, item in list do
+			if item.uid == uid then
+				return item
+			end
+		end
+	end
+	return nil
 end
 
 return public
