@@ -29,6 +29,17 @@ function public.getCategory(category: string)
 	return byCategory[category] or {}
 end
 
+function public.findItemByUid(inventory: {}, uid: string): {}?
+	for _, list in inventory do
+		for _, item in list do
+			if item.uid == uid then
+				return item
+			end
+		end
+	end
+	return nil
+end
+
 function private.loadFolder(folder)
 	for _, module in folder:GetChildren() do
 		if module:IsA("ModuleScript") then
@@ -36,10 +47,9 @@ function private.loadFolder(folder)
 			if ok and data and data.id then
 				registry[data.id] = data
 				if byCategory[data.category] then
-					-- print(module.Name)
 					table.insert(byCategory[data.category], data)
 				end
-			elseif module.Name == "ItemRegistry" or module.Name == "SetBonus" then
+			elseif module.Name == "ItemRegistry" or module.Name == "SetBonus" or module.Name == "ItemHandler" then
 				continue
 			else
 				warn("ItemRegistry: failed to load", module.Name)

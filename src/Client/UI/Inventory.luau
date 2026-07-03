@@ -3,7 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UITemplates = ReplicatedStorage.UITemplates
 local PlayerData = require(script.Parent.PlayerData)
 local UIManager = require(script.Parent.UIManager)
-local Utils = require(script.Parent.Utils)
+local StatsDisplay = require(script.Parent.StatsDisplay)
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 
 local Remotes = ReplicatedStorage.Shared.Remotes
@@ -23,6 +23,14 @@ local currentInfoTab = "stats"
 local category = "weapons"
 local currentSlot = nil
 local currentItem = nil
+
+local tabList = {
+	weapons = { frame = nil, text = nil },
+	armors = { frame = nil, text = nil },
+	materials = { frame = nil, text = nil },
+	artifacts = { frame = nil, text = nil },
+	misc = { frame = nil, text = nil },
+}
 
 local inventory
 
@@ -149,6 +157,12 @@ function public.onStart(screenGui: ScreenGui)
 		description = { frame = descriptionTab, text = descriptionTabText },
 	}
 
+	tabList.weapons = { frame = weaponsTab, text = weaponsTabText }
+	tabList.armors = { frame = armorsTab, text = armorsTabText }
+	tabList.materials = { frame = materialsTab, text = materialsTabText }
+	tabList.artifacts = { frame = artifactsTab, text = artifactsTabText }
+	tabList.misc = { frame = miscTab, text = miscTabText }
+
 	private.setupButtons()
 	private.changeTabs()
 
@@ -187,6 +201,48 @@ function public.updateSlots(data)
 	-- clear filters
 end
 
+function public.openSlot(targetUid)
+	local data = PlayerData.getPlayerData()
+	if not data then
+		return
+	end
+
+	local targetCategory = nil
+	for itemCategory, list in data.inventory do
+		for _, item in list do
+			if item.uid == targetUid then
+				targetCategory = itemCategory
+				break
+			end
+		end
+		if targetCategory then
+			break
+		end
+	end
+
+	if not targetCategory then
+		warn("Inventory.openSlot: uid not found: " .. tostring(targetUid))
+		return
+	end
+
+	UIManager.closeAll()
+	UIManager.openExclusive("Inventory")
+	private.selectTab(targetCategory)
+
+	for _, slot in slots:GetChildren() do
+		if slot:GetAttribute("uid") == targetUid then
+			currentSlot = slot
+			currentItem = ItemRegistry.findItemByUid(data.inventory, targetUid)
+			if currentItem then
+				private.updateInfo(currentItem)
+				private.toggleButtons(data)
+				contents.Visible = true
+			end
+			break
+		end
+	end
+end
+
 function private.createItemSlot(data, item)
 	local defaultInfo = ItemRegistry.get(item.id)
 	local newSlot = slotTemplate:Clone()
@@ -201,7 +257,8 @@ function private.createItemSlot(data, item)
 	newGlow.ImageColor3 = ItemRegistry.rarity[defaultInfo.rarity]
 	equippedIndicator.Visible = false
 
-	if item.uid == data.equipped[category == "weapons" and "weapon" or category] then
+	local slot = private.getEquippedSlot(item, category)
+	if slot and item.uid == data.equipped[slot] then
 		newSlot.LayoutOrder = 1
 		equippedIndicator.Visible = true
 	end
@@ -215,84 +272,55 @@ function private.createItemSlot(data, item)
 			currentSlot = newSlot
 			currentItem = item
 			private.updateInfo(item)
-			private.toggleButtons(data)
+			private.toggleButtons(PlayerData.getPlayerData())
 			contents.Visible = true
 		end
 	end)
 end
 
-function public.openSlot(targetUid, data)
-	for _, slot in slots:GetChildren() do
-		if slot:GetAttribute("uid") == targetUid then
-			UIManager.closeAll()
-			UIManager.openExclusive("Inventory")
-			currentSlot = slot
-			public.updateSlots(data)
-		end
+---- MISC. ----
+
+function private.selectTab(name: string)
+	category = name
+	private.resetTabColor(tabs)
+	local tab = tabList[name]
+	if tab then
+		tab.frame.BackgroundColor3 = Color3.fromHex("dcc9a9")
+		tab.text.TextColor3 = Color3.fromHex("2c2624")
+	end
+
+	local data = PlayerData.getPlayerData()
+	if data then
+		public.updateSlots(data)
 	end
 end
 
----- MISC. ----
+function private.getEquippedSlot(item, itemCategory)
+	if itemCategory == "weapons" then
+		return "weapon"
+	elseif itemCategory == "armors" then
+		local defaultInfo = ItemRegistry.get(item.id)
+		return defaultInfo and defaultInfo.subCategory
+	end
+	return nil
+end
 
 function private.search() end
 
 function private.filterSlots() end
 
 function private.changeTabs()
-	weaponsTabButton.MouseButton1Click:Connect(function()
-		category = "weapons"
-		private.resetTabColor(tabs)
-		weaponsTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
-		weaponsTabText.TextColor3 = Color3.fromHex("2c2624")
-		local data = PlayerData.getPlayerData()
-		if data then
-			public.updateSlots(data)
+	for name, _ in tabList do
+		local tab = tabList[name]
+		if tab and tab.frame then
+			local button = tab.frame:FindFirstChild("button")
+			if button then
+				button.MouseButton1Click:Connect(function()
+					private.selectTab(name)
+				end)
+			end
 		end
-	end)
-
-	materialsTabButton.MouseButton1Click:Connect(function()
-		category = "materials"
-		private.resetTabColor(tabs)
-		materialsTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
-		materialsTabText.TextColor3 = Color3.fromHex("2c2624")
-		local data = PlayerData.getPlayerData()
-		if data then
-			public.updateSlots(data)
-		end
-	end)
-
-	artifactsTabButton.MouseButton1Click:Connect(function()
-		category = "artifacts"
-		private.resetTabColor(tabs)
-		artifactsTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
-		artifactsTabText.TextColor3 = Color3.fromHex("2c2624")
-		local data = PlayerData.getPlayerData()
-		if data then
-			public.updateSlots(data)
-		end
-	end)
-
-	armorsTabButton.MouseButton1Click:Connect(function()
-		category = "armors"
-		private.resetTabColor(tabs)
-		armorsTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
-		armorsTabText.TextColor3 = Color3.fromHex("2c2624")
-		local data = PlayerData.getPlayerData()
-		if data then
-			public.updateSlots(data)
-		end
-	end)
-
-	miscTabButton.MouseButton1Click:Connect(function()
-		category = "misc"
-		private.resetTabColor(tabs)
-		miscTab.BackgroundColor3 = Color3.fromHex("dcc9a9")
-		miscTabText.TextColor3 = Color3.fromHex("2c2624")
-		local data = PlayerData.getPlayerData()
-		if data then
-			public.updateSlots(data)
-		end
-	end)
+	end
 end
 
 function private.resetTabColor(tab)
@@ -321,12 +349,11 @@ function private.setupButtons()
 	end)
 
 	equipButton.MouseButton1Click:Connect(function()
-		equipItem:FireServer(currentItem.id, category)
+		equipItem:FireServer(currentItem.uid, category)
 	end)
 
 	unequipButton.MouseButton1Click:Connect(function()
-		unequipItem:FireServer(currentItem.id, category)
-		public.updateSlots(PlayerData.getPlayerData())
+		unequipItem:FireServer(currentItem.uid, category)
 	end)
 
 	statsTabButton.MouseButton1Click:Connect(function()
@@ -348,7 +375,8 @@ function private.toggleButtons(data)
 		warn("No current item entry set")
 		return
 	end
-	local equippedUid = data.equipped[category == "weapons" and "weapon" or category]
+	local slot = private.getEquippedSlot(currentItem, category)
+	local equippedUid = slot and data.equipped[slot]
 	if equippedUid and equippedUid == currentItem.uid then
 		equipFrame.Visible = false
 		sellFrame.Visible = false
@@ -376,7 +404,7 @@ function private.updateInfo(item)
 
 	if category == "materials" then
 		currentInfoTab = "description"
-		amount.Text = "x" .. item.quantity
+		amount.Text = "x" .. item.amount
 		statsTab.Visible = false
 		tagsTab.Visible = false
 		passivesTab.Visible = false
@@ -416,7 +444,9 @@ function private.updateStats(item)
 		end
 	end
 
-	local order = Utils.statOrder[item.category]
+	local defaultInfo = ItemRegistry.get(item.id)
+	local itemCategory = defaultInfo.category
+	local order = StatsDisplay.statOrder[itemCategory]
 	if not order then
 		return
 	end
@@ -433,10 +463,10 @@ function private.updateStats(item)
 
 			newStat.Parent = statsInfo
 			newStat.Name = name
-			statAmount.Text = Utils.format(name, value)
-			statName.Text = Utils.uiNames[name] or name
+			statAmount.Text = StatsDisplay.format(name, value)
+			statName.Text = StatsDisplay.uiNames[name] or name
 			statRank.Text = "[" .. rank .. "]"
-			statRank.TextColor3 = ItemRegistry.rarity[Utils.rankRarity[rank]] or ItemRegistry.rarity.common
+			statRank.TextColor3 = ItemRegistry.rarity[StatsDisplay.rankRarity[rank]] or ItemRegistry.rarity.common
 		end
 	end
 end
@@ -449,6 +479,7 @@ function private.updateDescription(item)
 	local defaultInfo = ItemRegistry.get(item.id)
 
 	if not defaultInfo.description then
+		print(item)
 		warn("No description found for: " .. item.id)
 		return
 	end

@@ -15,5 +15,5 @@ return {
 	baseSpeed = 0,
 	stats = {},
 	rolls = {},
-	discription = "A piece of armor that does what you would think it does.",
+	description = "A piece of armor that does what you would think it does.",
 }

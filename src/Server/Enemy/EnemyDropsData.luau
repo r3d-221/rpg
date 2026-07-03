@@ -9,23 +9,6 @@ public.rarityTiers = {
 	"secret",
 }
 
--- the higher the index, the higher the rarity
-public.statRank = {
-	S = 1.2, -- 20%
-	A = 1.15,
-	B = 1.1,
-	C = 1.05,
-	D = 1,
-}
-
-public.statRankWeights = {
-	S = 0.05,
-	A = 0.10,
-	B = 0.20,
-	C = 0.30,
-	D = 0.35,
-}
-
 public.rarityWeights = {
 	common = 0.63,
 	rare = 0.2,

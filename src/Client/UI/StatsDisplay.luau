@@ -1,4 +1,3 @@
--- Shared/Modules/StatDisplay.luau
 local public = {}
 
 public.uiNames = {
@@ -54,17 +53,6 @@ function public.format(stat: string, value: number): string
 	else
 		return string.format("%.1f", value)
 	end
-end
-
-function public.findItemByUid(itemList, uid)
-	for _, list in itemList do
-		for _, item in list do
-			if item.uid == uid then
-				return item
-			end
-		end
-	end
-	return nil
 end
 
 return public

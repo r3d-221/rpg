@@ -4,7 +4,7 @@ local Inventory = require(script.Parent.Inventory)
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local PlayerData = require(script.Parent.PlayerData)
-local Utils = require(script.Parent.Utils)
+local StatsDisplay = require(script.Parent.StatsDisplay)
 
 local Remotes = ReplicatedStorage.Shared.Remotes
 local spendStatPoint = Remotes.spendStatPoint
@@ -151,7 +151,7 @@ end
 function private.updateStatPoints(data, class)
 	assignablePointsAmount.Text = data.classes[class].assignableStatPoints
 
-	for stat, frame in Utils.statPoints do
+	for stat, frame in StatsDisplay.statPoints do
 		local statFrame = statPoints:FindFirstChild(frame)
 		if not statFrame then
 			warn("Frame not found for: " .. stat)
@@ -203,14 +203,14 @@ function private.updateEquipments(data)
 		end
 
 		glow.Visible = true
-		local item = uid and Utils.findItemByUid(data.inventory, uid)
+		local item = uid and ItemRegistry.findItemByUid(data.inventory, uid)
 		local defaultInfo = ItemRegistry.get(item.id)
 		glow.ImageColor3 = ItemRegistry.rarity[defaultInfo.rarity]
 	end
 end
 
 function private.updateStats(data, class)
-	for stat, frame in Utils.uiNames do
+	for stat, frame in StatsDisplay.uiNames do
 		local statFrame = Stats:FindFirstChild(frame)
 		if not statFrame then
 			warn("Frame not found for: " .. stat)
@@ -223,7 +223,7 @@ function private.updateStats(data, class)
 			continue
 		end
 
-		text.Text = Utils.format(stat, data.classes[class].stats[stat] or 0)
+		text.Text = StatsDisplay.format(stat, data.classes[class].stats[stat] or 0)
 	end
 end
 
@@ -239,7 +239,7 @@ function private.setupButtons()
 		profile.Visible = false
 	end)
 
-	for stat, frame in Utils.statPoints do
+	for stat, frame in StatsDisplay.statPoints do
 		local statFrame = statPoints:FindFirstChild(frame)
 		if not statFrame then
 			warn("Frame not found for: " .. stat)
@@ -261,10 +261,31 @@ function private.setupButtons()
 		resetStatPoints:FireServer()
 	end)
 
-	weaponSlotButton.MouseButton1Click:Connect(function()
-		local data = PlayerData.getPlayerData()
-		Inventory.openSlot(data.equipped.weapon, data)
-	end)
+	for name, slot in equipments do
+		local slotFrame = equipmentsList:FindFirstChild(slot)
+		if not slotFrame then
+			warn("Profile: slot frame not found: " .. slot)
+			continue
+		end
+
+		local button = slotFrame:FindFirstChild("button")
+		if not button then
+			warn("Profile: button not found in: " .. slot)
+			continue
+		end
+
+		button.MouseButton1Click:Connect(function()
+			local data = PlayerData.getPlayerData()
+			if not data then
+				return
+			end
+			local uid = data.equipped[name]
+			if not uid then
+				return
+			end
+			Inventory.openSlot(uid)
+		end)
+	end
 
 	infoTabButton.MouseButton1Click:Connect(function()
 		private.clearInfo()

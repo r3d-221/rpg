@@ -1,11 +1,9 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local HttpService = game:GetService("HttpService")
 
-local EnemyDropsHandler = require(ServerScriptService.Server.Enemy.EnemyDropsHandler)
+local StatsCalculator = require(ServerScriptService.Server.Modules.StatsCalculator)
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
-local PlayerClassData = require(script.Parent.PlayerClassData)
 local WeaponHandler = require(ServerScriptService.Server.Modules.WeaponHandler)
 local PlayerConfig = require(ReplicatedStorage.Shared.Modules.PlayerConfig)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
@@ -19,18 +17,17 @@ local equipItem = Remotes.equipItem
 local unequipItem = Remotes.unequipItem
 local syncStamina = Remotes.syncStamina
 
-local PROFILE_STORE_KEY = "test_v10"
+local PROFILE_STORE_KEY = "test_v11"
 
 local STACK_CAP = 100
 local STAMINA_REGEN_RATE = 10
 local STAMINA_REGEN_DELAY = 2
 
-local STAT_POINT_VALUES = {
-	health = 10,
-	armor = 2,
-	damage = 3,
-	critRate = 0.01,
-	critDamage = 0.05,
+local ARMOR_SLOTS = {
+	helmet = true,
+	chestplate = true,
+	leggings = true,
+	boots = true,
 }
 
 local DEFAULT_PLAYER_DATA = {
@@ -39,7 +36,6 @@ local DEFAULT_PLAYER_DATA = {
 	title = "None",
 	rank = "D",
 
-	-- Shared
 	stamina = 100,
 	staminaCost = 15,
 	staminaSpeedMultiplier = 1.25,
@@ -89,9 +85,8 @@ local DEFAULT_PLAYER_DATA = {
 			assignableStatPoints = 3,
 			classLevel = 1,
 			classExp = 0,
-
+			baseStats = {},
 			stats = {},
-
 			statPoints = {
 				health = 0,
 				damage = 0,
@@ -99,15 +94,15 @@ local DEFAULT_PLAYER_DATA = {
 				critRate = 0,
 				critDamage = 0,
 			},
+			tempBuffs = {},
 		},
 
 		archer = {
 			assignableStatPoints = 3,
 			classLevel = 1,
 			classExp = 0,
-
+			baseStats = {},
 			stats = {},
-
 			statPoints = {
 				health = 0,
 				damage = 0,
@@ -115,15 +110,15 @@ local DEFAULT_PLAYER_DATA = {
 				critRate = 0,
 				critDamage = 0,
 			},
+			tempBuffs = {},
 		},
 
 		mage = {
 			assignableStatPoints = 3,
 			classLevel = 1,
 			classExp = 0,
-
+			baseStats = {},
 			stats = {},
-
 			statPoints = {
 				health = 0,
 				damage = 0,
@@ -131,15 +126,15 @@ local DEFAULT_PLAYER_DATA = {
 				critRate = 0,
 				critDamage = 0,
 			},
+			tempBuffs = {},
 		},
 
 		paladin = {
 			assignableStatPoints = 3,
 			classLevel = 1,
 			classExp = 0,
-
+			baseStats = {},
 			stats = {},
-
 			statPoints = {
 				health = 0,
 				damage = 0,
@@ -147,12 +142,13 @@ local DEFAULT_PLAYER_DATA = {
 				critRate = 0,
 				critDamage = 0,
 			},
+			tempBuffs = {},
 		},
 	},
 }
 
 local store = ProfileStore.New(PROFILE_STORE_KEY, DEFAULT_PLAYER_DATA)
-local profiles = {} -- key: player; value: profile
+local profiles = {}
 
 local leaderstats = {}
 local sprintingPlayers = {}
@@ -169,55 +165,94 @@ function public.onStart()
 		task.spawn(private.onPlayerAdded, player)
 	end
 
-	equipItem.OnServerEvent:Connect(function(player, itemId, category)
+	-- no need for category
+	-- search from uid
+	-- for armors, check the sub category
+	equipItem.OnServerEvent:Connect(function(player: Player, uid: string, category: string)
 		local data = public.getData(player)
 		if not data then
 			return
 		end
 
-		local found = false
-		for _, item in data.inventory[category] do
-			if item.id == itemId then
-				found = true
+		local inventory = data.inventory[category]
+		if not inventory then
+			warn("equipItem: invalid category: " .. tostring(category))
+			return
+		end
+
+		local item = nil
+		for _, entry in inventory do
+			if entry.uid == uid then
+				item = entry
 				break
 			end
 		end
 
-		if not found then
-			warn("Player does not own item: " .. itemId)
+		if not item then
+			warn("equipItem: player does not own item: " .. uid)
+			print(item)
 			return
 		end
 
-		local equippedItem = nil
-		for _, item in data.inventory[category] do
-			if item.id == itemId then
-				equippedItem = item
-				break
+		local registryItem = ItemRegistry.findItemByUid(data.inventory, uid)
+		if not registryItem then
+			warn("equipItem: no registry entry for: " .. uid)
+			return
+		end
+
+		if category == "weapons" then
+			data.equipped.weapon = item.uid
+			WeaponHandler.equip(player, item.id)
+		elseif category == "armors" then
+			local defaultInfo = ItemRegistry.get(registryItem.id)
+			local slot = defaultInfo.subCategory
+			if not ARMOR_SLOTS[slot] then
+				warn("equipItem: unknown armor slot: " .. tostring(slot))
+				return
 			end
-		end
-		if not equippedItem then
-			warn("Could not find item entry for: " .. itemId)
+			data.equipped[slot] = item.uid
+		else
+			warn("equipItem: equipping not yet supported for category: " .. tostring(category))
 			return
 		end
 
-		-- only handles the weapons
-		data.equipped.weapon = equippedItem.uid
-		WeaponHandler.equip(player, equippedItem.id)
+		StatsCalculator.calculateBase(data)
 		private.sync(player)
 	end)
 
-	unequipItem.OnServerEvent:Connect(function(player)
+	unequipItem.OnServerEvent:Connect(function(player: Player, uid: string, category: string)
 		local data = public.getData(player)
 		if not data then
 			return
 		end
 
-		data.equipped.weapon = nil
-		WeaponHandler.unequip(player)
+		local registryItem = ItemRegistry.findItemByUid(data.inventory, uid)
+		if not registryItem then
+			warn("equipItem: no registry entry for: " .. uid)
+			return
+		end
+
+		if category == "weapons" then
+			data.equipped.weapon = nil
+			WeaponHandler.unequip(player)
+		elseif category == "armors" then
+			local defaultInfo = ItemRegistry.get(registryItem.id)
+			local slot = defaultInfo.subCategory
+			if not ARMOR_SLOTS[slot] then
+				warn("unequipItem: unknown armor slot: " .. tostring(slot))
+				return
+			end
+			data.equipped[slot] = nil
+		else
+			warn("unequipItem: unequipping not yet supported for category: " .. tostring(category))
+			return
+		end
+
+		StatsCalculator.calculateBase(data)
 		private.sync(player)
 	end)
 
-	useSprint.OnServerEvent:Connect(function(player, isSprinting)
+	useSprint.OnServerEvent:Connect(function(player: Player, isSprinting: boolean)
 		if isSprinting then
 			if sprintingPlayers[player] then
 				return
@@ -231,8 +266,7 @@ function public.onStart()
 						break
 					end
 
-					local success = private.useStamina(player, data.staminaCost)
-					if not success then
+					if not private.useStamina(player, data.staminaCost) then
 						sprintingPlayers[player] = nil
 						useSprint:FireClient(player, false)
 						break
@@ -245,7 +279,7 @@ function public.onStart()
 		end
 	end)
 
-	spendStatPoint.OnServerEvent:Connect(function(player, stat)
+	spendStatPoint.OnServerEvent:Connect(function(player: Player, stat: string)
 		local data = public.getData(player)
 		if not data then
 			return
@@ -254,30 +288,31 @@ function public.onStart()
 		local classData = data.classes[data.class]
 
 		if (classData.assignableStatPoints or 0) <= 0 then
-			print("no points to spend")
+			warn("spendStatPoint: no assignable points for: " .. player.Name)
 			return
 		end
 		if classData.statPoints[stat] == nil then
-			print("invalid stat:", stat)
+			warn("spendStatPoint: invalid stat: " .. tostring(stat))
 			return
 		end
 
 		classData.assignableStatPoints -= 1
 		classData.statPoints[stat] += 1
-		private.applyStatPoints(data)
+		StatsCalculator.calculateBase(data)
 		private.sync(player)
 	end)
 
-	resetStatPoints.OnServerEvent:Connect(function(player)
+	resetStatPoints.OnServerEvent:Connect(function(player: Player)
 		local data = public.getData(player)
 		if not data then
 			return
 		end
+
 		local classData = data.classes[data.class]
 
 		local cost = 0
 		if (data.currency.gems or 0) < cost then
-			-- send alert massege
+			-- TODO: send alert to client
 			return
 		end
 
@@ -289,7 +324,7 @@ function public.onStart()
 			classData.statPoints[stat] = 0
 		end
 		classData.assignableStatPoints = (classData.assignableStatPoints or 0) + total
-		private.applyStatPoints(data)
+		StatsCalculator.calculateBase(data)
 		private.sync(player)
 	end)
 end
@@ -298,20 +333,19 @@ function public.getProfile(player: Player)
 	return profiles[player]
 end
 
-function public.getData(player: Player): {}
+function public.getData(player: Player): {}?
 	local profile = profiles[player]
 	return profile and profile.Data
 end
 
-function public.addCurrency(player, id, amount)
+function public.addCurrency(player: Player, id: string, amount: number)
 	local data = public.getData(player)
 	if not data then
 		return
 	end
 
 	if id == "classExp" then
-		local classData = data.classes[data.class]
-		classData.classExp += amount
+		data.classes[data.class].classExp += amount
 		private.checkLevelUp(data, "class")
 	elseif id == "rankExp" then
 		data.currency.rankExp += amount
@@ -326,57 +360,47 @@ end
 function public.addItem(player: Player, item)
 	local data = public.getData(player)
 	if not data then
-		warn("Couldn't add item to player data.")
+		warn("addItem: no data for player: " .. player.Name)
 		return
 	end
 
-	local category = item.category
-	if not data.inventory[category] then
-		warn("Item category not found in player data")
+	local registryItem = ItemRegistry.get(item.id)
+	if not registryItem then
+		warn("addItem: no registry entry for id: " .. tostring(item.id))
 		return
 	end
 
-	if category == "weapons" or category == "armors" then
-		if not item.stats then
-			local registryItem = ItemRegistry.get(item.id)
-			local info = EnemyDropsHandler.rollStats(registryItem, item.category)
-			item.stats = info.stats
-			item.rolls = info.rolls
-		end
-		if not item.uid then
-			item.uid = HttpService:GenerateGUID(false)
-		end
-	end
-
+	local category = registryItem.category
 	local slots = data.inventory[category]
 	local slotCap = data.storageSlots[category]
 
-	if category == "materials" then
-		local remaining = item.quantity or 1
+	if not slots then
+		warn("addItem: category not found in inventory: " .. tostring(category))
+		return
+	end
 
-		-- fills in slots that have the item but aren't full
+	if category == "materials" then
+		local remaining = item.amount or 1
+
 		for _, existing in slots do
-			if existing.id == item.id and existing.quantity < STACK_CAP then
-				local space = STACK_CAP - existing.quantity
-				local toAdd = math.min(space, remaining)
-				existing.quantity += toAdd
-				remaining -= toAdd
-			end
 			if remaining <= 0 then
-				private.sync(player)
-				return
+				break
+			end
+			if existing.id == item.id and existing.amount < STACK_CAP then
+				local toAdd = math.min(STACK_CAP - existing.amount, remaining)
+				existing.amount += toAdd
+				remaining -= toAdd
 			end
 		end
 
-		-- creates new slot
 		while remaining > 0 do
 			if #slots >= slotCap then
-				warn("Storage full for " .. category)
-				-- drop the item for pickup
+				warn("addItem: storage full for " .. category)
+				-- TODO: spawn item in world for pickup
 				break
 			end
 			local toAdd = math.min(remaining, STACK_CAP)
-			table.insert(slots, { id = item.id, category = category, rarity = item.rarity, quantity = toAdd })
+			table.insert(slots, { id = item.id, amount = toAdd })
 			remaining -= toAdd
 		end
 
@@ -384,10 +408,9 @@ function public.addItem(player: Player, item)
 		return
 	end
 
-	-- non-stackables
 	if #slots >= slotCap then
-		warn("Backpack full for category: " .. category .. " — item dropped: " .. item.id)
-		-- drop the item for pickup
+		warn("addItem: backpack full for " .. category .. ", item dropped: " .. item.id)
+		-- TODO: spawn item in world for pickup
 		private.sync(player)
 		return
 	end
@@ -399,37 +422,35 @@ end
 function public.changeClass(player: Player, class: string)
 	local data = public.getData(player)
 	if not data then
-		warn("Couldn't add item to player data.")
 		return
 	end
 
-	if data.classes[class] then
-		data.class = class
-		-- update the player stats
-		print("Changed the class to: " .. data.class)
-		private.sync(player)
+	if not data.classes[class] then
+		warn("changeClass: invalid class: " .. tostring(class))
+		return
 	end
+
+	data.class = class
+	StatsCalculator.calculateBase(data)
+	private.sync(player)
 end
 
 function public.addStorageSlots(player: Player, category: string, amount: number)
 	local data = public.getData(player)
 	if not data then
-		warn("Couldn't add storage to player data.")
 		return
 	end
 
 	if not data.storageSlots[category] then
-		warn("Item category not found in player data")
+		warn("addStorageSlots: invalid category: " .. tostring(category))
 		return
 	end
 
 	data.storageSlots[category] += amount
 	private.sync(player)
-	-- print(data.storageSlots)
 end
 
--- different from all the other values since it changes frequently
-function public.getStamina(player: Player)
+function public.getStamina(player: Player): number
 	return stamina[player] or 100
 end
 
@@ -450,47 +471,30 @@ function private.useStamina(player: Player, amount: number): boolean
 	return true
 end
 
-function private.checkLevelUp(data, type: string)
-	if type == "class" then
-		local required = PlayerConfig.expToClassLevel(data.classes[data.class].classLevel) -- exp required to level up
+function private.checkLevelUp(data, levelType: string)
+	if levelType == "class" then
+		local classData = data.classes[data.class]
+		local required = PlayerConfig.expToClassLevel(classData.classLevel)
 
-		while data.classes[data.class].classExp >= required do
-			data.classes[data.class].classExp -= required
-			data.classes[data.class].classLevel += 1
-			data.classes[data.class].assignableStatPoints += 1
-			required = PlayerConfig.expToClassLevel(data.classes[data.class].classLevel)
+		while classData.classExp >= required do
+			classData.classExp -= required
+			classData.classLevel += 1
+			classData.assignableStatPoints += 1
+			required = PlayerConfig.expToClassLevel(classData.classLevel)
 		end
-	end
 
-	if type == "rank" then
-		local required = PlayerConfig.expToClassLevel(data.rankLevel) -- exp required to level up
+		StatsCalculator.calculateBase(data)
+	elseif levelType == "rank" then
+		local required = PlayerConfig.expToRankLevel(data.rankLevel)
 
 		while data.currency.rankExp >= required do
 			data.currency.rankExp -= required
 			data.rankLevel += 1
-			required = PlayerConfig.expToClassLevel(data.rankLevel)
+			required = PlayerConfig.expToRankLevel(data.rankLevel)
 		end
 
-		private.rankUp()
+		-- TODO: handle rank-up rewards/effects when designed
 	end
-end
-
-function private.rankUp() end
-
-function private.applyStatPoints(data) -- needs to be fixed
-	local classData = data.classes[data.class]
-	local baseStats = PlayerClassData.baseStats[data.class]
-	local points = classData.statPoints
-
-	for stat, value in baseStats do
-		classData.stats[stat] = value
-	end
-
-	classData.stats.health += points.health * STAT_POINT_VALUES.health
-	classData.stats.armor += points.armor * STAT_POINT_VALUES.armor
-	classData.stats.damage += points.damage * STAT_POINT_VALUES.damage
-	classData.stats.critRate += points.critRate * STAT_POINT_VALUES.critRate
-	classData.stats.critDamage += points.critDamage * STAT_POINT_VALUES.critDamage
 end
 
 function private.onPlayerAdded(player: Player)
@@ -509,26 +513,24 @@ function private.onPlayerAdded(player: Player)
 	profiles[player] = profile
 	profile:Reconcile()
 
-	private.applyStatPoints(profile.Data)
+	local data = profile.Data
+	StatsCalculator.calculateBase(data)
 
-	local stats = Instance.new("Folder")
-	stats.Name = "leaderstats"
-	stats.Parent = player
+	local statsFolder = Instance.new("Folder")
+	statsFolder.Name = "leaderstats"
+	statsFolder.Parent = player
 
-	local level = Instance.new("IntValue")
-	level.Name = "Level"
-	level.Value = profile.Data.rankLevel
-	level.Parent = stats
+	local levelValue = Instance.new("IntValue")
+	levelValue.Name = "Level"
+	levelValue.Value = data.rankLevel
+	levelValue.Parent = statsFolder
 
-	local class = Instance.new("StringValue")
-	class.Name = "Class"
-	class.Value = profile.Data.class
-	class.Parent = stats
+	local classValue = Instance.new("StringValue")
+	classValue.Name = "Class"
+	classValue.Value = data.class
+	classValue.Parent = statsFolder
 
-	leaderstats[player] = {
-		level = level,
-		class = class,
-	}
+	leaderstats[player] = { level = levelValue, class = classValue }
 
 	player.AncestryChanged:Connect(function()
 		if not player:IsDescendantOf(Players) then
@@ -536,46 +538,45 @@ function private.onPlayerAdded(player: Player)
 		end
 	end)
 
-	stamina[player] = profile.Data.stamina
+	stamina[player] = data.stamina
 
-	-- stamina regen loop
 	task.spawn(function()
 		while player:IsDescendantOf(Players) do
 			task.wait(1)
 
-			local data = public.getData(player)
-			if not data then
+			local currentData = public.getData(player)
+			if not currentData then
 				continue
 			end
 
-			local max = data.stamina
+			local max = currentData.stamina
 			local current = stamina[player] or max
 			local lastUsed = staminaLastUsed[player] or 0
 
 			if current < max and tick() - lastUsed >= STAMINA_REGEN_DELAY then
 				stamina[player] = math.min(current + STAMINA_REGEN_RATE, max)
-				syncStamina:FireClient(player, stamina[player], data.stamina)
+				syncStamina:FireClient(player, stamina[player], max)
 			end
 		end
 	end)
 
 	player.CharacterAdded:Connect(function()
-		local data = public.getData(player)
-		if data and data.equipped.weapon then
-			local item = private.findItemByUid(data.inventory, data.equipped.weapon)
+		local currentData = public.getData(player)
+		if not currentData then
+			return
+		end
+		if currentData.equipped.weapon then
+			local item = ItemRegistry.findItemByUid(currentData.inventory, currentData.equipped.weapon)
 			if item then
 				WeaponHandler.equip(player, item.id)
 			end
 		end
 	end)
 
-	local data = public.getData(player)
-	if data and data.equipped.weapon then
-		local item = private.findItemByUid(data.inventory, data.equipped.weapon)
+	if data.equipped.weapon then
+		local item = ItemRegistry.findItemByUid(data.inventory, data.equipped.weapon)
 		if item then
 			WeaponHandler.equip(player, item.id)
-			print(item.id)
-			print(data.equipped)
 		end
 	end
 
@@ -587,6 +588,7 @@ function private.onPlayerRemoved(player: Player)
 	staminaLastUsed[player] = nil
 	stamina[player] = nil
 	sprintingPlayers[player] = nil
+
 	local profile = profiles[player]
 	if profile then
 		profile:EndSession()
@@ -600,7 +602,6 @@ function private.sync(player: Player)
 		return
 	end
 
-	-- needs to be changed
 	data.currentStamina = stamina[player]
 	syncPlayerData:FireClient(player, data)
 
@@ -609,17 +610,6 @@ function private.sync(player: Player)
 		stats.level.Value = data.rankLevel
 		stats.class.Value = data.class
 	end
-end
-
-function private.findItemByUid(itemList, uid)
-	for _, list in itemList do
-		for _, item in list do
-			if item.uid == uid then
-				return item
-			end
-		end
-	end
-	return nil
 end
 
 return public

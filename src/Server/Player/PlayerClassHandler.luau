@@ -67,10 +67,10 @@ function private.checkEquippedItems(data)
 				print(data)
 				local item = private.findItemByUid(data.inventory.armors, v)
 				local defaultInfo = ItemRegistry.get(item.id)
-				if defaultInfo.subCategory == filter.weapons then
+				if defaultInfo.subCategory == filter.armors then
 					continue
 				else
-					if defaultInfo.subCategory == filter.weapons then
+					if defaultInfo.subCategory == filter.armors then
 						continue
 					else
 						-- unequip the item

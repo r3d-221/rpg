@@ -1,4 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local ItemHandler = require(ServerScriptService.Server.Modules.ItemHandler)
 local EnemyDropsData = require(script.Parent.EnemyDropsData)
 local ItemRegistry = require(ReplicatedStorage.Shared.Items.ItemRegistry)
 
@@ -28,18 +30,14 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 		local rarity = private.pickRarity(adjustedRange)
 
 		local weaponType = private.pickItemType(weaponConfig.weaponType)
-		local info = weaponType and private.pickItem("weapons", weaponType, rarity)
+		local registryItem = weaponType and private.pickItem("weapons", weaponType, rarity)
 
-		if info and info.item then
+		if registryItem then
 			local level = math.random(weaponConfig.levelRange.min, weaponConfig.levelRange.max)
-			table.insert(droppedItems, {
-				id = info.item.id,
-				rolls = info.rolls,
-				stats = info.stats,
-				level = level,
-				category = "weapons",
-				rarity = rarity,
-			})
+			local instance = ItemHandler.createItem(registryItem.id, level)
+			if instance then
+				table.insert(droppedItems, instance)
+			end
 		end
 	end
 
@@ -50,18 +48,14 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 		local rarity = private.pickRarity(adjustedRange)
 
 		local armorType = private.pickItemType(armorConfig.armorType)
-		local info = armorType and private.pickItem("armors", armorType, rarity)
+		local registryItem = armorType and private.pickItem("armors", armorType, rarity)
 
-		if info and info.item then
+		if registryItem then
 			local level = math.random(armorConfig.levelRange.min, armorConfig.levelRange.max)
-			table.insert(droppedItems, {
-				id = info.item.id,
-				rolls = info.rolls,
-				stats = info.stats,
-				level = level,
-				category = "armors",
-				rarity = rarity,
-			})
+			local instance = ItemHandler.createItem(registryItem.id, level)
+			if instance then
+				table.insert(droppedItems, instance)
+			end
 		end
 	end
 
@@ -72,17 +66,17 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 		local rarity = private.pickRarity(adjustedRange)
 
 		local materialType = private.pickItemType(ingredientConfig.materialType)
-		local info = private.pickItem("materials", materialType, rarity)
+		local registryItem = private.pickItem("materials", materialType, rarity)
 
-		if info and info.item then
+		if registryItem then
 			local scaledMax =
 				math.max(ingredientConfig.quantity.min, math.floor(ingredientConfig.quantity.max * dropRate))
 			local quantity = math.random(ingredientConfig.quantity.min, scaledMax)
 
-			table.insert(
-				droppedItems,
-				{ id = info.item.id, category = "materials", rarity = rarity, quantity = quantity }
-			)
+			local instance = ItemHandler.createMaterial(registryItem.id, quantity)
+			if instance then
+				table.insert(droppedItems, instance)
+			end
 		end
 	end
 
@@ -98,7 +92,6 @@ function public.rollDrops(difficultyLevel: string, enemyType: string, dropRate: 
 	return { currency = currencyDrops, items = droppedItems }
 end
 
--- converts the position of the rarity in the list to a number
 function private.rarityToIndex(rarity: string): number
 	for i, tier in EnemyDropsData.rarityTiers do
 		if tier == rarity then
@@ -122,7 +115,6 @@ function private.applyLuck(rarityRange, luck: number): {}
 	}
 end
 
--- gets the rarity
 function private.pickRarity(rarityRange): string
 	local minIndex = private.rarityToIndex(rarityRange.min)
 	local maxIndex = private.rarityToIndex(rarityRange.max)
@@ -130,7 +122,6 @@ function private.pickRarity(rarityRange): string
 	local pool = {}
 	local totalWeight = 0
 
-	-- gets the rarities in the range
 	for i = minIndex, maxIndex do
 		local tier = EnemyDropsData.rarityTiers[i]
 		local weight = EnemyDropsData.rarityWeights[tier]
@@ -138,7 +129,6 @@ function private.pickRarity(rarityRange): string
 		totalWeight += weight
 	end
 
-	-- gets a tier depending on the weight
 	local roll = math.random() * totalWeight
 	local cumulative = 0
 	for _, entry in pool do
@@ -151,25 +141,6 @@ function private.pickRarity(rarityRange): string
 	return pool[#pool].tier
 end
 
-function private.pickRank(): string
-	local totalWeight = 0
-	for rank, _ in EnemyDropsData.statRank do
-		totalWeight += EnemyDropsData.statRankWeights[rank]
-	end
-
-	local roll = math.random() * totalWeight
-	local cumulative = 0
-	for rank, _ in EnemyDropsData.statRank do
-		cumulative += EnemyDropsData.statRankWeights[rank]
-		if roll <= cumulative then
-			return rank
-		end
-	end
-
-	return "D"
-end
-
--- gets the sub category
 function private.pickItemType(typeTable: {}): string?
 	local totalWeight = 0
 	for _, weight in typeTable do
@@ -187,7 +158,6 @@ function private.pickItemType(typeTable: {}): string?
 	return nil
 end
 
--- gets a random item from the sub category
 function private.pickItem(category: string, type: string?, rarity: string): {}?
 	local allItems = ItemRegistry.getCategory(category)
 	local candidates = {}
@@ -218,59 +188,7 @@ function private.pickItem(category: string, type: string?, rarity: string): {}?
 		return nil
 	end
 
-	local item = candidates[math.random(1, #candidates)]
-	local info = public.rollStats(item, category)
-	if not info then
-		return nil
-	end
-
-	return { item = item, rolls = info.rolls, stats = info.stats }
-end
-
-function public.rollStats(item, category)
-	local stats = {}
-	local rolls = {}
-
-	if category == "materials" then
-		return { rolls = rolls, stats = stats }
-	end
-
-	if category == "weapons" then
-		rolls = {
-			private.pickRank(),
-			private.pickRank(),
-			private.pickRank(),
-			private.pickRank(),
-			private.pickRank(),
-		}
-		stats = {
-			damage = (item.baseDamage or 0) * EnemyDropsData.statRank[rolls[1]],
-			critRate = (item.baseCritRate or 0) * EnemyDropsData.statRank[rolls[2]],
-			critDamage = (item.baseCritDamage or 0) * EnemyDropsData.statRank[rolls[3]],
-			attackSpeed = (item.baseAttackSpeed or 0) * EnemyDropsData.statRank[rolls[4]],
-			armorPierce = (item.baseArmorPierce or 0) * EnemyDropsData.statRank[rolls[5]],
-		}
-		return { rolls = rolls, stats = stats }
-	end
-
-	if category == "armors" then
-		rolls = {
-			private.pickRank(),
-			private.pickRank(),
-			private.pickRank(),
-			private.pickRank(),
-		}
-		stats = {
-			health = (item.baseHealth or 0) * EnemyDropsData.statRank[rolls[1]],
-			armor = (item.baseArmor or 0) * EnemyDropsData.statRank[rolls[2]],
-			luck = (item.baseLuck or 0) * EnemyDropsData.statRank[rolls[3]],
-			walkspeed = (item.baseSpeed and item.baseSpeed > 0) and item.baseSpeed * EnemyDropsData.statRank[rolls[4]]
-				or 0,
-		}
-		return { rolls = rolls, stats = stats }
-	end
-
-	return { rolls = rolls, stats = stats }
+	return candidates[math.random(1, #candidates)]
 end
 
 return public
